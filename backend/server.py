@@ -29,8 +29,8 @@ import sqlite3
 import bcrypt
 import re
 import time 
-from .database import DATABASE, validate_user, add_user, get_user_role, get_users_by_role, User, add_teacher_request
-from .database import init_db
+from database import DATABASE, validate_user, add_user, get_user_role, get_users_by_role, User, add_teacher_request
+from database import init_db
 
 import argparse
 import toml
@@ -377,5 +377,6 @@ def make_app():
 if __name__ == "__main__":
     app = make_app()
     app.listen(args.port)
+    print(f"Server started at http://localhost:{args.port}")
     tornado.ioloop.IOLoop.current().start()
 

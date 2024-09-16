@@ -1,3 +1,5 @@
 
 backend/secret
 backend/config.toml
+*.pyc
+backend/db
