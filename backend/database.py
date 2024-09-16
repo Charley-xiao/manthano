@@ -18,6 +18,34 @@ class User:
 
     def __repr__(self):
         return str(self)
+    
+class Chapter:
+    def __init__(self, id, title, content, type):
+        self.id = id
+        self.title = title
+        self.content = content
+        self.type = type
+
+    def __str__(self):
+        return f"Chapter(id={self.id}, title='{self.title}', content='{self.content}')"
+
+    def __repr__(self):
+        return str(self)
+    
+class Course:
+    def __init__(self, id, title, description, chapters, owner):
+        self.id = id
+        self.title = title
+        self.description = description
+        self.chapters = chapters
+        self.owner = owner
+        self.students = []
+
+    def __str__(self):
+        return f"Course(id={self.id}, title='{self.title}', description='{self.description}', chapters={self.chapters}, owner='{self.owner}', students={self.students})"
+    
+    def __repr__(self):
+        return str(self)
 
 def create_user_table():
     conn = sqlite3.connect(DATABASE)
@@ -91,7 +119,10 @@ def create_add_teacher_request_table():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL,
             password_hash TEXT NOT NULL,
-            email TEXT NOT NULL
+            email TEXT NOT NULL,
+            UNIQUE(username, email),
+            FOREIGN KEY(username) REFERENCES users(username),
+            FOREIGN KEY(email) REFERENCES users(email)
         )
     ''')
     conn.commit()
@@ -113,3 +144,29 @@ def add_teacher_request(username, password, email):
     finally:
         conn.close()
     return True
+
+def create_inbox_table():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS inbox (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sender TEXT NOT NULL,
+            receiver TEXT NOT NULL,
+            subject TEXT NOT NULL,
+            body TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            read INTEGER NOT NULL DEFAULT 0,
+            type TEXT NOT NULL DEFAULT 'message', -- message, request
+            priority INTEGER NOT NULL DEFAULT 0, -- 0: normal, 1: high
+            FOREIGN KEY(sender) REFERENCES users(username),
+            FOREIGN KEY(receiver) REFERENCES users(username)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def init_db():
+    create_user_table()
+    create_add_teacher_request_table()
+    create_inbox_table()
