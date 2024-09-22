@@ -166,7 +166,76 @@ def create_inbox_table():
     conn.commit()
     conn.close()
 
+def create_course_table():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS courses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            owner TEXT NOT NULL,
+            type TEXT NOT NULL DEFAULT 'open', -- open, ongoing, closed
+            FOREIGN KEY(owner) REFERENCES users(username)
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS chapters (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL,
+            type TEXT NOT NULL DEFAULT 'teaching', -- teaching, homework, project
+            course_id INTEGER NOT NULL,
+            FOREIGN KEY(course_id) REFERENCES courses(id)
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS course_students (
+            course_id INTEGER NOT NULL,
+            student TEXT NOT NULL,
+            FOREIGN KEY(course_id) REFERENCES courses(id),
+            FOREIGN KEY(student) REFERENCES users(username)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def create_join_course_requests_table():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS join_course_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student TEXT NOT NULL,
+            course_id INTEGER NOT NULL,
+            FOREIGN KEY(student) REFERENCES users(username),
+            FOREIGN KEY(course_id) REFERENCES courses(id)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def create_add_course_requests_table():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS add_course_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            owner TEXT NOT NULL,
+            course_id INTEGER NOT NULL,
+            FOREIGN KEY(owner) REFERENCES users(username),
+            FOREIGN KEY(course_id) REFERENCES courses(id)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
 def init_db():
     create_user_table()
     create_add_teacher_request_table()
     create_inbox_table()
+    create_course_table()
+    create_join_course_requests_table()
+    create_add_course_requests_table()
