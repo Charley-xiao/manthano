@@ -1,0 +1,67 @@
+<video id="videoPlayer" controls>
+    <source src="your-video-source.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+</video>
+
+<script>
+    const videoPlayer = document.getElementById('videoPlayer');
+    let watchTime = 0;
+    let isVideoPlaying = false;
+    let checkInterval;
+
+    // Start tracking when the video starts playing
+    videoPlayer.addEventListener('play', () => {
+        if (isVideoPlaying) {
+            videoPlayer.pause();
+            alert("You can only watch one video at a time.");
+        } else {
+            isVideoPlaying = true;
+            checkInterval = setInterval(() => {
+                watchTime++;
+                sendWatchTimeToServer(watchTime);
+                if (watchTime >= 300) { // Example: after 5 minutes
+                    detectInactivity();
+                }
+            }, 1000);
+        }
+    });
+
+    // Stop tracking when the video is paused or ends
+    videoPlayer.addEventListener('pause', () => {
+        isVideoPlaying = false;
+        clearInterval(checkInterval);
+    });
+
+    videoPlayer.addEventListener('ended', () => {
+        isVideoPlaying = false;
+        clearInterval(checkInterval);
+    });
+
+    // Function to send watch time to the server for validation
+    function sendWatchTimeToServer(watchTime) {
+        fetch('/anticheat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ watch_time: watchTime })
+        }).then(response => response.json())
+          .then(data => {
+              if (data.violation) {
+                  alert("Violation detected.");
+                  videoPlayer.pause();
+              }
+          });
+    }
+
+    // Detect inactivity by checking if the user is focused on the video
+    function detectInactivity() {
+        if (document.hidden) {
+            alert("Inactivity detected. Video paused.");
+            videoPlayer.pause();
+        }
+    }
+
+    // Listen for visibility changes (user switching tabs or minimizing the browser)
+    document.addEventListener('visibilitychange', detectInactivity);
+</script>

@@ -181,12 +181,22 @@ def create_course_table():
     ''')
 
     cursor.execute('''
+        CREATE TABLE IF NOT EXISTS course_likes (
+            course_id INTEGER NOT NULL,
+            student TEXT NOT NULL,
+            FOREIGN KEY(course_id) REFERENCES courses(id),
+            FOREIGN KEY(student) REFERENCES users(username)
+        )
+    ''')
+
+    cursor.execute('''
         CREATE TABLE IF NOT EXISTS chapters (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             content TEXT NOT NULL,
             type TEXT NOT NULL DEFAULT 'teaching', -- teaching, homework, project
             course_id INTEGER NOT NULL,
+            published INTEGER NOT NULL DEFAULT 0,
             FOREIGN KEY(course_id) REFERENCES courses(id)
         )
     ''')
