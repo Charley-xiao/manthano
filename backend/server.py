@@ -10,6 +10,15 @@ Students can join open courses.
 Teachers can send email notifications to students who join the course.
 Students can give the lesson they have joined a like.
 
+The functions of the chapter include the following specific contents:
+Upload courseware module: Teachers can upload courseware for chapters, and the files support at least MD and PDF formats
+Update the courseware module: Teachers can choose to keep the original courseware, and each version of the courseware is marked with a version number
+Download courseware module: Teachers can set whether the current courseware is downloadable or not.
+Video module: Course teachers can upload videos corresponding to chapters, and users can watch them online 
+Comment module: A comment area is reserved for each courseware for user comments and teacher Q&A
+Attachment module: Teachers can upload attachments corresponding to this chapter, such as data, code, etc. Downloadable for students.
+Teaching evaluation function: Students can evaluate the course. Feedback scores and reviews.
+
 
 Advanced Requirement (25%)
 Popular courses and popular teachers list.
@@ -27,6 +36,7 @@ Pretty UI.
 
 import sqlite3
 import bcrypt
+import os 
 import re
 import time 
 from database import DATABASE, validate_user, add_user, get_user_role, get_users_by_role, User, add_teacher_request
@@ -990,6 +1000,386 @@ class VideoAnticheatHandler(tornado.web.RequestHandler):
             if data['active'] and current_time - data['last_active'] > 60:
                 data['active'] = False
 
+
+class CourseWareHandler(BaseHandler):
+    """
+    Handles the courseware of a chapter.
+    """
+    @tornado.web.authenticated
+    def post(self):
+        """
+        Uploads a courseware to the chapter.
+
+        Supported file formats: PDF, MD, TXT, DOCX, PPTX, XLSX, JPG, PNG, MP4, MOV, AVI, MKV.
+
+        Note:
+        - The courseware will be stored in the 'files/courseware' directory.
+        - The filename will be hashed and stored in the database.
+        - Only the owner of the course can upload courseware.
+        - The courseware is invisible to students by default.
+
+        Required arguments:
+        - chapter_id: The id of the chapter.
+        - file: The file to upload.
+
+        Returns:
+        - The filename of the uploaded courseware.
+        """
+        username = self.get_current_user()
+        chapter_id = self.get_argument("chapter_id")
+        file = self.request.files['file'][0]
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT owner FROM courses c
+                JOIN chapters ch ON c.id = ch.course_id
+                WHERE ch.id = ?
+            ''', (chapter_id,))
+            owner = cursor.fetchone()
+            if owner and owner[0] == username:
+                filename = file['filename'] + time.strftime('%Y%m%d%H%M%S') # Add timestamp for versioning
+                file_path = f'files/courseware/{filename}'
+                with open(file_path, 'wb') as f:
+                    f.write(file['body'])
+                cursor.execute('''
+                    INSERT INTO courseware (chapter_id, filename) VALUES (?, ?)
+                ''', (chapter_id, filename))
+                conn.commit()
+                self.write(filename)
+            else:
+                self.set_status(403)
+                self.write("Forbidden: You do not have permission to upload courseware to this chapter.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+    @tornado.web.authenticated
+    def get(self):
+        """
+        Returns the courseware of the chapter.
+
+        Note:
+        - If the request is sent by a student, courseware that is not published by the teacher will not be shown.
+
+        Required arguments:
+        - chapter_id: The id of the chapter.
+        """
+        username = self.get_current_user()
+        chapter_id = self.get_argument("chapter_id")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT owner FROM courses c
+                JOIN chapters ch ON c.id = ch.course_id
+                WHERE ch.id = ?
+            ''', (chapter_id,))
+            owner = cursor.fetchone()
+            if owner and owner[0] == username:
+                cursor.execute('''
+                    SELECT filename FROM courseware WHERE chapter_id = ?
+                ''', (chapter_id,))
+                courseware = cursor.fetchall()
+                self.write(json.dumps(courseware))
+            else:
+                cursor.execute('''
+                    SELECT published FROM chapters WHERE id = ?
+                ''', (chapter_id,))
+                published = cursor.fetchone()
+                if published and published[0] == 1:
+                    cursor.execute('''
+                        SELECT filename, is_visible, is_downloadable FROM courseware WHERE chapter_id = ?
+                    ''', (chapter_id,))
+                    courseware = cursor.fetchall()
+                    if get_user_role(username) == 'student':
+                        courseware = [file for file in courseware if file[1] == 1]
+                    self.write(json.dumps(courseware))
+                else:
+                    self.set_status(403)
+                    self.write("Forbidden: You do not have permission to access the courseware of this chapter.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+    @tornado.web.authenticated
+    def delete(self):
+        """
+        Deletes the courseware of the chapter.
+
+        Note:
+        - Only the owner of the course can delete courseware.
+
+        Required arguments:
+        - chapter_id: The id of the chapter.
+        - filename: The filename of the courseware.
+        """
+        username = self.get_current_user()
+        chapter_id = self.get_argument("chapter_id")
+        filename = self.get_argument("filename")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT owner FROM courses c
+                JOIN chapters ch ON c.id = ch.course_id
+                WHERE ch.id = ?
+            ''', (chapter_id,))
+            owner = cursor.fetchone()
+            if owner and owner[0] == username:
+                cursor.execute('''
+                    DELETE FROM courseware WHERE chapter_id = ? AND filename = ?
+                ''', (chapter_id, filename))
+                file_path = f'files/courseware/{filename}'
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                conn.commit()
+                self.write("Courseware deleted successfully.")
+            else:
+                self.set_status(403)
+                self.write("Forbidden: You do not have permission to delete courseware from this chapter.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+    @tornado.web.authenticated
+    def put(self):
+        """
+        Updates the visibility or downloadability of the courseware of the chapter.
+
+        Note:
+        - Only the owner of the course can update the visibility or downloadability of courseware.
+
+        Required arguments:
+        - chapter_id: The id of the chapter.
+        - filename: The filename of the courseware.
+        - is_visible: The visibility status of the courseware.
+        - is_downloadable: The downloadability status of the courseware.
+
+        Returns:
+        - The updated visibility status of the courseware.
+        - The updated downloadability status of the courseware.
+        """
+        username = self.get_current_user()
+        chapter_id = self.get_argument("chapter_id")
+        filename = self.get_argument("filename")
+        is_visible = self.get_argument("is_visible")
+        is_downloadable = self.get_argument("is_downloadable")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT owner FROM courses c
+                JOIN chapters ch ON c.id = ch.course_id
+                WHERE ch.id = ?
+            ''', (chapter_id,))
+            owner = cursor.fetchone()
+            if owner and owner[0] == username:
+                cursor.execute('''
+                    UPDATE courseware SET is_visible = ?, is_downloadable = ? WHERE chapter_id = ? AND filename = ?
+                ''', (is_visible, is_downloadable, chapter_id, filename))
+                conn.commit()
+                self.write({"is_visible": is_visible, "is_downloadable": is_downloadable})
+            else:
+                self.set_status(403)
+                self.write("Forbidden: You do not have permission to update the visibility of courseware in this chapter.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+
+class CourseWareFileHandlerWithAuth(tornado.web.StaticFileHandler):
+    """
+    File handler with authentication for courseware.
+
+    IMPORTANT: This is a security risk if not handled properly.
+
+    1. If the user is the owner of the course or admin, they can access the courseware.
+    2. If the user is a student, they can access the courseware only if it is visible.
+
+    A typical path for courseware files is '/files/courseware/<filename>'.
+
+    However, when requesting the file, the path should be '/files/courseware/<chapter_id>/<filename>'.
+    """
+    @tornado.web.authenticated
+    def validate_absolute_path(self, root, absolute_path):
+        username = self.get_current_user()
+        chapter_id = self.request.path.split('/')[-2]
+        filename = self.request.path.split('/')[-1]
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT owner FROM courses c
+                JOIN chapters ch ON c.id = ch.course_id
+                WHERE ch.id = ?
+            ''', (chapter_id,))
+            owner = cursor.fetchone()
+            if owner and (owner[0] == username or get_user_role(username) == 'admin'):
+                return absolute_path
+            else:
+                cursor.execute('''
+                    SELECT is_visible FROM courseware WHERE chapter_id = ? AND filename = ?
+                ''', (chapter_id, filename))
+                is_visible = cursor.fetchone()
+                if is_visible and is_visible[0] == 1:
+                    return absolute_path
+                else:
+                    raise tornado.web.HTTPError(403)
+        except sqlite3.Error:
+            raise tornado.web.HTTPError(500)
+        finally:
+            conn.close()
+
+
+class AllCoursesHandler(BaseHandler):
+    @tornado.web.authenticated
+    def get(self):
+        """
+        Returns all the courses.
+        """
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT id, title, description FROM courses
+            ''')
+            courses = cursor.fetchall()
+            self.write(json.dumps(courses))
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+
+class EvaluationHandler(BaseHandler):
+    """
+    Handles the evaluation of a course.
+
+    Students can evaluate a course by giving a rating and feedback comments.
+    """
+    @tornado.web.authenticated
+    def post(self):
+        """
+        Evaluates a course.
+
+        Required arguments:
+        - course_id: The id of the course.
+        - rating: The rating of the course.
+        - feedback: The feedback comments for the course.
+
+        CREATE TABLE IF NOT EXISTS evaluations (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        course_id TEXT NOT NULL,
+                        student TEXT NOT NULL,
+                        rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+                        feedback TEXT,
+                        date_submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+        """
+        username = self.get_current_user()
+        course_id = self.get_argument("course_id")
+        rating = self.get_argument("rating")
+        feedback = self.get_argument("feedback")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                INSERT INTO evaluations (course_id, student, rating, feedback) VALUES (?, ?, ?, ?, ?)
+            ''', (course_id, username, rating, feedback))
+            conn.commit()
+            self.write("Course evaluated successfully.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+    @tornado.web.authenticated
+    def get(self):
+        """
+        Gets the evaluation of a course.
+
+        Required arguments:
+        - course_id: The id of the course.
+        """
+        username = self.get_current_user()
+        course_id = self.get_argument("course_id")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT rating, feedback, date_submitted, student FROM evaluations WHERE course_id = ?
+            ''', (course_id,))
+            evaluations = cursor.fetchall()
+            self.write(json.dumps(evaluations))
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+    @tornado.web.authenticated
+    def delete(self):
+        """
+        Deletes a comment from the evaluation of a course.
+
+        Note:
+        - Only the owner of the comment can delete it.
+
+        Required arguments:
+        - comment_id: The id of the comment.
+        """
+        username = self.get_current_user()
+        comment_id = self.get_argument("comment_id")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT student FROM evaluations WHERE id = ?
+            ''', (comment_id,))
+            student = cursor.fetchone()
+            if student and student[0] == username:
+                cursor.execute('''
+                    DELETE FROM evaluations WHERE id = ?
+                ''', (comment_id,))
+                conn.commit()
+                self.write("Comment deleted successfully.")
+            else:
+                self.set_status(403)
+                self.write("Forbidden: You do not have permission to delete this comment.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
@@ -1005,7 +1395,12 @@ def make_app():
         (r"/course/notif", CourseNotifHandler),
         (r"/course/like", CourseLikeHandler),
         (r"/course/recommend", CourseRecommendHandler),
-        (r"/anticheat", VideoAnticheatHandler)
+        (r"/anticheat", VideoAnticheatHandler),
+        (r"/courseware", CourseWareHandler),
+        (r"/files/courseware/(.*)", CourseWareFileHandlerWithAuth, {"path": "files/courseware"}),
+        (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
+        (r"/course/all", AllCoursesHandler),
+        (r"/evaluation", EvaluationHandler),
     ], cookie_secret=SECRET_KEY, login_url="/login")
 
 if __name__ == "__main__":
