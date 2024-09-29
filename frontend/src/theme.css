@@ -1,0 +1,16 @@
+:root {
+    --nav-bg: #ffffff;
+    --button-bg: #3498db;
+    --button-text: #ffffff;
+    --button-hover-bg: #2980b9;
+    --card-bg: #f9f9f9;
+}
+
+.dark {
+    --nav-bg: #2c3e50;
+    --button-bg: #e74c3c;
+    --button-text: #ffffff;
+    --button-hover-bg: #c0392b;
+    --card-bg: #34495e;
+    color: #ecf0f1;
+}
