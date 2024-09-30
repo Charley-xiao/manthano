@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import axios from 'axios';
 axios.defaults.withCredentials = true;
-const $router = useRouter();
+const router = useRouter();
 
 enum Themes {
   light = 'light',
@@ -18,6 +18,7 @@ const getCourses = async () => {
   try {
     const response = await axios.get('/api/my/course');
     courses.value = response.data;
+    console.log('Courses:', courses.value);
   } catch (error: any) {
     console.error('An error occurred while fetching courses:', error);
   }
@@ -25,7 +26,6 @@ const getCourses = async () => {
 
 onMounted(() => {
   getLoginStatus();
-  getCourses();
 });
 
 function toggleTheme() {
@@ -35,27 +35,26 @@ function toggleTheme() {
 const getLoginStatus = async () => {
   try {
     const response = await axios.get('/api/');
+    console.log('Login status:', response.data);
     if (response.data.username) {
       isLoggedIn.value = true;
       username.value = response.data.username;
       role.value = response.data.role;
+      getCourses();
     } else {
       isLoggedIn.value = false;
-      $router.push('/login');
+      console.log('User is not logged in');
+      router.push('/login');
     }
   } catch (error: any) {
     if (error.response && error.response.status === 401) {
       isLoggedIn.value = false;
-      $router.push('/login');
+      router.push('/login');
     } else {
       console.error('An error occurred while fetching login status:', error);
     }
   }
 }
-
-onMounted(() => {
-  getLoginStatus();
-});
 </script>
 
 <template>
@@ -66,6 +65,15 @@ onMounted(() => {
         <button @click="toggleTheme">Switch Theme</button>
       </div>
     </nav>
+
+    <!-- <div class="left-bar">
+      <ul>
+      <li><router-link to="/"><img src="./assets/icons/my-courses-icon.png" alt="My Courses Icon" /> My Courses</router-link></li>
+      <li><router-link to="/explore"><img src="./assets/icons/explore-icon.png" alt="Explore Icon" /> Explore</router-link></li>
+      <li><router-link to="/community"><img src="./assets/icons/community-icon.png" alt="Community Icon" /> Community</router-link></li>
+      <li><router-link to="/support"><img src="./assets/icons/support-icon.png" alt="Support Icon" /> Support</router-link></li>
+      </ul>
+    </div> -->
 
     <div class="course-grid">
       <div class="course-card" v-for="course in courses" :key="course.id">
@@ -156,5 +164,34 @@ nav {
   .course-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Left Bar */
+.left-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 200px;
+  background-color: var(--nav-bg);
+  padding: 20px;
+}
+
+.left-bar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.left-bar li {
+  margin-bottom: 20px;
+}
+
+.left-bar a {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.left-bar a:hover {
+  text-decoration: underline;
 }
 </style>
