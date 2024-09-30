@@ -151,9 +151,14 @@ class LoginHandler(BaseHandler):
             active_sessions[username] = session_id
             self.set_secure_cookie("user", username)
             self.set_secure_cookie("session_id", session_id)
-            self.redirect("/")
+            self.write(json.dumps({
+                'success': True
+            }))
         else:
-            self.write("Login failed. Incorrect username or password.")
+            self.write(json.dumps({
+                'success': False,
+                'message': 'Incorrect password'
+            }))
 
 
 class RegisterHandler(BaseHandler):
@@ -175,15 +180,15 @@ class RegisterHandler(BaseHandler):
         username = self.get_argument("username")
         password = self.get_argument("password")
         email = self.get_argument("email")
-        role = self.get_argument("role")
+        role = self.get_argument("role", 'student')
 
         if role == 'admin':
             self.write("Registration failed. Admin registration is not allowed.")
         elif role == 'student':
             if add_user(username, password, email, role):
                 self.write(f"User {username} registered successfully as {role}!")
-                self.redirect("/login")
             else:
+                self.set_status(400)
                 self.write("Registration failed. Possibly due to duplicate username/email or invalid email format.")
         elif role == 'teacher':
             if add_teacher_request(username, password, email):
@@ -194,6 +199,7 @@ class RegisterHandler(BaseHandler):
                             f'User {username} has requested to register as a course teacher. Please approve or deny the request on the admin panel.')
                 self.write(f"Request sent to admin for approval.")
             else:
+                self.set_status(400)
                 self.write("Request failed. Possibly due to duplicate username/email or invalid email format.")
 
 
@@ -406,6 +412,7 @@ class MyCourseHandler(BaseHandler):
                     WHERE cs.student = ?
                 ''', (username,))
                 courses = cursor.fetchall()
+                courses = [{'id': c[0], 'title': c[1], 'description': c[2]} for c in courses]
                 self.write(json.dumps(courses))
             else:
                 self.set_status(403)

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios';
 axios.defaults.withCredentials = true;
-
 const $router = useRouter();
 
 enum Themes {
@@ -13,6 +12,21 @@ const theme = ref<Themes>(Themes.light);
 const isLoggedIn = ref<boolean>(false);
 const username = ref<string>('');
 const role = ref<string>('student');
+const courses = ref<Array<{ id: number; title: string; description: string }>>([]);
+
+const getCourses = async () => {
+  try {
+    const response = await axios.get('/api/my/course');
+    courses.value = response.data;
+  } catch (error: any) {
+    console.error('An error occurred while fetching courses:', error);
+  }
+};
+
+onMounted(() => {
+  getLoginStatus();
+  getCourses();
+});
 
 function toggleTheme() {
   theme.value = theme.value === Themes.light ? Themes.dark : Themes.light;
@@ -27,12 +41,12 @@ const getLoginStatus = async () => {
       role.value = response.data.role;
     } else {
       isLoggedIn.value = false;
-      $router.push('/RegistrationAndLogin');
+      $router.push('/login');
     }
   } catch (error: any) {
     if (error.response && error.response.status === 401) {
       isLoggedIn.value = false;
-      $router.push('/RegistrationAndLogin');
+      $router.push('/login');
     } else {
       console.error('An error occurred while fetching login status:', error);
     }
@@ -47,34 +61,29 @@ onMounted(() => {
 <template>
   <div :class="['app', theme]">
     <nav>
-      <div class="logo">CourseSite</div>
-      <div>
-        <button @click="$router.push('/RegistrationAndLogin')">
-          Go to Registration and Login
-        </button>
-        <RouterView />
-      </div>
+      <div class="logo"><img src="./assets/logo.jpg" alt="logo" style="width: 80px; height: 80px;" />Manthano</div>
       <div class="theme-toggle">
         <button @click="toggleTheme">Switch Theme</button>
       </div>
     </nav>
 
-    <!-- <div class="course-grid">
+    <div class="course-grid">
       <div class="course-card" v-for="course in courses" :key="course.id">
-        <img :src="course.image" alt="course image" />
+        <!--<img :src="course.image" alt="course image" />-->
         <h2>{{ course.title }}</h2>
         <p>{{ course.description }}</p>
       </div>
-    </div> -->
+    </div>
   </div>
 </template>
 
 <style scoped>
-/* Global Styles */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
+
 .app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   text-align: center;
-  color: #2c3e50;
+  color: var(--text-color);
 }
 
 nav {
@@ -86,8 +95,12 @@ nav {
 }
 
 .logo {
-  font-size: 24px;
+  font-family: "Montserrat", sans-serif;
+  font-size: 52px;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .theme-toggle button {

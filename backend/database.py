@@ -71,7 +71,7 @@ def validate_user(username, password):
 
     if row:
         stored_hash = row[0]
-        return bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
+        return bcrypt.checkpw(password.encode('utf-8'), stored_hash)
     return False
 
 def add_user(username, password, email, role='student'):
@@ -242,6 +242,31 @@ def create_add_course_requests_table():
     conn.commit()
     conn.close()
 
+def add_fake_data():
+    add_user('admin', 'adminpass', 'admin@example.com', 'admin')
+    add_user('teacher1', 'teacherpass', 'teacher1@example.com', 'teacher')
+    add_user('student1', 'studentpass', 'student1@example.com', 'student')
+    add_user('student2', 'studentpass', 'student2@example.com', 'student')
+
+    add_teacher_request('teacher2', 'teacherpass', 'teacher2@example.com')
+
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+
+    cursor.execute('INSERT INTO courses (title, description, owner) VALUES (?, ?, ?)', ('Course 1', 'Description for Course 1', 'teacher1'))
+    cursor.execute('INSERT INTO courses (title, description, owner) VALUES (?, ?, ?)', ('Course 2', 'Description for Course 2', 'teacher1'))
+
+    cursor.execute('INSERT INTO chapters (title, content, course_id) VALUES (?, ?, ?)', ('Chapter 1', 'Content for Chapter 1', 1))
+    cursor.execute('INSERT INTO chapters (title, content, course_id) VALUES (?, ?, ?)', ('Chapter 2', 'Content for Chapter 2', 1))
+    cursor.execute('INSERT INTO chapters (title, content, course_id) VALUES (?, ?, ?)', ('Chapter 1', 'Content for Chapter 1', 2))
+
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (1, 'student1'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (1, 'student2'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (2, 'student1'))
+
+    conn.commit()
+    conn.close()
+
 def init_db():
     create_user_table()
     create_add_teacher_request_table()
@@ -249,3 +274,4 @@ def init_db():
     create_course_table()
     create_join_course_requests_table()
     create_add_course_requests_table()
+    # add_fake_data()
