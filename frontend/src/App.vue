@@ -1,24 +1,7 @@
 <script setup lang="ts">
-const courses = ref([
-  {
-    id: 1,
-    title: 'Introduction to Programming',
-    description: 'Learn the basics of programming with this course.',
-    image: 'https://via.placeholder.com/300',
-  },
-  {
-    id: 2,
-    title: 'Web Development Bootcamp',
-    description: 'A comprehensive guide to web development.',
-    image: 'https://via.placeholder.com/300',
-  },
-  {
-    id: 3,
-    title: 'UI/UX Design Fundamentals',
-    description: 'Master the essentials of user experience and design.',
-    image: 'https://via.placeholder.com/300',
-  },
-]);
+import axios from 'axios';
+
+const $router = useRouter();
 
 enum Themes {
   light = 'light',
@@ -26,11 +9,38 @@ enum Themes {
 }
 
 const theme = ref<Themes>(Themes.light);
+const isLoggedIn = ref<boolean>(false);
+const username = ref<string>('');
+const role = ref<string>('student');
 
 function toggleTheme() {
   theme.value = theme.value === Themes.light ? Themes.dark : Themes.light;
-  // get html data-theme and change it
 }
+
+const getLoginStatus = async () => {
+  try {
+    const response = await axios.get('/api/');
+    if (response.data.username) {
+      isLoggedIn.value = true;
+      username.value = response.data.username;
+      role.value = response.data.role;
+    } else {
+      isLoggedIn.value = false;
+      $router.push('/RegistrationAndLogin');
+    }
+  } catch (error: any) {
+    if (error.response && error.response.status === 401) {
+      isLoggedIn.value = false;
+      $router.push('/RegistrationAndLogin');
+    } else {
+      console.error('An error occurred while fetching login status:', error);
+    }
+  }
+}
+
+onMounted(() => {
+  getLoginStatus();
+});
 </script>
 
 <template>
@@ -48,13 +58,13 @@ function toggleTheme() {
       </div>
     </nav>
 
-    <div class="course-grid">
+    <!-- <div class="course-grid">
       <div class="course-card" v-for="course in courses" :key="course.id">
         <img :src="course.image" alt="course image" />
         <h2>{{ course.title }}</h2>
         <p>{{ course.description }}</p>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 

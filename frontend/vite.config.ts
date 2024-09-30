@@ -11,4 +11,13 @@ export default defineConfig({
       dts: './src/auto-imports.d.ts',
     })
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:9265',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  }
 })

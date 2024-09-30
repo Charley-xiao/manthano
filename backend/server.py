@@ -46,7 +46,7 @@ import toml
 import json
 import hashlib
 import uuid
-from recommender import recommend_courses_with_content
+# from recommender import recommend_courses_with_content
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--port', type=int, default=9265)
@@ -109,10 +109,13 @@ class BaseHandler(tornado.web.RequestHandler):
 
 
 class MainHandler(BaseHandler):
-    @tornado.web.authenticated
     def get(self):
-        role = self.get_user_role()
-        self.write(f"Welcome, {self.current_user.decode('utf-8')}! You're logged in as {role}.")
+        """
+        Returns username and role of the current user in JSON format.
+        """
+        username = self.get_current_user()
+        role = get_user_role(username)
+        self.write(json.dumps({"username": username, "role": role}))
 
 
 class AdminHandler(BaseHandler):
