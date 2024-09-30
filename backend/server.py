@@ -106,6 +106,10 @@ class BaseHandler(tornado.web.RequestHandler):
             role = get_user_role(username)
             return role
         return None
+    
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "http://localhost:5173")
+        self.set_header("Access-Control-Allow-Credentials", "true")
 
 
 class MainHandler(BaseHandler):
