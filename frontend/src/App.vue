@@ -49,32 +49,51 @@ const getLoginStatus = async () => {
 <template>
   <div :class="['app', theme]">
     <nav>
-      <div class="logo"><img src="./assets/logo.jpg" alt="logo" style="width: 80px; height: 80px;" />Manthano</div>
+      <div class="logo">
+        <img src="./assets/logo.jpg" alt="logo" />
+        Manthano
+      </div>
+
+      <div class="nav-links">
+        <div v-if="isLoggedIn" class="user-info">
+          <p>Welcome, {{ username }}!</p>
+          <p v-if="role === 'student'">Student</p>
+          <p v-else-if="role === 'teacher'">Teacher</p>
+          <p v-else>Admin</p>
+        </div>
+        <div v-else>
+          <router-link to="/login" class="auth-link">Login</router-link>
+          <router-link to="/register" class="auth-link">Register</router-link>
+        </div>
+        <div v-if="isLoggedIn">
+          <router-link to="/logout" class="auth-link">Logout</router-link>
+        </div>
+      </div>
+
+      <div class="top-bar">
+        <router-link to="/course" class="nav-item">My Courses</router-link>
+        <router-link to="/explore" class="nav-item">Explore</router-link>
+        <router-link to="/community" class="nav-item">Community</router-link>
+        <router-link to="/support" class="nav-item">Support</router-link>
+      </div>
+
       <div class="theme-toggle">
-        <button @click="toggleTheme">Switch Theme</button>
+        <button @click="toggleTheme" class="theme-button">Switch Theme</button>
       </div>
     </nav>
-
-    <!-- <div class="left-bar">
-      <ul>
-      <li><router-link to="/"><img src="./assets/icons/my-courses-icon.png" alt="My Courses Icon" /> My Courses</router-link></li>
-      <li><router-link to="/explore"><img src="./assets/icons/explore-icon.png" alt="Explore Icon" /> Explore</router-link></li>
-      <li><router-link to="/community"><img src="./assets/icons/community-icon.png" alt="Community Icon" /> Community</router-link></li>
-      <li><router-link to="/support"><img src="./assets/icons/support-icon.png" alt="Support Icon" /> Support</router-link></li>
-      </ul>
-    </div> -->
 
     <router-view />
   </div>
 </template>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap");
 
 .app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  text-align: center;
+  font-family: 'Montserrat', sans-serif;
   color: var(--text-color);
+  background: var(--app-bg);
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 nav {
@@ -82,57 +101,93 @@ nav {
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  background-color: var(--nav-bg);
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-bottom: 2px solid var(--nav-border);
 }
 
 .logo {
-  font-family: "Montserrat", sans-serif;
-  font-size: 52px;
-  font-weight: bold;
   display: flex;
   align-items: center;
-  gap: 10px;
+  font-size: 32px;
+  font-weight: 700;
+  color: #fff;
 }
 
-.theme-toggle button {
-  padding: 10px 20px;
-  background-color: var(--button-bg);
-  color: var(--button-text);
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s;
+.logo img {
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+  border-radius: 50%;
+  border: 2px solid #fff;
 }
 
-.theme-toggle button:hover {
-  background-color: var(--button-hover-bg);
+.nav-links {
+  display: flex;
+  align-items: center;
 }
 
-/* Left Bar */
-.left-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 200px;
-  background-color: var(--nav-bg);
-  padding: 20px;
+.user-info p {
+  margin: 0 10px;
+  color: #fff;
 }
 
-.left-bar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.left-bar li {
-  margin-bottom: 20px;
-}
-
-.left-bar a {
-  color: var(--text-color);
+.auth-link {
+  margin: 0 15px;
+  font-size: 18px;
+  color: #fff;
   text-decoration: none;
+  transition: color 0.3s;
 }
 
-.left-bar a:hover {
-  text-decoration: underline;
+.auth-link:hover {
+  color: #ffdd57;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+}
+
+.nav-item {
+  color: #fff;
+  margin: 0 15px;
+  font-size: 18px;
+  text-decoration: none;
+  position: relative;
+}
+
+.nav-item::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: #ffdd57;
+  bottom: -5px;
+  left: 0;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.nav-item:hover::after {
+  transform: scaleX(1);
+}
+
+.theme-toggle {
+  margin-left: auto;
+}
+
+.theme-button {
+  padding: 10px 20px;
+  background: #ffdd57;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.theme-button:hover {
+  background: #ffc107;
 }
 </style>

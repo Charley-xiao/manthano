@@ -3,7 +3,16 @@
     --button-bg: #3498db;
     --button-text: #ffffff;
     --button-hover-bg: #2980b9;
-    --card-bg: #f9f9f9;
+    --card-bg: linear-gradient(135deg, #667eea, #764ba2);
+    --card-hover-bg: linear-gradient(135deg, #5a67d8, #6b46c1);
+    --card-text-color: #ffffff;
+    --top-bar-bg: #f9f9f9;
+    --text-color: #2c3e50;
+    --app-bg: #f0f0f0;
+    --course-link-bg: #ffffff;
+    --course-link-text: #764ba2;
+    --course-link-hover-bg: #ffdd57;
+    --course-link-hover-text: #764ba2;
 }
 
 .dark {
@@ -11,6 +20,14 @@
     --button-bg: #e74c3c;
     --button-text: #ffffff;
     --button-hover-bg: #c0392b;
-    --card-bg: #34495e;
-    color: #ecf0f1;
+    --card-bg: linear-gradient(135deg, #34495e, #2c3e50);
+    --card-hover-bg: linear-gradient(135deg, #2a3c4a, #22313f);
+    --card-text-color: #ecf0f1;
+    --top-bar-bg: #2c3e50;
+    --text-color: #ecf0f1;
+    --app-bg: #2c3e50;
+    --course-link-bg: #ecf0f1;
+    --course-link-text: #3498db;
+    --course-link-hover-bg: #e74c3c;
+    --course-link-hover-text: #ffffff;
 }
