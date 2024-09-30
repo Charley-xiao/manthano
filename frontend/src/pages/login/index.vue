@@ -17,7 +17,8 @@ const login = async () => {
             },
         });
         if (response.data.success) {
-            router.push('/');
+            router.push('/course');
+            window.location.reload();
         } else {
             console.log(response.data.message);
         }
