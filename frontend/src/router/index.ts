@@ -7,6 +7,12 @@ const routes = Object.entries(import.meta.glob('../pages/**/*.vue')).map(([path,
         component: component
     };
 });
+
+routes.push({
+    path: '/cdetail/:id',
+    component: () => import('../pages/cdetail/index.vue'),
+});
+
 console.log(routes);
 
 export const router = createRouter({

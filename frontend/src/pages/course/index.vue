@@ -2,6 +2,8 @@
 import axios from 'axios';
 axios.defaults.withCredentials = true;
 
+const router = useRouter();
+
 const courses = ref<Array<{ id: number; title: string; description: string }>>([]);
 
 const colors = [
@@ -43,7 +45,9 @@ onMounted(() => {
           <p>{{ course.description }}</p>
         </div>
         <div class="card-footer">
-          <router-link :to="'/course/' + course.id" class="course-link">View Course</router-link>
+          <div class="course-link" @click="router.push(`/cdetail/${course.id}`)">
+            View Course
+          </div>
         </div>
       </div>
     </div>
@@ -71,6 +75,7 @@ onMounted(() => {
   justify-content: space-between;
   position: relative;
   overflow: hidden;
+  z-index: 1;
 }
 
 .course-card:hover {
@@ -109,6 +114,7 @@ onMounted(() => {
   background: radial-gradient(circle, rgba(255,255,255,0.2), rgba(0,0,0,0));
   transition: transform 0.6s ease;
   transform: scale(0.5);
+  z-index: 0;
 }
 
 .course-card:hover::before {
@@ -124,6 +130,7 @@ onMounted(() => {
   text-decoration: none;
   text-align: center;
   transition: background-color 0.3s ease;
+  z-index: 3;
 }
 
 .course-link:hover {
