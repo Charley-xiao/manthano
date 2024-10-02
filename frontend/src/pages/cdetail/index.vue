@@ -82,7 +82,7 @@ const courseDetails = ref<CourseDetails>({
 });
 
 const isOwnerOrAdmin = ref(true);
-const activeTab = ref('teaching'); 
+const activeTab = ref('teaching');
 
 interface Comment {
     user: string;
@@ -92,14 +92,14 @@ interface Comment {
 
 const comments = ref<Comment[]>([
     {
-      user: 'Alice',
-      content: 'Great course! I learned a lot.',
-      timestamp: '2024-09-30 10:00:00'
+        user: 'Alice',
+        content: 'Great course! I learned a lot.',
+        timestamp: '2024-09-30 10:00:00'
     },
     {
-      user: 'Bob',
-      content: 'Wow~',
-      timestamp: '2024-10-01 12:34:22'
+        user: 'Bob',
+        content: 'Wow~',
+        timestamp: '2024-10-01 12:34:22'
     }
 ]);
 
@@ -130,11 +130,11 @@ const toHumanReadable = (timestamp: string) => {
     const isYesterday = date.toDateString() === new Date(now.setDate(now.getDate() - 1)).toDateString();
 
     if (isToday) {
-      return 'Today at ' + date.toLocaleTimeString();
+        return 'Today at ' + date.toLocaleTimeString();
     } else if (isYesterday) {
-      return 'Yesterday at ' + date.toLocaleTimeString();
+        return 'Yesterday at ' + date.toLocaleTimeString();
     } else {
-      return dateLocale;
+        return dateLocale;
     }
 };
 </script>
@@ -158,7 +158,9 @@ const toHumanReadable = (timestamp: string) => {
             <div class="chapter-list">
                 <div v-for="chapter in filteredChapters(activeTab)" :key="chapter.id" class="chapter-card">
                     <h3>{{ chapter.title }}</h3>
-                    <iframe v-if="chapter.type === 'teaching'" :src="chapter.content" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                    <iframe v-if="chapter.type === 'teaching'" :src="chapter.content" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
                     <div v-else>
                         <a :href="chapter.content" target="_blank">Open {{ chapter.type }} Material</a>
                     </div>
@@ -179,11 +181,11 @@ const toHumanReadable = (timestamp: string) => {
             <h2>Comments</h2>
             <div class="comment-list">
                 <div v-for="(comment, index) in comments" :key="index" class="comment">
-                  <div class="comment-header">
-                    <strong>{{ comment.user }}</strong>
-                    <span class="timestamp">{{ toHumanReadable(comment.timestamp) }}</span>
-                  </div>
-                  <p class="comment-content">{{ comment.content }}</p>
+                    <div class="comment-header">
+                        <strong>{{ comment.user }}</strong>
+                        <span class="timestamp">{{ toHumanReadable(comment.timestamp) }}</span>
+                    </div>
+                    <p class="comment-content">{{ comment.content }}</p>
                 </div>
             </div>
             <div class="comment-form">
@@ -197,165 +199,177 @@ const toHumanReadable = (timestamp: string) => {
 
 <style scoped>
 .course-container {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
-  padding: 20px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    padding: 20px;
 }
 
 
 .course-header {
-  background-color: #f9f9f9;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 .course-type {
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: #fff;
-  font-size: 14px;
-  display: inline-block;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 14px;
+    display: inline-block;
 }
 
 .course-type.open {
-  background-color: #2ecc71;
+    background-color: #2ecc71;
 }
 
 .course-type.ongoing {
-  background-color: #f39c12;
+    background-color: #f39c12;
 }
 
 .course-type.closed {
-  background-color: #e74c3c;
+    background-color: #e74c3c;
 }
 
 .course-owner {
-  font-size: 16px;
-  margin-top: 10px;
+    font-size: 16px;
+    margin-top: 10px;
 }
 
 
 .tabs {
-  display: flex;
-  margin-bottom: 20px;
+    display: flex;
+    margin-bottom: 20px;
 }
 
 .tabs button {
-  flex: 1;
-  padding: 10px;
-  cursor: pointer;
-  background-color: #ecf0f1;
-  border: none;
-  outline: none;
-  transition: background-color 0.3s ease;
+    flex: 1;
+    padding: 10px;
+    cursor: pointer;
+    background-color: #ecf0f1;
+    border: none;
+    outline: none;
+    transition: background-color 0.3s ease;
 }
 
 .tabs button.active {
-  background-color: #3498db;
-  color: #fff;
+    background-color: #3498db;
+    color: #fff;
 }
 
 
 .chapter-list {
-  display: grid;
-  gap: 20px;
+    display: grid;
+    gap: 20px;
 }
 
 .chapter-card {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
 }
 
 .chapter-card:hover {
-  transform: scale(1.02);
+    transform: scale(1.02);
 }
 
 
 .courseware-section {
-  margin-top: 20px;
+    margin-top: 20px;
 }
 
 .courseware-section ul {
-  list-style: none;
-  padding: 0;
+    list-style: none;
+    padding: 0;
 }
 
 .courseware-section li {
-  background-color: #ecf0f1;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 5px;
+    background-color: #ecf0f1;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
 }
 
 
 .course-comments {
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .comment-list {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 10px;
-  background-color: var(--comment-bg);
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+    background-color: var(--comment-bg);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .comment {
-  padding: 15px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  background-color: #f4f4f4;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.3s ease;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    background-color: #f4f4f4;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease;
 }
 
 .comment:hover {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 14px;
 }
 
 .comment-header strong {
-  font-size: 16px;
-  color: #2c3e50;
+    font-size: 16px;
+    color: #2c3e50;
 }
 
 .comment-header .timestamp {
-  font-size: 12px;
-  color: #7f8c8d;
+    font-size: 12px;
+    color: #7f8c8d;
 }
 
 .comment-content {
-  font-size: 15px;
-  line-height: 1.5;
-  color: #34495e;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #34495e;
 }
 
 .comment-form textarea {
-  width: 100%;
-  height: 80px;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 5px; border: 1px solid #ccc; resize: none; }
+    width: 100%;
+    height: 80px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    resize: none;
+}
 
-.comment-form button { background-color: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s ease; }
+.comment-form button {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 
-.comment-form button
-{ background-color: #2980b9; } 
+.comment-form button {
+    background-color: #2980b9;
+}
 </style>

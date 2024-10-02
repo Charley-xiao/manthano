@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import axios from 'axios';
 axios.defaults.withCredentials = true;
+
 const router = useRouter();
 
 enum Themes {
@@ -54,6 +55,15 @@ const getLoginStatus = async () => {
         Manthano
       </div>
 
+      <div class="top-bar">
+        <div v-if="isLoggedIn">
+          <router-link to="/course" class="nav-item">My Courses</router-link>
+          <router-link to="/community" class="nav-item">Community</router-link>
+        </div>
+        <router-link to="/explore" class="nav-item">Explore</router-link>
+        <router-link to="/support" class="nav-item">Support</router-link>
+      </div>
+
       <div class="nav-links">
         <div v-if="isLoggedIn" class="user-info">
           <p>Welcome, {{ username }}!</p>
@@ -61,20 +71,13 @@ const getLoginStatus = async () => {
           <p v-else-if="role === 'teacher'">Teacher</p>
           <p v-else>Admin</p>
         </div>
-        <div v-else>
-          <router-link to="/login" class="auth-link">Login</router-link>
+        <div v-else class="auth-button">
+          <router-link to="/login" class="auth-link" id="login">Login</router-link>
           <router-link to="/register" class="auth-link">Register</router-link>
         </div>
-        <div v-if="isLoggedIn">
+        <div v-if="isLoggedIn" class="auth-button" id="logout-button">
           <router-link to="/logout" class="auth-link">Logout</router-link>
         </div>
-      </div>
-
-      <div class="top-bar">
-        <router-link to="/course" class="nav-item">My Courses</router-link>
-        <router-link to="/explore" class="nav-item">Explore</router-link>
-        <router-link to="/community" class="nav-item">Community</router-link>
-        <router-link to="/support" class="nav-item">Support</router-link>
       </div>
 
       <div class="theme-toggle">
@@ -86,7 +89,7 @@ const getLoginStatus = async () => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap");
 
 .app {
@@ -100,7 +103,7 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 10px 20px;
   background: linear-gradient(90deg, #667eea, #764ba2);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-bottom: 2px solid var(--nav-border);
@@ -108,15 +111,15 @@ nav {
 
 .logo {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   font-size: 32px;
   font-weight: 700;
   color: #fff;
 }
 
 .logo img {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   margin-right: 10px;
   border-radius: 50%;
   border: 2px solid #fff;
@@ -124,6 +127,7 @@ nav {
 
 .nav-links {
   display: flex;
+  justify-content: flex-end;
   align-items: center;
 }
 
@@ -132,21 +136,49 @@ nav {
   color: #fff;
 }
 
-.auth-link {
+.auth-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: #1b09e5;
+  border: medium solid #848de9;
+  border-radius: 5px;
+  cursor: pointer;
+  // fit-content;
   margin: 0 15px;
-  font-size: 18px;
-  color: #fff;
-  text-decoration: none;
-  transition: color 0.3s;
+  padding: 7px 15px;
+
+  #login::after {
+    content: "/";
+    margin: 0 2px;
+    color: #b2ccef;
+    pointer-events: none;
+  }
+
+  .auth-link {
+    margin: 0;
+    font-size: 18px;
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .auth-link:hover {
+    color: #ffdd57;
+  }
 }
 
-.auth-link:hover {
-  color: #ffdd57;
+#logout-button {
+  background-color: #d51010;
+  border: medium solid #e87878;
 }
 
 .top-bar {
   display: flex;
   justify-content: space-around;
+  align-items: center;
+  margin-left: auto;
   padding: 10px;
 }
 
@@ -172,10 +204,6 @@ nav {
 
 .nav-item:hover::after {
   transform: scaleX(1);
-}
-
-.theme-toggle {
-  margin-left: auto;
 }
 
 .theme-button {
