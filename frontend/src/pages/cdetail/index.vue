@@ -103,18 +103,98 @@ const comments = ref<Comment[]>([
     }
 ]);
 
+const newChapter = ref({
+    title: '',
+    type: 'teaching',
+    content: '',
+    courseware: []
+});
+
+// Add a new chapter
+const addChapter = async () => {
+    const newChapterDetails = {
+        ...newChapter.value,
+        id: Date.now().toString()
+    };
+    courseDetails.value.chapters.push(newChapterDetails);
+
+    try {
+        await axios.post(`/api/courses/${courseId}/addChapter`, newChapterDetails);
+        alert('Chapter added successfully!');
+    } catch (error) {
+        console.error('Failed to add chapter:', error);
+    }
+};
+
+// Edit a chapter
+const editChapter = async (chapterId: string, updatedDetails: any) => {
+    const chapterIndex = courseDetails.value.chapters.findIndex(ch => ch.id === chapterId);
+    if (chapterIndex !== -1) {
+        courseDetails.value.chapters[chapterIndex] = { ...courseDetails.value.chapters[chapterIndex], ...updatedDetails };
+
+        try {
+            await axios.post(`/api/courses/${courseId}/editChapter`, {
+                id: chapterId,
+                ...updatedDetails
+            });
+            alert('Chapter updated successfully!');
+        } catch (error) {
+            console.error('Failed to update chapter:', error);
+        }
+    }
+};
+
+// Delete a chapter
+const deleteChapter = async (chapterId: string) => {
+    courseDetails.value.chapters = courseDetails.value.chapters.filter(ch => ch.id !== chapterId);
+
+    try {
+        await axios.post(`/api/courses/${courseId}/deleteChapter`, { id: chapterId });
+        alert('Chapter deleted successfully!');
+    } catch (error) {
+        console.error('Failed to delete chapter:', error);
+    }
+};
+
+// Add courseware to a chapter
+const addCourseware = async (chapterId: string, courseware: { name: string; link: string }) => {
+    const chapter = courseDetails.value.chapters.find(ch => ch.id === chapterId);
+    if (chapter) {
+        chapter.courseware.push(courseware);
+
+        try {
+            await axios.post(`/api/courses/${courseId}/addCourseware`, { chapterId, courseware });
+            alert('Courseware added successfully!');
+        } catch (error) {
+            console.error('Failed to add courseware:', error);
+        }
+    }
+};
+
 const fetchCourseDetails = async () => {
     try {
         const response = await axios.get(`/api/courses/${courseId}`);
         courseDetails.value = response.data;
 
-        isOwnerOrAdmin.value = response.data.owner || response.data.isAdmin;
+        isOwnerOrAdmin.value = (response.data.owner === currentUsername.value) || response.data.isAdmin;
     } catch (error) {
         console.error('Failed to fetch course details:', error);
     }
 };
 
+const fetchCourseComments = async () => {
+    try {
+        const response = await axios.get(`/api/incoursecomments/${courseId}`);
+        comments.value = response.data;
+    } catch (error) {
+        console.error('Failed to fetch course comments:', error);
+    }
+};
+
+const currentUsername = ref('Alice');
+
 onMounted(() => {
+    currentUsername.value = localStorage.getItem('username') || '';
     // fetchCourseDetails();
 });
 
@@ -155,17 +235,41 @@ const toHumanReadable = (timestamp: string) => {
                 <button :class="{ active: activeTab === 'project' }" @click="activeTab = 'project'">Project</button>
             </div>
 
+            <div v-if="isOwnerOrAdmin" class="manage-chapters">
+                <h2>Manage Chapters</h2>
+                <form @submit.prevent="addChapter" class="chapter-form">
+                    <input v-model="newChapter.title" placeholder="Chapter Title" class="form-input" required/>
+                    <select v-model="newChapter.type" class="form-select">
+                        <option value="teaching">Teaching</option>
+                        <option value="homework">Homework</option>
+                        <option value="project">Project</option>
+                    </select>
+                    <input v-model="newChapter.content" placeholder="Content URL" class="form-input" required/>
+                    <button type="submit" class="btn primary">Add Chapter</button>
+                </form>
+
+                <h3>Existing Chapters</h3>
+                <ul class="chapter-list">
+                    <li v-for="chapter in courseDetails.chapters" :key="chapter.id" class="chapter-item">
+                        <p class="chapter-title">{{ chapter.title }}</p>
+                        <div class="chapter-actions">
+                            <button @click="editChapter(chapter.id, { title: 'Updated Title' })" class="btn edit">Edit</button>
+                            <button @click="deleteChapter(chapter.id)" class="btn delete">Delete</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+
             <div class="chapter-list">
                 <div v-for="chapter in filteredChapters(activeTab)" :key="chapter.id" class="chapter-card">
                     <h3>{{ chapter.title }}</h3>
-                    <iframe v-if="chapter.type === 'teaching'" :src="chapter.content" frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen></iframe>
+                    <iframe v-if="chapter.type === 'teaching'" :src="chapter.content" frameborder="0"></iframe>
                     <div v-else>
                         <a :href="chapter.content" target="_blank">Open {{ chapter.type }} Material</a>
                     </div>
 
-                    <div v-if="isOwnerOrAdmin && chapter.courseware.length" class="courseware-section">
+                    <div v-if="chapter.courseware.length" class="courseware-section">
                         <h4>Courseware</h4>
                         <ul>
                             <li v-for="(file, index) in chapter.courseware" :key="index">
@@ -207,7 +311,7 @@ const toHumanReadable = (timestamp: string) => {
 
 
 .course-header {
-    background-color: #f9f9f9;
+    background-color: var(--app-bg);
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -217,7 +321,7 @@ const toHumanReadable = (timestamp: string) => {
 .course-type {
     padding: 5px 10px;
     border-radius: 5px;
-    color: #fff;
+    color: var(--app-bg);
     font-size: 14px;
     display: inline-block;
 }
@@ -249,7 +353,8 @@ const toHumanReadable = (timestamp: string) => {
     flex: 1;
     padding: 10px;
     cursor: pointer;
-    background-color: #ecf0f1;
+    background-color: var(--app-bg);
+    color: var(--text-color);
     border: none;
     outline: none;
     transition: background-color 0.3s ease;
@@ -257,7 +362,7 @@ const toHumanReadable = (timestamp: string) => {
 
 .tabs button.active {
     background-color: #3498db;
-    color: #fff;
+    color: var(--app-bg);
 }
 
 
@@ -267,7 +372,7 @@ const toHumanReadable = (timestamp: string) => {
 }
 
 .chapter-card {
-    background-color: #fff;
+    background-color: var(--app-bg);
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
@@ -289,7 +394,7 @@ const toHumanReadable = (timestamp: string) => {
 }
 
 .courseware-section li {
-    background-color: #ecf0f1;
+    background-color: var(--app-bg);
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 5px;
@@ -297,7 +402,7 @@ const toHumanReadable = (timestamp: string) => {
 
 
 .course-comments {
-    background-color: #f9f9f9;
+    background-color: var(--app-bg);
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
@@ -316,7 +421,7 @@ const toHumanReadable = (timestamp: string) => {
     padding: 15px;
     margin-bottom: 20px;
     border-radius: 10px;
-    background-color: #f4f4f4;
+    background-color: var(--app-bg);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     transition: box-shadow 0.3s ease;
 }
@@ -335,7 +440,7 @@ const toHumanReadable = (timestamp: string) => {
 
 .comment-header strong {
     font-size: 16px;
-    color: #2c3e50;
+    color: var(--text-color);
 }
 
 .comment-header .timestamp {
@@ -346,7 +451,7 @@ const toHumanReadable = (timestamp: string) => {
 .comment-content {
     font-size: 15px;
     line-height: 1.5;
-    color: #34495e;
+    color: var(--text-color);
 }
 
 .comment-form textarea {
@@ -371,5 +476,97 @@ const toHumanReadable = (timestamp: string) => {
 
 .comment-form button {
     background-color: #2980b9;
+}
+
+.manage-chapters {
+    background-color: var(--app-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.manage-chapters {
+    
+
+.chapter-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.form-input, .form-select {
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    transition: border-color 0.3s;
+}
+
+.form-input:focus, .form-select:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.chapter-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.chapter-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    transition: box-shadow 0.3s ease;
+}
+
+.chapter-item:hover {
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.chapter-title {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.chapter-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+    border: none;
+    font-weight: 600;
+}
+
+.btn.primary {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.btn.edit {
+    background-color: #f39c12;
+    color: #fff;
+}
+
+.btn.delete {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+}
+
+.btn:active {
+    transform: scale(1);
+}
 }
 </style>
