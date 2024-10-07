@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import axios from 'axios';
+import { isLoggedIn } from './store/index.d';
 axios.defaults.withCredentials = true;
-
-const router = useRouter();
 
 enum Themes {
   light = 'light',
@@ -10,7 +9,6 @@ enum Themes {
 }
 
 const theme = ref<Themes>(Themes.light);
-const isLoggedIn = ref<boolean>(false);
 const username = ref<string>('');
 const role = ref<string>('student');
 
@@ -30,16 +28,16 @@ const getLoginStatus = async () => {
       isLoggedIn.value = true;
       username.value = response.data.username;
       role.value = response.data.role;
-      router.push('/course');
+      // router.push('/course');
     } else {
       isLoggedIn.value = false;
       console.log('User is not logged in');
-      router.push('/login');
+      // router.push('/login');
     }
   } catch (error: any) {
     if (error.response && error.response.status === 401) {
       isLoggedIn.value = false;
-      router.push('/login');
+      // router.push('/login');
     } else {
       console.error('An error occurred while fetching login status:', error);
     }
@@ -145,7 +143,6 @@ nav {
   border: medium solid #848de9;
   border-radius: 5px;
   cursor: pointer;
-  // fit-content;
   margin: 0 15px;
   padding: 7px 15px;
 

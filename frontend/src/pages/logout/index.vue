@@ -1,41 +1,43 @@
 <script lang="ts" setup>
-import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { isLoggedIn } from "../../store/index.d";
+
 axios.defaults.withCredentials = true;
 
 const router = useRouter();
 const isLoading = ref<boolean>(false);
 
 const logout = async () => {
-    isLoading.value = true;
-    try {
-        document.cookie.split(";").forEach((c) => {
-            document.cookie = c
-                .replace(/^ +/, "")
-                .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        });
-        router.push('/login');
-        window.location.reload();
-    } catch (error) {
-        console.error('An error occurred while logging out:', error);
-    } finally {
-        isLoading.value = false;
-    }
+  isLoading.value = true;
+  try {
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+    isLoggedIn.value = false;
+    router.push('/');
+    // window.location.reload();
+  } catch (error) {
+    console.error('An error occurred while logging out:', error);
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>
 
 <template>
-    <div id="logout" class="fade-in">
-        <div class="logout-container">
-            <h2>Log Out?</h2>
-            <h3>This cannot be undone.</h3>
-            <button @click="logout" class="logout-button-shake">
-                <span v-if="!isLoading">Logout</span>
-                <span v-else class="spinner"></span>
-            </button>
-            <router-link to="/course" class="cancel-link">Keep my session</router-link>
-        </div>
+  <div id="logout" class="fade-in">
+    <div class="logout-container">
+      <h2>Log Out?</h2>
+      <h3>This cannot be undone.</h3>
+      <button @click="logout" class="logout-button-shake">
+        <span v-if="!isLoading">Logout</span>
+        <span v-else class="spinner"></span>
+      </button>
+      <router-link to="/course" class="cancel-link">Keep my session</router-link>
     </div>
+  </div>
 </template>
 
 <style scoped>
@@ -47,6 +49,7 @@ const logout = async () => {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -84,20 +87,29 @@ const logout = async () => {
 }
 
 .logout-button-shake:hover {
-  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 @keyframes shake {
-  10%, 90% {
+
+  10%,
+  90% {
     transform: translate3d(-1px, 0, 0);
   }
-  20%, 80% {
+
+  20%,
+  80% {
     transform: translate3d(2px, 0, 0);
   }
-  30%, 50%, 70% {
+
+  30%,
+  50%,
+  70% {
     transform: translate3d(-4px, 0, 0);
   }
-  40%, 60% {
+
+  40%,
+  60% {
     transform: translate3d(4px, 0, 0);
   }
 }
@@ -115,6 +127,7 @@ const logout = async () => {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }

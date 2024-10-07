@@ -18,7 +18,7 @@ class User:
 
     def __repr__(self):
         return str(self)
-    
+
 class Chapter:
     def __init__(self, id, title, content, type):
         self.id = id
@@ -31,7 +31,7 @@ class Chapter:
 
     def __repr__(self):
         return str(self)
-    
+
 class Course:
     def __init__(self, id, title, description, chapters, owner):
         self.id = id
@@ -43,7 +43,7 @@ class Course:
 
     def __str__(self):
         return f"Course(id={self.id}, title='{self.title}', description='{self.description}', chapters={self.chapters}, owner='{self.owner}', students={self.students})"
-    
+
     def __repr__(self):
         return str(self)
 
@@ -274,4 +274,4 @@ def init_db():
     create_course_table()
     create_join_course_requests_table()
     create_add_course_requests_table()
-    # add_fake_data()
+    add_fake_data()

@@ -3,3 +3,4 @@ backend/secret
 backend/config.toml
 *.pyc
 backend/db
+frontend/package-lock.json

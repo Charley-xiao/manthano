@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import axios from 'axios';
+import { isLoggedIn } from "../../store/index.d";
+
 axios.defaults.withCredentials = true;
 const router = useRouter();
 
@@ -8,49 +10,50 @@ const password = ref<string>('');
 const isLoading = ref<boolean>(false);
 
 const login = async () => {
-    isLoading.value = true;
-    try {
-        const params = new URLSearchParams();
-        params.append('username', username.value);
-        params.append('password', password.value);
-        const response = await axios.post('/api/login', params, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-        });
-        if (response.data.success) {
-            router.push('/course');
-            window.location.reload();
-        } else {
-            console.log(response.data.message);
-        }
-    } catch (error: any) {
-        console.error('An error occurred while logging in:', error);
-    } finally {
-        isLoading.value = false;
+  isLoading.value = true;
+  try {
+    const params = new URLSearchParams();
+    params.append('username', username.value);
+    params.append('password', password.value);
+    const response = await axios.post('/api/login', params, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+    if (response.data.success) {
+      isLoggedIn.value = true;
+      router.push('/course');
+      // window.location.reload();
+    } else {
+      console.log(response.data.message);
     }
+  } catch (error: any) {
+    console.error('An error occurred while logging in:', error);
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>
 
 <template>
-    <div id="login" class="fade-in">
-        <div class="login-container">
-            <h2>Login</h2>
-            <form @submit.prevent="login" class="login-form">
-                <label for="username">Username:</label>
-                <input type="text" id="username" v-model="username" required class="input3d" />
+  <div id="login" class="fade-in">
+    <div class="login-container">
+      <h2>Login</h2>
+      <form @submit.prevent="login" class="login-form">
+        <label for="username">Username:</label>
+        <input type="text" id="username" v-model="username" required class="input3d" />
 
-                <label for="password">Password:</label>
-                <input type="password" id="password" v-model="password" required class="input3d" />
+        <label for="password">Password:</label>
+        <input type="password" id="password" v-model="password" required class="input3d" />
 
-                <button type="submit" class="submit-button">
-                    <span v-if="!isLoading">Login</span>
-                    <span v-else class="spinner"></span>
-                </button>
-            </form>
-            <p>Don't have an account? <router-link to="/register">Register here</router-link></p>
-        </div>
+        <button type="submit" class="submit-button">
+          <span v-if="!isLoading">Login</span>
+          <span v-else class="spinner"></span>
+        </button>
+      </form>
+      <p>Don't have an account? <router-link to="/register">Register here</router-link></p>
     </div>
+  </div>
 </template>
 
 <style scoped>
@@ -62,6 +65,7 @@ const login = async () => {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -131,6 +135,7 @@ const login = async () => {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }

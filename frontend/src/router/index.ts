@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 const routes = Object.entries(import.meta.glob('../pages/**/*.vue')).map(([path, component]) => {
-    const routePath = path.replace("/pages", "").replace("/index", "").slice(2, -4);
+    const p = path.replace("/pages", "").replace("/index", "").slice(2, -4);
+    const routePath = p === '/home' ? '/' : p;
     return {
         path: routePath,
         component: component

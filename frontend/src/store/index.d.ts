@@ -1,0 +1,1 @@
+export const isLoggedIn: Ref<boolean> = ref(false);
