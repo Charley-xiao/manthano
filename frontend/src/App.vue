@@ -48,7 +48,7 @@ const getLoginStatus = async () => {
 <template>
   <div :class="['app', theme]">
     <nav>
-      <div class="logo">
+      <div class="logo" @click="$router.push('/')" style="cursor: pointer;">
         <img src="./assets/logo.jpg" alt="logo" />
         Manthano
       </div>
