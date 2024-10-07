@@ -119,7 +119,7 @@ const addChapter = async () => {
     courseDetails.value.chapters.push(newChapterDetails);
 
     try {
-        await axios.post(`/api/courses/${courseId}/addChapter`, newChapterDetails);
+        await axios.post(`/api/courses/${courseId}`, newChapterDetails);
         alert('Chapter added successfully!');
     } catch (error) {
         console.error('Failed to add chapter:', error);
@@ -133,7 +133,7 @@ const editChapter = async (chapterId: string, updatedDetails: any) => {
         courseDetails.value.chapters[chapterIndex] = { ...courseDetails.value.chapters[chapterIndex], ...updatedDetails };
 
         try {
-            await axios.post(`/api/courses/${courseId}/editChapter`, {
+            await axios.put(`/api/courses/${courseId}`, {
                 id: chapterId,
                 ...updatedDetails
             });
@@ -149,7 +149,7 @@ const deleteChapter = async (chapterId: string) => {
     courseDetails.value.chapters = courseDetails.value.chapters.filter(ch => ch.id !== chapterId);
 
     try {
-        await axios.post(`/api/courses/${courseId}/deleteChapter`, { id: chapterId });
+        await axios.delete(`/api/courses/${courseId}`, { params: { id: chapterId } });
         alert('Chapter deleted successfully!');
     } catch (error) {
         console.error('Failed to delete chapter:', error);
@@ -163,7 +163,7 @@ const addCourseware = async (chapterId: string, courseware: { name: string; link
         chapter.courseware.push(courseware);
 
         try {
-            await axios.post(`/api/courses/${courseId}/addCourseware`, { chapterId, courseware });
+            await axios.post(`/api/courseware`, { chapterId, courseware });
             alert('Courseware added successfully!');
         } catch (error) {
             console.error('Failed to add courseware:', error);
@@ -184,12 +184,38 @@ const fetchCourseDetails = async () => {
 
 const fetchCourseComments = async () => {
     try {
-        const response = await axios.get(`/api/incoursecomments/${courseId}`);
+        const response = await axios.get(`/api/courses/${courseId}/comments`);
         comments.value = response.data;
     } catch (error) {
         console.error('Failed to fetch course comments:', error);
     }
 };
+
+
+const commentContent = ref('');
+
+const postCourseComment = async () => {
+    if (!commentContent.value.trim()) {
+        alert('Comment cannot be empty');
+        return;
+    }
+
+    const newComment = {
+        user: currentUsername.value,
+        content: commentContent.value,
+        timestamp: new Date().toISOString()
+    };
+
+    try {
+        await axios.post(`/api/courses/${courseId}/comments`, newComment);
+        comments.value.push(newComment);
+        commentContent.value = '';
+        alert('Comment posted successfully!');
+    } catch (error) {
+        console.error('Failed to post comment:', error);
+    }
+};
+
 
 const currentUsername = ref('Alice');
 
@@ -292,10 +318,9 @@ const toHumanReadable = (timestamp: string) => {
                     <p class="comment-content">{{ comment.content }}</p>
                 </div>
             </div>
-            <div class="comment-form">
-                <h3>Leave a Comment</h3>
-                <textarea placeholder="Your comment..."></textarea>
-                <button>Submit</button>
+            <div class="comment-form" @submit.prevent="postCourseComment">
+                <textarea v-model="commentContent" placeholder="Your comment..."></textarea>
+                <button type="submit">Submit</button>
             </div>
         </div>
     </div>

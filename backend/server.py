@@ -47,6 +47,21 @@ import json
 import hashlib
 import uuid
 # from recommender import recommend_courses_with_content
+import warnings
+from functools import wraps
+
+def verified(cls):
+    """Class decorator to mark a class as verified."""
+    cls._is_verified = True
+    original_methods = {name: method for name, method in cls.__dict__.items() if callable(method)}
+    for name, method in original_methods.items():
+        @wraps(method)
+        def wrapper(self, *args, **kwargs):
+            if not getattr(self, '_is_verified', False):
+                warnings.warn(f"Warning: {self.__class__.__name__} is not verified!")
+            return method(self, *args, **kwargs)
+        setattr(cls, name, wrapper)
+    return cls
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--port', type=int, default=9265)
@@ -1394,6 +1409,103 @@ class EvaluationHandler(BaseHandler):
         finally:
             conn.close()
 
+
+class CourseCommentsHandler(BaseHandler):
+    """
+    Handles the in-course comments.
+
+    Note: This is different from the evaluation comments.
+    """
+    @tornado.web.authenticated
+    def post(self):
+        """
+        Adds a comment to a course.
+
+        Required arguments:
+        - course_id: The id of the course.
+        - comment: The comment text.
+        """
+        username = self.get_current_user()
+        course_id = self.get_argument("course_id")
+        comment = self.get_argument("comment")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                INSERT INTO course_comments (course_id, student, comment) VALUES (?, ?, ?)
+            ''', (course_id, username, comment))
+            conn.commit()
+            self.write("Comment added successfully.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+    @tornado.web.authenticated
+    def get(self):
+        """
+        Gets the comments of a course.
+
+        Required arguments:
+        - course_id: The id of the course.
+        """
+        course_id = self.get_argument("course_id")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT student, comment, date_submitted FROM course_comments WHERE course_id = ?
+            ''', (course_id,))
+            comments = cursor.fetchall()
+            self.write(json.dumps(comments))
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+    @tornado.web.authenticated
+    def delete(self):
+        """
+        Deletes a comment from a course.
+
+        Note:
+        - Only the owner of the comment can delete it.
+
+        Required arguments:
+        - comment_id: The id of the comment.
+        """
+        username = self.get_current_user()
+        comment_id = self.get_argument("comment_id")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT student FROM course_comments WHERE id = ?
+            ''', (comment_id,))
+            student = cursor.fetchone()
+            if student and student[0] == username:
+                cursor.execute('''
+                    DELETE FROM course_comments WHERE id = ?
+                ''', (comment_id,))
+                conn.commit()
+                self.write("Comment deleted successfully.")
+            else:
+                self.set_status(403)
+                self.write("Forbidden: You do not have permission to delete this comment.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
@@ -1402,6 +1514,7 @@ def make_app():
         (r"/admin", AdminHandler), 
         (r"/logout", LogoutHandler),
         (r"/inbox", InboxHandler),
+        (r"/courses/\d+/comments", CourseCommentsHandler),
         (r"/my/course", MyCourseHandler),
         (r"/add/teacher", AddTeacherHandler),
         (r"/add/course", AddCourseHandler),
