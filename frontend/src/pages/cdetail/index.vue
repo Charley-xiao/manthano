@@ -227,6 +227,41 @@ const getProgress = async () => {
     }
 };
 
+const isStudentSectionOpen = ref(false);
+const newStudent = ref('');
+
+const toggleStudentSection = () => {
+    isStudentSectionOpen.value = !isStudentSectionOpen.value;
+};
+
+const addStudent = async () => {
+    if (!newStudent.value.trim()) {
+        alert('Student username cannot be empty');
+        return;
+    }
+
+    courseDetails.value.students.push(newStudent.value);
+
+    try {
+        await axios.post(`/api/courses/${courseId}/students`, { username: newStudent.value });
+        alert('Student added successfully!');
+        newStudent.value = '';
+    } catch (error) {
+        console.error('Failed to add student:', error);
+    }
+};
+
+const removeStudent = async (student: string) => {
+    courseDetails.value.students = courseDetails.value.students.filter(s => s !== student);
+
+    try {
+        await axios.delete(`/api/courses/${courseId}/students`, { data: { username: student } });
+        alert('Student removed successfully!');
+    } catch (error) {
+        console.error('Failed to remove student:', error);
+    }
+};
+
 const currentUsername = ref('Alice');
 
 onMounted(() => {
@@ -301,6 +336,25 @@ const toHumanReadable = (timestamp: string) => {
                         </div>
                     </li>
                 </ul>
+            </div>
+
+            <div v-if="isOwnerOrAdmin" class="manage-students">
+                <h2 @click="toggleStudentSection" class="collapsible-header">
+                    Manage Students
+                    <span :class="{ 'arrow-up': isStudentSectionOpen, 'arrow-down': !isStudentSectionOpen }"></span>
+                </h2>
+                <div v-if="isStudentSectionOpen" class="collapsible-content">
+                    <form @submit.prevent="addStudent" class="student-form">
+                        <input v-model="newStudent" placeholder="Student Username" class="form-input" required />
+                        <button type="submit" class="btn primary">Add Student</button>
+                    </form>
+                    <ul class="student-list">
+                        <li v-for="student in courseDetails.students" :key="student" class="student-item">
+                            <span>{{ student }}</span>
+                            <button @click="removeStudent(student)" class="btn delete">Remove</button>
+                        </li>
+                    </ul>
+                </div>
             </div>
 
 
@@ -432,6 +486,119 @@ const toHumanReadable = (timestamp: string) => {
     transform: translateY(-50%);
     color: white;
     font-weight: bold;
+}
+
+.manage-students {
+    background-color: var(--app-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.collapsible-header {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--app-bg);
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.collapsible-header:hover {
+    background-color: #f0f0f0;
+}
+
+.arrow-up::after {
+    content: '▲';
+    margin-left: 10px;
+}
+
+.arrow-down::after {
+    content: '▼';
+    margin-left: 10px;
+}
+
+.collapsible-content {
+    padding: 10px;
+    background-color: var(--app-bg);
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+}
+
+.student-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.student-form input {
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    transition: border-color 0.3s;
+}
+
+.student-form input:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.student-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.student-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    transition: box-shadow 0.3s ease;
+}
+
+.student-item:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+    border: none;
+    font-weight: 600;
+}
+
+.btn.primary {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.btn.edit {
+    background-color: #f39c12;
+    color: #fff;
+}
+
+.btn.delete {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+}
+
+.btn:active {
+    transform: scale(1);
 }
 
 .chapter-list {
@@ -603,38 +770,6 @@ const toHumanReadable = (timestamp: string) => {
 .chapter-actions {
     display: flex;
     gap: 10px;
-}
-
-.btn {
-    padding: 8px 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s;
-    border: none;
-    font-weight: 600;
-}
-
-.btn.primary {
-    background-color: #3498db;
-    color: #fff;
-}
-
-.btn.edit {
-    background-color: #f39c12;
-    color: #fff;
-}
-
-.btn.delete {
-    background-color: #e74c3c;
-    color: #fff;
-}
-
-.btn:hover {
-    transform: scale(1.05);
-}
-
-.btn:active {
-    transform: scale(1);
 }
 }
 </style>
