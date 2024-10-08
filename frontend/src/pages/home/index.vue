@@ -18,6 +18,9 @@
 import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
+import helvetikerFont from 'three/examples/fonts/helvetiker_regular.typeface.json'; // Load default font
 
 export default defineComponent({
     setup() {
@@ -25,6 +28,18 @@ export default defineComponent({
         let scene: THREE.Scene, camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer;
         let objects: THREE.Mesh[] = [];
         let particles: THREE.Points, particleMaterial: THREE.PointsMaterial;
+        let equations: THREE.Mesh[] = [];
+
+        const formulas = [
+            "E = mc^2", 
+            "F = ma", 
+            "P = NP?",
+            "x^2 + y^2 = r^2",
+            "L = λW",
+            "PV = nRT",
+            "V = IR",
+            "F = q(E + v x B)",
+        ];
 
         const init3DScene = () => {
             if (canvas.value) {
@@ -37,12 +52,30 @@ export default defineComponent({
                 renderer.setSize(window.innerWidth, window.innerHeight);
 
                 const controls = new OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = true; 
-                controls.dampingFactor = 0.05; 
-                controls.screenSpacePanning = false; 
-                controls.minDistance = 1; 
-                controls.maxDistance = 50; 
-                controls.maxPolarAngle = Math.PI / 2; 
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                controls.minDistance = 1;
+                controls.maxDistance = 50;
+
+                const loader = new FontLoader();
+                const font = loader.parse(helvetikerFont);
+
+                // Generate floating equations
+                formulas.forEach((formula) => {
+                    const geometryText = new TextGeometry(formula, {
+                        font: font,
+                        size: 0.4,
+                        height: 0.05,
+                    });
+                    const materialText = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                    const textMesh = new THREE.Mesh(geometryText, materialText);
+                    
+                    textMesh.position.set((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10);
+                    textMesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+
+                    scene.add(textMesh);
+                    equations.push(textMesh);
+                });
 
                 const material = new THREE.ShaderMaterial({
                     uniforms: {
@@ -64,8 +97,7 @@ export default defineComponent({
                 gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
               }
             `,
-                    side: THREE.BackSide,
-                });
+                    side: THREE.BackSide,});
                 const geometry = new THREE.SphereGeometry(500, 64, 64);
                 const backgroundMesh = new THREE.Mesh(geometry, material);
                 scene.add(backgroundMesh);
@@ -91,7 +123,6 @@ export default defineComponent({
                     positions[i * 3] = (Math.random() - 0.5) * 10;
                     positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
                     positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
-
                     const hue = Math.random() * 60 + 30;  
                     const saturation = 0.5 + Math.random() * 0.3; 
                     const lightness = 0.4 + Math.random() * 0.2;  
@@ -116,6 +147,12 @@ export default defineComponent({
                 const animate = () => {
                     requestAnimationFrame(animate);
 
+                    // Rotate floating objects
+                    equations.forEach(eq => {
+                        eq.rotation.x += 0.01;
+                        eq.rotation.y += 0.01;
+                    });
+
                     objects.forEach(obj => {
                         obj.rotation.x += 0.01;
                         obj.rotation.y += 0.01;
@@ -125,7 +162,6 @@ export default defineComponent({
                     particles.rotation.y += 0.002;
 
                     controls.update();
-
                     renderer.render(scene, camera);
                 };
 
@@ -195,6 +231,7 @@ export default defineComponent({
     font-size: 4rem;
     font-weight: 700;
     margin: 0;
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
 }
 
 .slogan-small {
