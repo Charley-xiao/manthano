@@ -274,4 +274,4 @@ def init_db():
     create_course_table()
     create_join_course_requests_table()
     create_add_course_requests_table()
-    add_fake_data()
+    # add_fake_data()

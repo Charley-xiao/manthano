@@ -1506,6 +1506,69 @@ class CourseCommentsHandler(BaseHandler):
         finally:
             conn.close()
 
+
+class CourseProgressHandler(BaseHandler):
+    """
+    Handles the progress of a course for a student.
+    """
+    @tornado.web.authenticated
+    def get(self):
+        """
+        Gets the progress of a course for the current user.
+
+        Required arguments:
+        - course_id: The id of the course.
+        """
+        username = self.get_current_user()
+        course_id = self.get_argument("course_id")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT progress FROM course_progress WHERE course_id = ? AND student = ?
+            ''', (course_id, username))
+            progress = cursor.fetchone()
+            if progress:
+                self.write(json.dumps({"progress": progress[0]}))
+            else:
+                self.write(json.dumps({"progress": 0}))
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+    @tornado.web.authenticated
+    def post(self):
+        """
+        Updates the progress of a course for the current user.
+
+        Required arguments:
+        - course_id: The id of the course.
+        - progress: The progress of the course.
+        """
+        username = self.get_current_user()
+        course_id = self.get_argument("course_id")
+        progress = self.get_argument("progress")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                INSERT INTO course_progress (course_id, student, progress) VALUES (?, ?, ?)
+                ON CONFLICT(course_id, student) DO UPDATE SET progress = excluded.progress
+            ''', (course_id, username, progress))
+            conn.commit()
+            self.write("Progress updated successfully.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
@@ -1528,6 +1591,7 @@ def make_app():
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
         (r"/course/all", AllCoursesHandler),
         (r"/evaluation", EvaluationHandler),
+        (r"/course/progress/\d+", CourseProgressHandler),
     ], cookie_secret=SECRET_KEY, login_url="/login")
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute } from 'vue-router';
+import AntiCheatVideoPlayer from '../../components/AntiCheatVideoPlayer.vue'
 
 const route = useRoute();
 const courseId = route.params.id;
@@ -22,6 +23,7 @@ interface CourseDetails {
             name: string;
             link: string;
         }[];
+        isEditing?: boolean;
     }[];
 }
 
@@ -127,19 +129,17 @@ const addChapter = async () => {
 };
 
 // Edit a chapter
-const editChapter = async (chapterId: string, updatedDetails: any) => {
-    const chapterIndex = courseDetails.value.chapters.findIndex(ch => ch.id === chapterId);
-    if (chapterIndex !== -1) {
-        courseDetails.value.chapters[chapterIndex] = { ...courseDetails.value.chapters[chapterIndex], ...updatedDetails };
+const saveChapterTitle = async (chapter: { id: string; title: string }) => {
+    const chapterToUpdate = courseDetails.value.chapters.find(ch => ch.id === chapter.id);
+    if (chapterToUpdate) {
+        chapterToUpdate.title = chapter.title;
+        chapterToUpdate.isEditing = false;
 
         try {
-            await axios.put(`/api/courses/${courseId}`, {
-                id: chapterId,
-                ...updatedDetails
-            });
-            alert('Chapter updated successfully!');
+            await axios.put(`/api/courses/${courseId}`, chapterToUpdate);
+            alert('Chapter title updated successfully!');
         } catch (error) {
-            console.error('Failed to update chapter:', error);
+            console.error('Failed to update chapter title:', error);
         }
     }
 };
@@ -216,6 +216,16 @@ const postCourseComment = async () => {
     }
 };
 
+const progress = ref(57);
+
+const getProgress = async () => {
+    try {
+        const response = await axios.get(`/api/course/progress/${courseId}`);
+        progress.value = response.data;
+    } catch (error) {
+        console.error('Failed to fetch course progress:', error);
+    }
+};
 
 const currentUsername = ref('Alice');
 
@@ -260,6 +270,11 @@ const toHumanReadable = (timestamp: string) => {
                 <button :class="{ active: activeTab === 'homework' }" @click="activeTab = 'homework'">Homework</button>
                 <button :class="{ active: activeTab === 'project' }" @click="activeTab = 'project'">Project</button>
             </div>
+                
+            <h2>Progress</h2>
+            <div class="progress">
+                <div class="progress-bar" :style="{ width: progress + '%' }" :data-progress="progress"></div>
+            </div>
 
             <div v-if="isOwnerOrAdmin" class="manage-chapters">
                 <h2>Manage Chapters</h2>
@@ -279,7 +294,9 @@ const toHumanReadable = (timestamp: string) => {
                     <li v-for="chapter in courseDetails.chapters" :key="chapter.id" class="chapter-item">
                         <p class="chapter-title">{{ chapter.title }}</p>
                         <div class="chapter-actions">
-                            <button @click="editChapter(chapter.id, { title: 'Updated Title' })" class="btn edit">Edit</button>
+                            <input v-if="chapter.isEditing" v-model="chapter.title" @blur="saveChapterTitle(chapter)" class="form-input" />
+                            <span v-else>{{ chapter.title }}</span>
+                            <button @click="chapter.isEditing = !chapter.isEditing" class="btn edit">{{ chapter.isEditing ? 'Save' : 'Edit' }}</button>
                             <button @click="deleteChapter(chapter.id)" class="btn delete">Delete</button>
                         </div>
                     </li>
@@ -290,7 +307,7 @@ const toHumanReadable = (timestamp: string) => {
             <div class="chapter-list">
                 <div v-for="chapter in filteredChapters(activeTab)" :key="chapter.id" class="chapter-card">
                     <h3>{{ chapter.title }}</h3>
-                    <iframe v-if="chapter.type === 'teaching'" :src="chapter.content" frameborder="0"></iframe>
+                    <AntiCheatVideoPlayer v-if="chapter.type === 'teaching'" :src="chapter.content"></AntiCheatVideoPlayer>
                     <div v-else>
                         <a :href="chapter.content" target="_blank">Open {{ chapter.type }} Material</a>
                     </div>
@@ -390,6 +407,32 @@ const toHumanReadable = (timestamp: string) => {
     color: var(--app-bg);
 }
 
+
+.progress {
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    height: 20px;
+    margin-bottom: 20px;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    height: 100%;
+    transition: width 0.4s ease;
+    position: relative;
+}
+
+.progress-bar::after {
+    content: attr(data-progress) '%';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-weight: bold;
+}
 
 .chapter-list {
     display: grid;

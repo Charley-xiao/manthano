@@ -22,6 +22,7 @@ const login = async () => {
     });
     if (response.data.success) {
       isLoggedIn.value = true;
+      localStorage.setItem('username', username.value);
       router.push('/course');
       // window.location.reload();
     } else {
