@@ -49,7 +49,7 @@ const getLoginStatus = async () => {
   <div :class="['app', theme]">
     <nav>
       <div class="logo" @click="$router.push('/')" style="cursor: pointer;">
-        <img src="./assets/logo.jpg" alt="logo" />
+        <img src="./assets/logo.png" alt="logo" />
         Manthano
       </div>
 
@@ -116,8 +116,8 @@ nav {
 }
 
 .logo img {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   margin-right: 10px;
   border-radius: 50%;
   border: 2px solid #fff;
