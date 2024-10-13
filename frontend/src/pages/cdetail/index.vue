@@ -46,14 +46,14 @@ const courseDetails = ref<CourseDetails>({
             id: '2',
             title: 'Variables and Data Types',
             type: 'teaching',
-            content: 'https://www.youtube.com/embed/6OvJz0iQpHk',
+            content: 'https://www.bilibili.com/video/BV1Wc1dYSEAG/?spm_id_from=333.1007.tianma.3-4-10.click',
             courseware: []
         },
         {
             id: '3',
             title: 'Loops and Conditionals',
             type: 'teaching',
-            content: 'https://www.youtube.com/embed/6OvJz0iQpHk',
+            content: 'https://youtu.be/9wnja3h70DM?si=_NllYIa8wnuHI6MM',
             courseware: []
         },
         {
@@ -305,7 +305,7 @@ const toHumanReadable = (timestamp: string) => {
                 <button :class="{ active: activeTab === 'homework' }" @click="activeTab = 'homework'">Homework</button>
                 <button :class="{ active: activeTab === 'project' }" @click="activeTab = 'project'">Project</button>
             </div>
-                
+
             <h2>Progress</h2>
             <div class="progress">
                 <div class="progress-bar" :style="{ width: progress + '%' }" :data-progress="progress"></div>
@@ -314,13 +314,13 @@ const toHumanReadable = (timestamp: string) => {
             <div v-if="isOwnerOrAdmin" class="manage-chapters">
                 <h2>Manage Chapters</h2>
                 <form @submit.prevent="addChapter" class="chapter-form">
-                    <input v-model="newChapter.title" placeholder="Chapter Title" class="form-input" required/>
+                    <input v-model="newChapter.title" placeholder="Chapter Title" class="form-input" required />
                     <select v-model="newChapter.type" class="form-select">
                         <option value="teaching">Teaching</option>
                         <option value="homework">Homework</option>
                         <option value="project">Project</option>
                     </select>
-                    <input v-model="newChapter.content" placeholder="Content URL" class="form-input" required/>
+                    <input v-model="newChapter.content" placeholder="Content URL" class="form-input" required />
                     <button type="submit" class="btn primary">Add Chapter</button>
                 </form>
 
@@ -329,9 +329,11 @@ const toHumanReadable = (timestamp: string) => {
                     <li v-for="chapter in courseDetails.chapters" :key="chapter.id" class="chapter-item">
                         <p class="chapter-title">{{ chapter.title }}</p>
                         <div class="chapter-actions">
-                            <input v-if="chapter.isEditing" v-model="chapter.title" @blur="saveChapterTitle(chapter)" class="form-input" />
+                            <input v-if="chapter.isEditing" v-model="chapter.title" @blur="saveChapterTitle(chapter)"
+                                class="form-input" />
                             <span v-else>{{ chapter.title }}</span>
-                            <button @click="chapter.isEditing = !chapter.isEditing" class="btn edit">{{ chapter.isEditing ? 'Save' : 'Edit' }}</button>
+                            <button @click="chapter.isEditing = !chapter.isEditing" class="btn edit">{{
+                                chapter.isEditing ? 'Save' : 'Edit' }}</button>
                             <button @click="deleteChapter(chapter.id)" class="btn delete">Delete</button>
                         </div>
                     </li>
@@ -361,7 +363,8 @@ const toHumanReadable = (timestamp: string) => {
             <div class="chapter-list">
                 <div v-for="chapter in filteredChapters(activeTab)" :key="chapter.id" class="chapter-card">
                     <h3>{{ chapter.title }}</h3>
-                    <AntiCheatVideoPlayer v-if="chapter.type === 'teaching'" :src="chapter.content"></AntiCheatVideoPlayer>
+                    <AntiCheatVideoPlayer v-if="chapter.type === 'teaching'" :src="chapter.content">
+                    </AntiCheatVideoPlayer>
                     <div v-else>
                         <a :href="chapter.content" target="_blank">Open {{ chapter.type }} Material</a>
                     </div>
@@ -721,55 +724,57 @@ const toHumanReadable = (timestamp: string) => {
 }
 
 .manage-chapters {
-    
 
-.chapter-form {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
 
-.form-input, .form-select {
-    padding: 10px;
-    border: 2px solid #ccc;
-    border-radius: 5px;
-    width: 100%;
-    transition: border-color 0.3s;
-}
+    .chapter-form {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
 
-.form-input:focus, .form-select:focus {
-    border-color: #3498db;
-    outline: none;
-}
+    .form-input,
+    .form-select {
+        padding: 10px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        width: 100%;
+        transition: border-color 0.3s;
+    }
 
-.chapter-list {
-    list-style-type: none;
-    padding: 0;
-}
+    .form-input:focus,
+    .form-select:focus {
+        border-color: #3498db;
+        outline: none;
+    }
 
-.chapter-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 10px;
-    transition: box-shadow 0.3s ease;
-}
+    .chapter-list {
+        list-style-type: none;
+        padding: 0;
+    }
 
-.chapter-item:hover {
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-}
+    .chapter-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 10px;
+        transition: box-shadow 0.3s ease;
+    }
 
-.chapter-title {
-    font-weight: 600;
-    color: var(--text-color);
-}
+    .chapter-item:hover {
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    }
 
-.chapter-actions {
-    display: flex;
-    gap: 10px;
-}
+    .chapter-title {
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .chapter-actions {
+        display: flex;
+        gap: 10px;
+    }
 }
 </style>
