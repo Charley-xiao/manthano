@@ -16,6 +16,10 @@ onMounted(() => {
   getLoginStatus();
 });
 
+onUpdated(() => {
+  getLoginStatus();
+});
+
 function toggleTheme() {
   theme.value = theme.value === Themes.light ? Themes.dark : Themes.light;
 }
@@ -27,6 +31,7 @@ const getLoginStatus = async () => {
     if (response.data.username) {
       isLoggedIn.value = true;
       username.value = response.data.username;
+      console.log('User ' + username.value + ' is logged in');
       role.value = response.data.role;
       // router.push('/course');
     } else {

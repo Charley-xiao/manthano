@@ -7,15 +7,15 @@ const router = useRouter();
 const courses = ref<Array<{ id: number; title: string; description: string }>>([]);
 
 const colors = [
-    "linear-gradient(135deg, #667eea, #764ba2)", 
-    "linear-gradient(135deg, #ff6a00, #ee0979)",
-    "linear-gradient(135deg, #42e695, #3bb2b8)", 
-    "linear-gradient(135deg, #ff512f, #dd2476)", 
-    "linear-gradient(135deg, #24c6dc, #514a9d)"
+  "linear-gradient(135deg, #667eea, #764ba2)",
+  "linear-gradient(135deg, #ff6a00, #ee0979)",
+  "linear-gradient(135deg, #42e695, #3bb2b8)",
+  "linear-gradient(135deg, #ff512f, #dd2476)",
+  "linear-gradient(135deg, #24c6dc, #514a9d)"
 ]
 
 const getCardBackground = (index: number) => {
-    return colors[index % colors.length];
+  return colors[index % colors.length];
 }
 
 const getCourses = async () => {
@@ -34,23 +34,21 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="course-grid">
-      <div class="course-card" 
-           v-for="(course, index) in courses" 
-           :key="course.id" 
-           :style="{ background: getCardBackground(index) }">
-        <!--<img :src="course.image" alt="course image" />-->
-        <div class="card-content">
-          <h2>{{ course.title }}</h2>
-          <p>{{ course.description }}</p>
-        </div>
-        <div class="card-footer">
-          <div class="course-link" @click="router.push(`/cdetail/${course.id}`)">
-            View Course
-          </div>
+  <div class="course-grid">
+    <div class="course-card" v-for="(course, index) in courses" :key="course.id"
+      :style="{ background: getCardBackground(index) }">
+      <!--<img :src="course.image" alt="course image" />-->
+      <div class="card-content">
+        <h2>{{ course.title }}</h2>
+        <p>{{ course.description }}</p>
+      </div>
+      <div class="card-footer">
+        <div class="course-link" @click="router.push(`/cdetail/${course.id}`)">
+          View Course
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <style scoped>
@@ -111,7 +109,7 @@ onMounted(() => {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.2), rgba(0,0,0,0));
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0));
   transition: transform 0.6s ease;
   transform: scale(0.5);
   z-index: 0;
