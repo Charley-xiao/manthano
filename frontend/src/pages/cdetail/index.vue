@@ -2,7 +2,6 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute } from 'vue-router';
-import AntiCheatVideoPlayer from '../../components/AntiCheatVideoPlayer.vue'
 
 const route = useRoute();
 const courseId = route.params.id;
@@ -267,6 +266,13 @@ const currentUsername = ref('Alice');
 onMounted(() => {
     currentUsername.value = localStorage.getItem('username') || '';
     // fetchCourseDetails();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+});
+
+onUnmounted(() => {
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+    clearInterval(videoInterval!);
+    clearInterval(idleInterval!);
 });
 
 const filteredChapters = (type: string) => {
@@ -288,6 +294,90 @@ const toHumanReadable = (timestamp: string) => {
         return dateLocale;
     }
 };
+
+const playingVideoNumber = ref(-1);
+const isVideoModalOpen = ref(false);  // Control the modal visibility
+const selectedVideoUrl = ref<string | null>(null);
+const videoStarted = ref(false);
+const videoWatchedTime = ref(0);  // Track how much time has been watched
+const idleTime = ref(0);  // Track how long the user has been idle
+const videoDuration = ref(0); // Total video duration
+let videoInterval: NodeJS.Timer | null = null;  // For tracking video time
+let idleInterval: NodeJS.Timer | null = null;  // For tracking idle time
+
+// Ensure the user cannot leave the page or switch tabs while watching
+const handleVisibilityChange = () => {
+    if (document.hidden && videoStarted.value) {
+        alert("You have switched tabs! Please stay on the page to complete the video.");
+    }
+};
+
+// Enforce minimum viewing time
+const enforceMinimumViewingTime = () => {
+    if (videoWatchedTime.value < videoDuration.value * 0.9) {  // Require 90% viewing
+        alert("You must watch at least 90% of the video to close this.");
+        return false;
+    }
+    return true;
+};
+
+// Track video time
+const startTrackingVideoTime = () => {
+    videoInterval = setInterval(() => {
+        videoWatchedTime.value += 1;
+        if (videoWatchedTime.value >= videoDuration.value * 0.9) {
+            alert("You have met the required viewing time!");
+            clearInterval(videoInterval!);
+        }
+    }, 1000);
+};
+
+// Track idle time (if the video is paused or the user is idle)
+const startTrackingIdleTime = () => {
+    idleInterval = setInterval(() => {
+        idleTime.value += 1;
+        if (idleTime.value > 10) {  // If idle for more than 10 seconds
+            alert("You have been idle for too long. Please continue watching.");
+        }
+    }, 1000);
+};
+
+// Handle video play event
+const handleVideoPlay = () => {
+    videoStarted.value = true;
+    idleTime.value = 0;  // Reset idle time
+    startTrackingVideoTime();  // Start counting watched time
+};
+
+// Handle video pause event
+const handleVideoPause = () => {
+    idleTime.value = 0;  // Reset idle time when paused
+    clearInterval(videoInterval!);  // Stop tracking watched time
+    startTrackingIdleTime();  // Start counting idle time
+};
+
+// Prevent multiple videos playing simultaneously
+const showVideo = (videoUrl: string) => {
+    if (isVideoModalOpen.value) {
+        alert("You cannot open another video while one is playing.");
+        return;
+    }
+    selectedVideoUrl.value = videoUrl;
+    isVideoModalOpen.value = true;
+    videoWatchedTime.value = 0;  // Reset watched time
+    videoStarted.value = false;  // Reset video started state
+    videoDuration.value = 600; // Assume 600 seconds (10 mins), replace with actual duration if possible
+};
+
+// Close video modal
+const closeVideoModal = () => {
+    if (!enforceMinimumViewingTime()) return;
+    isVideoModalOpen.value = false;
+    clearInterval(videoInterval!);  // Stop video tracking
+    clearInterval(idleInterval!);  // Stop idle tracking
+    alert(`You watched ${videoWatchedTime.value} seconds of the video.`);
+};
+
 </script>
 
 <template>
@@ -361,7 +451,10 @@ const toHumanReadable = (timestamp: string) => {
             <div class="chapter-list">
                 <div v-for="chapter in filteredChapters(activeTab)" :key="chapter.id" class="chapter-card">
                     <h3>{{ chapter.title }}</h3>
-                    <AntiCheatVideoPlayer v-if="chapter.type === 'teaching'" :src="chapter.content"></AntiCheatVideoPlayer>
+                    <!-- If the user clicks this button, the page pops up the video in the front -->
+                    <div v-if="chapter.type === 'teaching'">
+                        <button @click="showVideo(chapter.content)" class="btn primary">Play Video</button>
+                    </div>
                     <div v-else>
                         <a :href="chapter.content" target="_blank">Open {{ chapter.type }} Material</a>
                     </div>
@@ -374,6 +467,20 @@ const toHumanReadable = (timestamp: string) => {
                             </li>
                         </ul>
                     </div>
+                </div>
+            </div>
+
+            <div v-if="isVideoModalOpen" class="video-modal">
+                <div class="modal-content">
+                    <button @click="closeVideoModal" class="close-btn">Close</button>
+                    <iframe 
+                        v-if="selectedVideoUrl" 
+                        :src="selectedVideoUrl" 
+                        frameborder="0" 
+                        allowfullscreen 
+                        @play="handleVideoPlay" 
+                        @pause="handleVideoPause">
+                    </iframe>
                 </div>
             </div>
         </div>
@@ -771,5 +878,43 @@ const toHumanReadable = (timestamp: string) => {
     display: flex;
     gap: 10px;
 }
+}
+
+.video-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    width: 80%;
+    max-width: 900px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.modal-content iframe {
+    width: 100%;
+    height: 500px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 8px;
+    background: red;
+    color: white;
+    border: none;
+    cursor: pointer;
 }
 </style>
