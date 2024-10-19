@@ -307,7 +307,7 @@ let idleInterval: NodeJS.Timer | null = null;  // For tracking idle time
 
 // Ensure the user cannot leave the page or switch tabs while watching
 const handleVisibilityChange = () => {
-    if (document.hidden && videoStarted.value) {
+    if (document.hidden && isVideoModalOpen.value) {
         alert("You have switched tabs! Please stay on the page to complete the video.");
     }
 };
