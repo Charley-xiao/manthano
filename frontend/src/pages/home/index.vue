@@ -6,7 +6,7 @@
             <h1 class="slogan">Manthano</h1>
             <h1 class="slogan-small">Inspire, Inquire, Aspire</h1>
             <p class="description">Empowering learning journeys through interactive courses.</p>
-            <div class="buttons">
+            <div v-if="!isLoggedIn" class="buttons">
                 <router-link to="/login" class="btn btn-login">Login</router-link>
                 <router-link to="/register" class="btn btn-register">Register</router-link>
             </div>
@@ -14,82 +14,82 @@
     </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
+import { isLoggedIn } from '../../store/index.d';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 import helvetikerFont from 'three/examples/fonts/helvetiker_regular.typeface.json'; // Load default font
 
-export default defineComponent({
-    setup() {
-        const canvas = ref<HTMLCanvasElement | null>(null);
-        let scene: THREE.Scene, camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer;
-        let objects: THREE.Mesh[] = [];
-        let particles: THREE.Points, particleMaterial: THREE.PointsMaterial;
-        let equations: THREE.Mesh[] = [];
 
-        const formulas = [
-            "E = mc^2", 
-            "F = ma", 
-            "P = NP?",
-            "x^2 + y^2 = r^2",
-            "L = λW",
-            "PV = nRT",
-            "V = IR",
-            "F = q(E + v x B)",
-        ];
+const canvas = ref<HTMLCanvasElement | null>(null);
+let scene: THREE.Scene, camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer;
+let objects: THREE.Mesh[] = [];
+let particles: THREE.Points, particleMaterial: THREE.PointsMaterial;
+let equations: THREE.Mesh[] = [];
 
-        const init3DScene = () => {
-            if (canvas.value) {
-                scene = new THREE.Scene();
+const formulas = [
+    "E = mc^2",
+    "F = ma",
+    "P = NP?",
+    "x^2 + y^2 = r^2",
+    "L = λW",
+    "PV = nRT",
+    "V = IR",
+    "F = q(E + v x B)",
+];
 
-                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                camera.position.z = 5;
+const init3DScene = () => {
+    if (canvas.value) {
+        scene = new THREE.Scene();
 
-                renderer = new THREE.WebGLRenderer({ canvas: canvas.value });
-                renderer.setSize(window.innerWidth, window.innerHeight);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
 
-                const controls = new OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = true;
-                controls.dampingFactor = 0.05;
-                controls.minDistance = 1;
-                controls.maxDistance = 50;
+        renderer = new THREE.WebGLRenderer({ canvas: canvas.value });
+        renderer.setSize(window.innerWidth, window.innerHeight);
 
-                const loader = new FontLoader();
-                const font = loader.parse(helvetikerFont);
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 1;
+        controls.maxDistance = 50;
 
-                // Generate floating equations
-                formulas.forEach((formula) => {
-                    const geometryText = new TextGeometry(formula, {
-                        font: font,
-                        size: 0.4,
-                        height: 0.05,
-                    });
-                    const materialText = new THREE.MeshBasicMaterial({ color: 0xffffff });
-                    const textMesh = new THREE.Mesh(geometryText, materialText);
-                    
-                    textMesh.position.set((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10);
-                    textMesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        const loader = new FontLoader();
+        const font = loader.parse(helvetikerFont);
 
-                    scene.add(textMesh);
-                    equations.push(textMesh);
-                });
+        // Generate floating equations
+        formulas.forEach((formula) => {
+            const geometryText = new TextGeometry(formula, {
+                font: font,
+                size: 0.4,
+                height: 0.05,
+            });
+            const materialText = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const textMesh = new THREE.Mesh(geometryText, materialText);
 
-                const material = new THREE.ShaderMaterial({
-                    uniforms: {
-                        color1: { value: new THREE.Color(0x667eea) },
-                        color2: { value: new THREE.Color(0x764ba2) }
-                    },
-                    vertexShader: `
+            textMesh.position.set((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10);
+            textMesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+
+            scene.add(textMesh);
+            equations.push(textMesh);
+        });
+
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                color1: { value: new THREE.Color(0x667eea) },
+                color2: { value: new THREE.Color(0x764ba2) }
+            },
+            vertexShader: `
               varying vec2 vUv;
               void main() {
                 vUv = uv;
                 gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
               }
             `,
-                    fragmentShader: `
+            fragmentShader: `
               uniform vec3 color1;
               uniform vec3 color2;
               varying vec2 vUv;
@@ -97,106 +97,106 @@ export default defineComponent({
                 gl_FragColor = vec4(mix(color1, color2, vUv.y), 1.0);
               }
             `,
-                    side: THREE.BackSide,});
-                const geometry = new THREE.SphereGeometry(500, 64, 64);
-                const backgroundMesh = new THREE.Mesh(geometry, material);
-                scene.add(backgroundMesh);
+            side: THREE.BackSide,
+        });
+        const geometry = new THREE.SphereGeometry(500, 64, 64);
+        const backgroundMesh = new THREE.Mesh(geometry, material);
+        scene.add(backgroundMesh);
 
-                const geometryIcosahedron = new THREE.IcosahedronGeometry(1, 0);
-                const materialIcosahedron = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-                const icosahedron = new THREE.Mesh(geometryIcosahedron, materialIcosahedron);
-                scene.add(icosahedron);
-                objects.push(icosahedron);
+        const geometryIcosahedron = new THREE.IcosahedronGeometry(1, 0);
+        const materialIcosahedron = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+        const icosahedron = new THREE.Mesh(geometryIcosahedron, materialIcosahedron);
+        scene.add(icosahedron);
+        objects.push(icosahedron);
 
-                const geometryCube = new THREE.BoxGeometry(1, 1, 1);
-                const materialCube = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
-                const cube = new THREE.Mesh(geometryCube, materialCube);
-                cube.position.set(-2, 1, -1);
-                scene.add(cube);
-                objects.push(cube);
+        const geometryCube = new THREE.BoxGeometry(1, 1, 1);
+        const materialCube = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+        const cube = new THREE.Mesh(geometryCube, materialCube);
+        cube.position.set(-2, 1, -1);
+        scene.add(cube);
+        objects.push(cube);
 
-                const particlesGeometry = new THREE.BufferGeometry();
-                const particlesCount = 500;
-                const positions = new Float32Array(particlesCount * 3);
-                const colors = new Float32Array(particlesCount * 3);
-                for (let i = 0; i < particlesCount; i++) {
-                    positions[i * 3] = (Math.random() - 0.5) * 10;
-                    positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-                    positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
-                    const hue = Math.random() * 60 + 30;  
-                    const saturation = 0.5 + Math.random() * 0.3; 
-                    const lightness = 0.4 + Math.random() * 0.2;  
-                    const color = new THREE.Color().setHSL(hue / 360, saturation, lightness);
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 500;
+        const positions = new Float32Array(particlesCount * 3);
+        const colors = new Float32Array(particlesCount * 3);
+        for (let i = 0; i < particlesCount; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 10;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+            const hue = Math.random() * 60 + 30;
+            const saturation = 0.5 + Math.random() * 0.3;
+            const lightness = 0.4 + Math.random() * 0.2;
+            const color = new THREE.Color().setHSL(hue / 360, saturation, lightness);
 
-                    colors[i * 3] = color.r;
-                    colors[i * 3 + 1] = color.g;
-                    colors[i * 3 + 2] = color.b;
-                }
-                particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            colors[i * 3] = color.r;
+            colors[i * 3 + 1] = color.g;
+            colors[i * 3 + 2] = color.b;
+        }
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
-                particleMaterial = new THREE.PointsMaterial({
-                    size: 0.05,
-                    vertexColors: true
-                });
-                particles = new THREE.Points(particlesGeometry, particleMaterial);
-                scene.add(particles);
+        particleMaterial = new THREE.PointsMaterial({
+            size: 0.05,
+            vertexColors: true
+        });
+        particles = new THREE.Points(particlesGeometry, particleMaterial);
+        scene.add(particles);
 
-                window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mousemove', onMouseMove);
 
-                const animate = () => {
-                    requestAnimationFrame(animate);
+        const animate = () => {
+            requestAnimationFrame(animate);
 
-                    // Rotate floating objects
-                    equations.forEach(eq => {
-                        eq.rotation.x += 0.01;
-                        eq.rotation.y += 0.01;
-                    });
-
-                    objects.forEach(obj => {
-                        obj.rotation.x += 0.01;
-                        obj.rotation.y += 0.01;
-                    });
-
-                    particles.rotation.x += 0.002;
-                    particles.rotation.y += 0.002;
-
-                    controls.update();
-                    renderer.render(scene, camera);
-                };
-
-                animate();
-            }
-        };
-
-        const onMouseMove = (event: MouseEvent) => {
-            const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-            const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+            // Rotate floating objects
+            equations.forEach(eq => {
+                eq.rotation.x += 0.01;
+                eq.rotation.y += 0.01;
+            });
 
             objects.forEach(obj => {
-                obj.rotation.x += mouseY * 0.1;
-                obj.rotation.y += mouseX * 0.1;
+                obj.rotation.x += 0.01;
+                obj.rotation.y += 0.01;
             });
+
+            particles.rotation.x += 0.002;
+            particles.rotation.y += 0.002;
+
+            controls.update();
+            renderer.render(scene, camera);
         };
 
-        onMounted(() => {
-            init3DScene();
-        });
+        animate();
+    }
+};
 
-        onBeforeUnmount(() => {
-            if (canvas.value) {
-                scene.clear();
-                renderer.dispose();
-                canvas.value = null;
-            }
-            window.removeEventListener('mousemove', onMouseMove);
-        });
+const onMouseMove = (event: MouseEvent) => {
+    const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+    const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        return {
-            canvas,
-        };
-    },
+    objects.forEach(obj => {
+        obj.rotation.x += mouseY * 0.1;
+        obj.rotation.y += mouseX * 0.1;
+    });
+};
+
+onMounted(() => {
+    init3DScene();
 });
+
+onBeforeUnmount(() => {
+    if (canvas.value) {
+        scene.clear();
+        renderer.dispose();
+        canvas.value = null;
+    }
+    window.removeEventListener('mousemove', onMouseMove);
+});
+
+// return {
+//     canvas,
+// };
+
 </script>
 
 <style scoped>
