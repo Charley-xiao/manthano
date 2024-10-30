@@ -15,24 +15,24 @@ const recentPosts = ref([
     { id: 12, title: 'Study Techniques for Visual Learners', author: 'Lily' },
     { id: 13, title: 'How to Manage Stress During Finals', author: 'Mike' },
     { id: 14, title: 'Study Techniques for Auditory Learners', author: 'Nancy' },
-    { id: 15, title: 'How to Stay Healthy During the School Year', author: 'Oliver' },
-    { id: 16, title: 'Study Techniques for Kinesthetic Learners', author: 'Pam' },
-    { id: 17, title: 'How to Make the Most of Your College Experience', author: 'Quinn' },
-    { id: 18, title: 'Study Techniques for Reading Comprehension', author: 'Rose' },
-    { id: 19, title: 'How to Prepare for College Applications', author: 'Sam' },
-    { id: 20, title: 'Study Techniques for Test-Taking', author: 'Tom' }
 ]);
 
 const popularTopics = ref(['Mathematics', 'Science', 'Literature', 'Study Techniques']);
 
+const colors = [
+    "linear-gradient(135deg, #667eea, #764ba2)",
+    "linear-gradient(135deg, #ff6a00, #ee0979)",
+    "linear-gradient(135deg, #42e695, #3bb2b8)",
+    "linear-gradient(135deg, #ff512f, #dd2476)",
+    "linear-gradient(135deg, #24c6dc, #514a9d)"
+];
 
 onMounted(() => {
     const cardHeaders: NodeListOf<HTMLElement> = document.querySelectorAll('div.card-header');
 
     cardHeaders.forEach(cardHeader => {
-        const randomColor = Math.random().toString(16).substring(2, 8);
-        console.log('#' + randomColor);
-        cardHeader.style.background = '#' + randomColor;
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        cardHeader.style.background = randomColor;
     });
 
     console.log(cardHeaders);
@@ -73,17 +73,17 @@ onMounted(() => {
                 </div>
             </section>
 
+            <section class="write-post">
+                <h2>
+                    <router-link to="/community/write">Write Your Own Post</router-link>
+                </h2>
+            </section>
+
             <section class="popular-topics">
                 <h2>Popular Topics</h2>
                 <ul>
                     <li v-for="topic in popularTopics" :key="topic">{{ topic }}</li>
                 </ul>
-            </section>
-
-            <section class="write-post">
-                <h2>
-                    <router-link to="/community/write">Write Your Own Post</router-link>
-                </h2>
             </section>
 
             <section class="study-tips">
@@ -156,6 +156,7 @@ h2 {
 .card-header {
     color: #fff;
     padding: 10px;
+    height: 10.8px;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
 }
@@ -163,6 +164,14 @@ h2 {
 .card-header a {
     color: #fff;
     text-decoration: none;
+    text-overflow: ellipsis;
+    -ms-word-break: break-all;
+    word-break: break-all;
+    word-break: break-word;
+    -webkit-hyphens: auto;
+    -moz-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
 .card-body {
