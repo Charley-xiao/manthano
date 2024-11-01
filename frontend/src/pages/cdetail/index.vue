@@ -174,6 +174,7 @@ const fetchCourseDetails = async () => {
     try {
         const response = await axios.get(`/api/courses/${courseId}`);
         courseDetails.value = response.data;
+        console.log('Course details:', courseDetails.value);
 
         isOwnerOrAdmin.value = (response.data.owner === currentUsername.value) || response.data.isAdmin;
     } catch (error) {
@@ -265,7 +266,7 @@ const currentUsername = ref('Alice');
 
 onMounted(() => {
     currentUsername.value = localStorage.getItem('username') || '';
-    // fetchCourseDetails();
+    fetchCourseDetails();
     document.addEventListener("visibilitychange", handleVisibilityChange);
 });
 

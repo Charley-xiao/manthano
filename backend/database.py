@@ -209,6 +209,16 @@ def create_course_table():
             FOREIGN KEY(student) REFERENCES users(username)
         )
     ''')
+
+    # courseware
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS courseware (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename TEXT NOT NULL,
+            chapter_id INTEGER NOT NULL,
+            FOREIGN KEY(chapter_id) REFERENCES chapters(id)
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -243,29 +253,59 @@ def create_add_course_requests_table():
     conn.close()
 
 def add_fake_data():
+    # Add some users
     add_user('admin', 'adminpass', 'admin@example.com', 'admin')
     add_user('teacher1', 'teacherpass', 'teacher1@example.com', 'teacher')
+    add_user('teacher2', 'teacherpass', 'teacher2@example.com', 'teacher')
     add_user('student1', 'studentpass', 'student1@example.com', 'student')
     add_user('student2', 'studentpass', 'student2@example.com', 'student')
+    add_user('student3', 'studentpass', 'student3@example.com', 'student')
 
-    add_teacher_request('teacher2', 'teacherpass', 'teacher2@example.com')
+    # Add a teacher request
+    add_teacher_request('teacher3', 'teacherpass', 'teacher3@example.com')
 
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
-    cursor.execute('INSERT INTO courses (title, description, owner) VALUES (?, ?, ?)', ('Course 1', 'Description for Course 1', 'teacher1'))
-    cursor.execute('INSERT INTO courses (title, description, owner) VALUES (?, ?, ?)', ('Course 2', 'Description for Course 2', 'teacher1'))
+    # Add some courses by teacher1
+    cursor.execute('INSERT INTO courses (title, description, owner) VALUES (?, ?, ?)', ('CS101', 'Introduction to Computer Science', 'teacher1'))
+    cursor.execute('INSERT INTO courses (title, description, owner) VALUES (?, ?, ?)', ('CS102', 'Data Structures', 'teacher1'))
+    cursor.execute('INSERT INTO courses (title, description, owner) VALUES (?, ?, ?)', ('CS103', 'Algorithms', 'teacher1'))
 
-    cursor.execute('INSERT INTO chapters (title, content, course_id) VALUES (?, ?, ?)', ('Chapter 1', 'Content for Chapter 1', 1))
-    cursor.execute('INSERT INTO chapters (title, content, course_id) VALUES (?, ?, ?)', ('Chapter 2', 'Content for Chapter 2', 1))
-    cursor.execute('INSERT INTO chapters (title, content, course_id) VALUES (?, ?, ?)', ('Chapter 1', 'Content for Chapter 1', 2))
+    # Fetch the course IDs to add chapters and students
+    cursor.execute('SELECT id FROM courses WHERE title = "CS101"')
+    cs101_id = cursor.fetchone()[0]
+    cursor.execute('SELECT id FROM courses WHERE title = "CS102"')
+    cs102_id = cursor.fetchone()[0]
 
-    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (1, 'student1'))
-    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (1, 'student2'))
-    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (2, 'student1'))
+    # Add some chapters for CS101
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Introduction', 'Basics of Computer Science', 'teaching', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Programming', 'Introduction to Python', 'teaching', cs101_id))
+
+    # Add some chapters for CS102
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Data Structures Overview', 'Arrays, Lists, Trees', 'teaching', cs102_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Linked Lists', 'Singly and Doubly Linked Lists', 'teaching', cs102_id))
+
+    # Add students to courses
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs101_id, 'student1'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs101_id, 'student2'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs102_id, 'student1'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs102_id, 'student3'))
+
+    # Add some courseware
+    cursor.execute('SELECT id FROM chapters WHERE title = "Introduction"')
+    introduction_id = cursor.fetchone()[0]
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('intro.pdf', introduction_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('intro.mp4', introduction_id))
+
+    cursor.execute('SELECT id FROM chapters WHERE title = "Programming"')
+    programming_id = cursor.fetchone()[0]
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('python.pdf', programming_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('python.mp4', programming_id))
 
     conn.commit()
     conn.close()
+
 
 def init_db():
     create_user_table()

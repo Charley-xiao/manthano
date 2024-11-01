@@ -127,7 +127,7 @@ class DetailedCourseHandler(BaseHandler):
         - content: The content of the chapter, typically a video link.
         - type: The type of the chapter (teaching, homework, project).
         - courseware: The courseware of the chapter, if the user is the owner or an admin.
-        Note:
+        Note: 
         1. The courseware is a list of files uploaded by the teacher, typically for homework or project chapters.
         2. If the request is sent by a student, chapters that are not published by the teacher will not be shown.
     """
@@ -162,15 +162,22 @@ class DetailedCourseHandler(BaseHandler):
                 if get_user_role(username) == 'student':
                     chapters = [chapter for chapter in chapters if chapter[4] == 1]
 
+                new_chapters = []
                 for chapter in chapters:
                     cursor.execute('''
                         SELECT filename FROM courseware WHERE chapter_id = ?
                     ''', (chapter[0],))
                     courseware = cursor.fetchall()
+                    courseware = [{'name': c[0], 'link': f'/files/courseware/{c[0]}'} for c in courseware]
                     chapter = list(chapter)
+                    print(chapter)
                     chapter.append(courseware)
+                    print(chapter)
+                    chapter = {'id': chapter[0], 'title': chapter[1], 'content': chapter[2], 'type': chapter[3], 'published': chapter[4], 'courseware': courseware}
+                    new_chapters.append(chapter)
 
-                course.append(chapters)
+                course.append(new_chapters)
+                course = {'id': course_id, 'title': course[0], 'description': course[1], 'owner': course[2], 'type': course[3], 'students': course[4], 'chapters': new_chapters}
                 self.write(json.dumps(course))
             else:
                 self.set_status(404)

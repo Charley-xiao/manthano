@@ -39,7 +39,6 @@ from database import init_db
 import argparse
 import json
 # from recommender import recommend_courses_with_content
-import warnings
 from functools import wraps
 
 def verified(cls):
@@ -50,7 +49,7 @@ def verified(cls):
         @wraps(method)
         def wrapper(self, *args, **kwargs):
             if not getattr(self, '_is_verified', False):
-                warnings.warn(f"Warning: {self.__class__.__name__} is not verified!")
+                print(f'Warning: {self.__class__.__name__} is not verified.')
             return method(self, *args, **kwargs)
         setattr(cls, name, wrapper)
     return cls
@@ -112,10 +111,10 @@ def make_app():
         (r"/my/course", MyCourseHandler),
         (r"/add/teacher", AddTeacherHandler),
         (r"/add/course", AddCourseHandler),
-        (r"/course/\d+", DetailedCourseHandler),
-        (r"/course/notif", CourseNotifHandler),
-        (r"/course/like", CourseLikeHandler),
-        (r"/course/recommend", CourseRecommendHandler),
+        (r"/courses/\d+", DetailedCourseHandler),
+        (r"/courses/notif", CourseNotifHandler),
+        (r"/courses/like", CourseLikeHandler),
+        (r"/courses/recommend", CourseRecommendHandler),
         (r"/anticheat", VideoAnticheatHandler),
         (r"/courseware", CourseWareHandler),
         (r"/files/courseware/(.*)", CourseWareFileHandlerWithAuth, {"path": "files/courseware"}),
@@ -131,6 +130,6 @@ if __name__ == "__main__":
     app = make_app()
     app.listen(args.port)
     print(f"Server started at http://localhost:{args.port}")
-    tornado.ioloop.PeriodicCallback(VideoAnticheatHandler.check_inactivity, 60000).start()
+    # tornado.ioloop.PeriodicCallback(VideoAnticheatHandler.check_inactivity, 60000).start()
     tornado.ioloop.IOLoop.current().start()
 
