@@ -219,6 +219,20 @@ def create_course_table():
             FOREIGN KEY(chapter_id) REFERENCES chapters(id)
         )
     ''')
+
+    # course comments
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS course_comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id INTEGER NOT NULL,
+            student TEXT NOT NULL,
+            comment TEXT NOT NULL,
+            date_submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(course_id) REFERENCES courses(id),
+            FOREIGN KEY(student) REFERENCES users(username)
+        )
+    ''')
+
     conn.commit()
     conn.close()
 
@@ -230,6 +244,7 @@ def create_join_course_requests_table():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             student TEXT NOT NULL,
             course_id INTEGER NOT NULL,
+            date_submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(student) REFERENCES users(username),
             FOREIGN KEY(course_id) REFERENCES courses(id)
         )

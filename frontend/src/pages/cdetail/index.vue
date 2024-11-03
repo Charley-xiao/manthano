@@ -184,7 +184,7 @@ const fetchCourseDetails = async () => {
 
 const fetchCourseComments = async () => {
     try {
-        const response = await axios.get(`/api/courses/${courseId}/comments`);
+        const response = await axios.get(`/api/courses/${courseId}/comments?course_id=${courseId}`);
         comments.value = response.data;
     } catch (error) {
         console.error('Failed to fetch course comments:', error);
@@ -204,14 +204,20 @@ const postCourseComment = async () => {
     const newComment = {
         user: currentUsername.value,
         content: commentContent.value,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        course_id: courseId
     };
 
+    const params = new URLSearchParams();
+    params.append('user', currentUsername.value);
+    params.append('content', commentContent.value);
+    params.append('timestamp', new Date().toISOString());
+    params.append('course_id', newComment.course_id);
+
     try {
-        await axios.post(`/api/courses/${courseId}/comments`, newComment);
+        await axios.post(`/api/courses/${courseId}/comments`, params);
         comments.value.push(newComment);
         commentContent.value = '';
-        alert('Comment posted successfully!');
     } catch (error) {
         console.error('Failed to post comment:', error);
     }
@@ -268,6 +274,7 @@ const currentUsername = ref('Alice');
 onMounted(() => {
     currentUsername.value = localStorage.getItem('username') || '';
     fetchCourseDetails();
+    fetchCourseComments();
     document.addEventListener("visibilitychange", handleVisibilityChange);
 });
 
@@ -500,10 +507,10 @@ const closeVideoModal = () => {
                     <p class="comment-content">{{ comment.content }}</p>
                 </div>
             </div>
-            <div class="comment-form" @submit.prevent="postCourseComment">
+            <form class="comment-form" @submit.prevent="postCourseComment">
                 <textarea v-model="commentContent" placeholder="Your comment..."></textarea>
                 <button type="submit">Submit</button>
-            </div>
+            </form>
         </div>
     </div>
 </template>
@@ -798,6 +805,11 @@ const closeVideoModal = () => {
     font-size: 15px;
     line-height: 1.5;
     color: var(--text-color);
+}
+
+.comment-form {
+    margin-top: 20px;
+    margin-right: 20px;
 }
 
 .comment-form textarea {

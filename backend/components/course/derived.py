@@ -238,9 +238,10 @@ class CourseCommentsHandler(BaseHandler):
         - course_id: The id of the course.
         - comment: The comment text.
         """
+        print(f'Request: {self.request.body}')
         username = self.get_current_user()
         course_id = self.get_argument("course_id")
-        comment = self.get_argument("comment")
+        comment = self.get_argument("content")
 
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
@@ -261,9 +262,6 @@ class CourseCommentsHandler(BaseHandler):
     def get(self):
         """
         Gets the comments of a course.
-
-        Required arguments:
-        - course_id: The id of the course.
         """
         course_id = self.get_argument("course_id")
 
@@ -275,6 +273,7 @@ class CourseCommentsHandler(BaseHandler):
                 SELECT student, comment, date_submitted FROM course_comments WHERE course_id = ?
             ''', (course_id,))
             comments = cursor.fetchall()
+            comments = [{'user': comment[0], 'content': comment[1], 'timestamp': comment[2]} for comment in comments]
             self.write(json.dumps(comments))
         except sqlite3.Error as e:
             self.set_status(500)
