@@ -196,6 +196,7 @@ const commentContent = ref('');
 
 const postCourseComment = async () => {
     if (!commentContent.value.trim()) {
+        console.log('Comment cannot be empty');
         alert('Comment cannot be empty');
         return;
     }

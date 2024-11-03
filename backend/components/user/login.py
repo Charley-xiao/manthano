@@ -2,7 +2,7 @@ import hashlib
 import uuid
 import json
 import tornado.web
-from components.user.base import BaseHandler
+from components.user.base import BaseHandler, active_sessions
 from database import validate_user, add_user, add_teacher_request, get_users_by_role
 from components.sendEmail import send_email
 

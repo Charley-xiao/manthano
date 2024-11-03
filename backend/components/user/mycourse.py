@@ -27,6 +27,7 @@ class MyCourseHandler(BaseHandler):
                     SELECT id, title, description FROM courses WHERE owner = ?
                 ''', (username,))
                 courses = cursor.fetchall()
+                courses = [{'id': c[0], 'title': c[1], 'description': c[2]} for c in courses]
                 self.write(json.dumps(courses))
             elif role == 'student':
                 cursor.execute('''
