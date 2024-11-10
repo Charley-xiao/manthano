@@ -14,6 +14,11 @@ routes.push({
     component: () => import('../pages/cdetail/index.vue'),
 });
 
+routes.push({
+    path: '/teacher/:teacherId',
+    component: () => import('../pages/teacher/index.vue'),
+});
+
 console.log(routes);
 
 export const router = createRouter({
