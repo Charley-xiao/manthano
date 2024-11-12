@@ -2,7 +2,7 @@ import sqlite3
 import bcrypt
 import re
 
-DATABASE = 'db'
+DATABASE = 'db.db'
 
 def validate_email_format(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email) is not None
@@ -46,6 +46,20 @@ class Course:
 
     def __repr__(self):
         return str(self)
+
+class Post:
+    def __init__(self, id, title, course_id, sender_name, content, likes, tag):
+        self.id = id
+        self.title = title
+        self.course_id = course_id
+        self.sender_name = sender_name
+        self.content = content
+        self.likes = likes
+        self.tag = tag
+
+    def __str__(self):
+        return f"Post(id={self.id}, title='{self.title}', course_id={self.course_id}, sender_name='{self.sender_name}', content='{self.content}', likes={self.likes}, tag='{self.tag}')"
+
 
 def create_user_table():
     conn = sqlite3.connect(DATABASE)
@@ -267,6 +281,48 @@ def create_add_course_requests_table():
     conn.commit()
     conn.close()
 
+def create_posts_table():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            sender_name TEXT NOT NULL,
+            content TEXT NOT NULL,
+            likes INTEGER NOT NULL,
+            tag TEXT NOT NULL,
+            date_submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(course_id) REFERENCES courses(id)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def get_posts(id):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute(f'SELECT * FROM posts where id = {id}')
+    rows = cursor.fetchall()
+    conn.close()
+
+    return [Post(*row) for row in rows]
+
+def add_post(course_id, title, sender_name, content, likes, tag):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    # try:
+    #     cursor.execute('INSERT INTO posts (course_id, title, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', (course_id, title, sender_name, content, likes, tag))
+    #     conn.commit()
+    # except sqlite3.IntegrityError:
+    #     return False
+    # finally:
+    #     conn.close()
+    cursor.execute('INSERT INTO posts (course_id, title, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', (course_id, title, sender_name, content, likes, tag))
+    conn.commit()
+    return True
+
 def add_fake_data():
     # Add some users
     add_user('admin', 'adminpass', 'admin@example.com', 'admin')
@@ -318,6 +374,11 @@ def add_fake_data():
     cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('python.pdf', programming_id))
     cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('python.mp4', programming_id))
 
+    # Add some posts
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', ('Math Conference', cs101_id, 'Li Ming', 'Please solve the math problem', 3, 'Plain'))
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', ('Physics Conference', cs101_id, 'Li Hua', 'Please write an essay', 5, 'Hot'))
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', ('Computer Science Conference', cs102_id, 'Li Tao', 'Please get out of bed', 45, 'Hot'))
+
     conn.commit()
     conn.close()
 
@@ -329,4 +390,5 @@ def init_db():
     create_course_table()
     create_join_course_requests_table()
     create_add_course_requests_table()
+    create_posts_table()
     add_fake_data()

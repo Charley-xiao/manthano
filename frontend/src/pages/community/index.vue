@@ -1,21 +1,25 @@
 <script setup lang="ts">
+import axios from "axios";
 
-const recentPosts = ref([
-    { id: 1, title: 'Tips for Effective Study Groups', author: 'Alice' },
-    { id: 2, title: 'Best Resources for Math Help', author: 'Bob' },
-    { id: 3, title: 'How to Prepare for Exams', author: 'Charlie' },
-    { id: 4, title: 'Study Techniques for Science Classes', author: 'David' },
-    { id: 5, title: 'Literature Class Discussions', author: 'Eve' },
-    { id: 6, title: 'Time Management Tips for Students', author: 'Frank' },
-    { id: 7, title: 'Effective Note-Taking Strategies', author: 'Grace' },
-    { id: 8, title: 'Study Techniques for Different Learning Styles', author: 'Helen' },
-    { id: 9, title: 'How to Stay Motivated in School', author: 'Ivy' },
-    { id: 10, title: 'Best Study Spots on Campus', author: 'Jack' },
-    { id: 11, title: 'How to Balance School and Work', author: 'Kevin' },
-    { id: 12, title: 'Study Techniques for Visual Learners', author: 'Lily' },
-    { id: 13, title: 'How to Manage Stress During Finals', author: 'Mike' },
-    { id: 14, title: 'Study Techniques for Auditory Learners', author: 'Nancy' },
-]);
+interface Post {
+    id: number;
+    course_id: number;
+    title: string,
+    sender_name: string;
+    content: string;
+    date_submitted: string,
+    likes: number;
+    tag: string;
+}
+
+const posts = ref<Post[]>([]);
+
+async function fetchPosts() {
+    const response = await axios.get('/api/posts');
+    const data = response.data;
+    posts.value = data.posts;
+    console.table(posts.value)
+}
 
 const popularTopics = ref(['Mathematics', 'Science', 'Literature', 'Study Techniques']);
 
@@ -27,15 +31,15 @@ const colors = [
     "linear-gradient(135deg, #24c6dc, #514a9d)"
 ];
 
-onMounted(() => {
+onMounted(async () => {
+    await fetchPosts();
+
     const cardHeaders: NodeListOf<HTMLElement> = document.querySelectorAll('div.card-header');
 
     cardHeaders.forEach(cardHeader => {
         const randomColor = colors[Math.floor(Math.random() * colors.length)];
         cardHeader.style.background = randomColor;
     });
-
-    console.log(cardHeaders);
 });
 
 </script>
@@ -59,15 +63,15 @@ onMounted(() => {
             </section>
 
             <section class="recent-discussions">
-                <h2>Recent Discussions</h2>
-                <div v-if="recentPosts.length === 0">No recent discussions.</div>
+                <h2>Evaluated Courses</h2>
+                <div v-if="posts.length === 0">No posts.</div>
                 <div class="post-card">
-                    <div class="card" v-for="post in recentPosts" :key="post.id">
+                    <div class="card" v-for="post in posts" :key="post.id">
                         <div class="card-header">
                             <router-link to="/community/post">{{ post.title }}</router-link>
                         </div>
                         <div class="card-body">
-                            <p>by {{ post.author }}</p>
+                            <p>by {{ post.sender_name }}</p>
                         </div>
                     </div>
                 </div>
