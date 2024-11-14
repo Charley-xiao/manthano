@@ -175,6 +175,7 @@ def create_course_table():
             title TEXT NOT NULL,
             description TEXT NOT NULL,
             owner TEXT NOT NULL,
+            category TEXT,
             type TEXT NOT NULL DEFAULT 'open', -- open, ongoing, closed
             FOREIGN KEY(owner) REFERENCES users(username)
         )
@@ -258,10 +259,11 @@ def create_add_course_requests_table():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS add_course_requests (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
             owner TEXT NOT NULL,
-            course_id INTEGER NOT NULL,
-            FOREIGN KEY(owner) REFERENCES users(username),
-            FOREIGN KEY(course_id) REFERENCES courses(id)
+            description TEXT NOT NULL,
+            category TEXT,
+            FOREIGN KEY(owner) REFERENCES users(username)
         )
     ''')
     conn.commit()
@@ -283,9 +285,8 @@ def add_fake_data():
     cursor = conn.cursor()
 
     # Add some courses by teacher1
-    cursor.execute('INSERT INTO courses (title, description, owner) VALUES (?, ?, ?)', ('CS101', 'Introduction to Computer Science', 'teacher1'))
-    cursor.execute('INSERT INTO courses (title, description, owner) VALUES (?, ?, ?)', ('CS102', 'Data Structures', 'teacher1'))
-    cursor.execute('INSERT INTO courses (title, description, owner) VALUES (?, ?, ?)', ('CS103', 'Algorithms', 'teacher1'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)', ('CS102', 'Data Structures', 'teacher1', 'Computer Science'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)', ('CS101', 'Introduction to Computer Science', 'teacher1', 'Computer Science'))
 
     # Fetch the course IDs to add chapters and students
     cursor.execute('SELECT id FROM courses WHERE title = "CS101"')

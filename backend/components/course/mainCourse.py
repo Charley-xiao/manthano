@@ -43,7 +43,7 @@ class AddCourseHandler(BaseHandler):
         try:
             if get_user_role(username) == 'admin':
                 cursor.execute('''
-                    SELECT title, description, owner FROM add_course_requests
+                    SELECT title, description, owner, category FROM add_course_requests
                 ''')
                 requests = cursor.fetchall()
                 self.write(json.dumps(requests))
@@ -67,6 +67,7 @@ class AddCourseHandler(BaseHandler):
         description = self.get_argument("description")
         owner = self.get_argument("owner")
         action = self.get_argument("action", None)
+        category = self.get_argument("category")
 
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
@@ -76,8 +77,8 @@ class AddCourseHandler(BaseHandler):
                 if get_user_role(username) == 'admin':
                     if action == 'approve':
                         cursor.execute('''
-                            INSERT INTO courses (title, description, owner) VALUES (?, ?, ?)
-                        ''', (title, description, owner))
+                            INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)
+                        ''', (title, description, owner, category))
                         cursor.execute('''
                             DELETE FROM add_course_requests WHERE title = ? AND owner = ?
                         ''', (title, owner))
@@ -98,8 +99,8 @@ class AddCourseHandler(BaseHandler):
             else:
                 if get_user_role(username) == 'teacher':
                     cursor.execute('''
-                        INSERT INTO add_course_requests (title, description, owner) VALUES (?, ?, ?)
-                    ''', (title, description, username))
+                        INSERT INTO add_course_requests (title, description, owner, category) VALUES (?, ?, ?, ?)
+                    ''', (title, description, username, category))
                     conn.commit()
                     self.write("Request sent successfully.")
                 else:
