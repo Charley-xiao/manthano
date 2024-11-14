@@ -326,59 +326,94 @@ def add_post(course_id, title, sender_name, content, likes, tag):
     return True
 
 def add_fake_data():
-    # Add some users
-    add_user('admin', 'adminpass', 'admin@example.com', 'admin')
-    add_user('teacher1', 'teacherpass', 'teacher1@example.com', 'teacher')
-    add_user('teacher2', 'teacherpass', 'teacher2@example.com', 'teacher')
-    add_user('student1', 'studentpass', 'student1@example.com', 'student')
-    add_user('student2', 'studentpass', 'student2@example.com', 'student')
-    add_user('student3', 'studentpass', 'student3@example.com', 'student')
+    # Add some users with varied passwords and realistic emails
+    add_user('admin', 'StrongAdminPass2024!', 'admin@schoolplatform.edu', 'admin')
+    add_user('mr.johnson', 'TeacherP@ss123', 'johnson.math@schoolplatform.edu', 'teacher')
+    add_user('ms.smith', 'Smith2024Teach!', 'smith.cs@schoolplatform.edu', 'teacher')
+    add_user('jane.doe', 'JDoe@Stud2024', 'jane.doe@schoolplatform.edu', 'student')
+    add_user('john.doe', 'JDoe123#Pass', 'john.doe@schoolplatform.edu', 'student')
+    add_user('alice.wong', 'AliceW2024!', 'alice.wong@schoolplatform.edu', 'student')
 
     # Add a teacher request
-    add_teacher_request('teacher3', 'teacherpass', 'teacher3@example.com')
+    add_teacher_request('mr.brown', 'NewTeach123!', 'brown.history@schoolplatform.edu')
 
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
-    # Add some courses by teacher1
-    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)', ('CS102', 'Data Structures', 'teacher1', 'Computer Science'))
-    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)', ('CS101', 'Introduction to Computer Science', 'teacher1', 'Computer Science'))
+    # Add some courses by ms.smith
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)', ('CS201', 'Advanced Data Structures', 'ms.smith', 'Computer Science'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)', ('CS101', 'Intro to Computer Science', 'ms.smith', 'Computer Science'))
 
     # Fetch the course IDs to add chapters and students
     cursor.execute('SELECT id FROM courses WHERE title = "CS101"')
     cs101_id = cursor.fetchone()[0]
-    cursor.execute('SELECT id FROM courses WHERE title = "CS102"')
-    cs102_id = cursor.fetchone()[0]
+    cursor.execute('SELECT id FROM courses WHERE title = "CS201"')
+    cs201_id = cursor.fetchone()[0]
 
     # Add some chapters for CS101
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Introduction', 'Basics of Computer Science', 'teaching', cs101_id))
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Programming', 'Introduction to Python', 'teaching', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Getting Started', 'Welcome to Computer Science', 'teaching', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Intro to Programming', 'Understanding Python Basics', 'teaching', cs101_id))
 
-    # Add some chapters for CS102
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Data Structures Overview', 'Arrays, Lists, Trees', 'teaching', cs102_id))
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Linked Lists', 'Singly and Doubly Linked Lists', 'teaching', cs102_id))
+    # Add some chapters for CS201
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Data Structures 101', 'Understanding Stacks and Queues', 'teaching', cs201_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Tree Structures', 'Binary Trees and Traversals', 'teaching', cs201_id))
 
     # Add students to courses
-    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs101_id, 'student1'))
-    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs101_id, 'student2'))
-    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs102_id, 'student1'))
-    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs102_id, 'student3'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs101_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs101_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs201_id, 'alice.wong'))
 
     # Add some courseware
-    cursor.execute('SELECT id FROM chapters WHERE title = "Introduction"')
-    introduction_id = cursor.fetchone()[0]
-    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('intro.pdf', introduction_id))
-    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('intro.mp4', introduction_id))
+    cursor.execute('SELECT id FROM chapters WHERE title = "Getting Started"')
+    intro_id = cursor.fetchone()[0]
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('welcome_guide.pdf', intro_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('welcome_video.mp4', intro_id))
 
-    cursor.execute('SELECT id FROM chapters WHERE title = "Programming"')
+    cursor.execute('SELECT id FROM chapters WHERE title = "Intro to Programming"')
     programming_id = cursor.fetchone()[0]
-    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('python.pdf', programming_id))
-    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('python.mp4', programming_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('python_intro.pdf', programming_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('python_basics.mp4', programming_id))
 
-    # Add some posts
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', ('Math Conference', cs101_id, 'Li Ming', 'Please solve the math problem', 3, 'Plain'))
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', ('Physics Conference', cs101_id, 'Li Hua', 'Please write an essay', 5, 'Hot'))
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', ('Computer Science Conference', cs102_id, 'Li Tao', 'Please get out of bed', 45, 'Hot'))
+    # Add some detailed posts
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', 
+                   ('Study Group Forming', cs101_id, 'Jane Doe', 
+                    'Hello everyone, I’m forming a study group for CS101. \n\n'
+                    'The goal of our group will be to explore key concepts such as programming basics, '
+                    'problem-solving strategies, and working through Python exercises together. I believe that learning '
+                    'in a group setting can enhance understanding through different perspectives and discussions. \n\n'
+                    'We’ll meet weekly on Tuesdays and Thursdays for an hour each. Each session will involve a brief recap '
+                    'of the week’s lectures, followed by collaborative problem-solving. Bring your questions, and let’s help each other excel!\n\n'
+                    'Please comment below if you are interested, and we can finalize the meeting schedule. Looking forward to learning together!', 
+                    15, 'Plain'))
+
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', 
+                   ('Python Tips & Tricks', cs101_id, 'John Doe', 
+                    'Hey everyone, \n\n'
+                    'As we dive deeper into Python, I thought it would be helpful to share some tips and tricks that have been a game-changer for me. \n\n'
+                    '1. **List Comprehensions**: Simplify your loops and make your code more Pythonic.\n'
+                    '2. **Debugging with pdb**: Use the built-in Python debugger to step through your code.\n'
+                    '3. **Virtual Environments**: Always set up a virtual environment for your projects to manage dependencies.\n\n'
+                    'I’ve also found that breaking down complex problems into smaller functions makes the code more readable and easier to test. '
+                    'Let’s use this thread to share more tips and discuss how we can write cleaner and more efficient code. What are your favorite Python hacks?', 
+                    25, 'Hot'))
+
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', 
+                   ('Mastering Binary Trees', cs201_id, 'Alice Wong', 
+                    'Hi all, \n\n'
+                    'In this post, I’d like to dive into binary trees, a foundational concept in data structures that will benefit us greatly '
+                    'in our CS201 journey and beyond. \n\n'
+                    '### Why Binary Trees?\n'
+                    'Binary trees are essential for understanding algorithms like search (binary search trees), sorting, and hierarchical data representation. '
+                    'They are also the basis for more complex structures like heaps and balanced trees (e.g., AVL and Red-Black Trees).\n\n'
+                    '### Key Operations\n'
+                    '- **Traversal**: Understanding in-order, pre-order, and post-order traversals is crucial.\n'
+                    '- **Balancing**: Learn how self-balancing trees optimize operations.\n\n'
+                    '### Practical Applications\n'
+                    'Binary trees are used in scenarios such as database indexing, network routing, and even some AI algorithms. I’ve also found them '
+                    'in file compression algorithms like Huffman encoding. \n\n'
+                    'Let’s discuss how we can make these concepts intuitive. Share your thoughts or questions below!', 
+                    40, 'Hot'))
 
     conn.commit()
     conn.close()
