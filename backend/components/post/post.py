@@ -35,10 +35,10 @@ class PostHandler(tornado.web.RequestHandler):
                     'course_id': post[1],
                     'title': post[2],
                     'sender_name': post[3],
-                    'content': post[3],
-                    'likes': post[4],
-                    'tag': post[5],
-                    'date_submitted': post[6]
+                    'content': post[4],
+                    'likes': post[5],
+                    'tag': post[6],
+                    'date_submitted': post[7]
                 })
             # for post in posts:
             #     post_id = post[0]
