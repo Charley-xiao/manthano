@@ -1,3 +1,57 @@
+<script setup lang="ts">
+import axios from "axios";
+
+interface Post {
+    id: number;
+    title: string,
+    course_id: number;
+    sender_name: string;
+    content: string;
+    likes: number;
+    tag: string;
+}
+
+const newPost = ref<Post>({
+    id: 0,
+    course_id: 0,
+    title: '',
+    sender_name: '',
+    content: '',
+    likes: 0,
+    tag: ''
+});
+
+async function createPost() {
+    const post = {
+        course_id: newPost.value.course_id,
+        sender_name: localStorage.getItem('username'),
+        title: newPost.value.title,
+        content: newPost.value.content,
+        tag: newPost.value.tag
+    };
+
+    try {
+        await axios.post('/api/posts', post)
+        alert('Post added successfully!');
+    } catch (error) {
+        console.error('Failed to add post:', error);
+    }
+
+    Object.keys(newPost.value).forEach(key => {
+        (newPost.value[key as keyof Post] as string | number) = {
+            id: 0,
+            course_id: 0,
+            title: '',
+            sender_name: '',
+            content: '',
+            likes: 0,
+            tag: ''
+        }[key as keyof Post] as string | number;
+    });
+    console.log(newPost.value)
+}
+</script>
+
 <template>
     <div id="forum" class="forum-container">
         <header class="forum-header">
@@ -9,13 +63,15 @@
                 <h2>Create a Post</h2>
                 <form @submit.prevent="createPost">
                     <input v-model="newPost.title" placeholder="Post Title" required />
+                    <input v-model="newPost.course_id" placeholder="Set Course" type="number" required />
                     <textarea v-model="newPost.content" placeholder="Share your tips or questions..."
                         required></textarea>
+                    <input v-model="newPost.tag" placeholder="Set Tag" required />
                     <button type="submit">Submit</button>
                 </form>
             </section>
 
-            <section class="post-list">
+            <!-- <section class="post-list">
                 <h2>Recent Posts</h2>
                 <div v-if="posts.length === 0">No posts available.</div>
                 <div v-for="post in posts" :key="post.id" class="post">
@@ -25,7 +81,7 @@
                         <small>Posted by: {{ post.author }} on {{ post.date }}</small>
                     </footer>
                 </div>
-            </section>
+            </section> -->
         </main>
 
         <footer class="forum-footer">
@@ -33,30 +89,6 @@
         </footer>
     </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-
-const newPost = ref({
-    title: '',
-    content: '',
-});
-
-const posts = ref([]);
-
-function createPost() {
-    const post = {
-        id: posts.value.length + 1,
-        title: newPost.value.title,
-        content: newPost.value.content,
-        author: 'User', // You can replace this with actual user info
-        date: new Date().toLocaleString(),
-    };
-    posts.value.push(post);
-    newPost.value.title = '';
-    newPost.value.content = '';
-}
-</script>
 
 <style scoped>
 .forum-container {
