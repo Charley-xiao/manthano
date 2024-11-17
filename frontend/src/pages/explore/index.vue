@@ -4,6 +4,7 @@
       <h1>Explore</h1>
       <p>Discover trending and recommended courses and instructors</p>
     </div>
+    
 
     <div class="tabs">
       <button 
@@ -48,7 +49,6 @@
           v-for="course in paginatedCourses"
           :key="course.id"
           class="course-card"
-          @click="goToCourse(course.id)"
         >
           <div class="course-info">
             <h3>{{ course.title }}</h3>
@@ -56,7 +56,7 @@
             <div class="course-rating">Rating: {{ course.rating }} ★</div>
             
             <div class="overlay">
-              <button @click.stop="goToCourse(course.id)">View Course</button>
+              <router-link :to="'/community/course/' + course.id" class="view">View Course</router-link>
             </div>
           </div>
         </div>
@@ -105,12 +105,11 @@
           v-for="teacher in sortedTeachers"
           :key="teacher.id"
           class="course-card"
-          @click="goToTeacher(teacher.id)"
         >
           <div class="course-thumbnail">
             <img :src="teacher.thumbnail" alt="Teacher thumbnail" />
             <div class="overlay">
-              <button @click.stop="goToTeacher(teacher.id)">View Teacher</button>
+              <router-link :to="'/community/teacher/' + teacher.id" class="view">View Teacher</router-link>
             </div>
           </div>
           <div class="course-info">
@@ -139,7 +138,7 @@ export default defineComponent({
     const selectedSort = ref<string>('trending');
     const selectedFilter = ref<string>('All');
     const currentPage = ref(1); 
-    const itemsPerPage = ref(10); 
+    const itemsPerPage = ref(8); 
     const filters = ref<string[]>(['All', 'Development', 'Design', 'Business']);
     const courses = ref([
       {
@@ -268,18 +267,6 @@ export default defineComponent({
     const changePage = (page: number) => {
       currentPage.value = page;
     };
-
-    const goToCourse = (courseId: number) => {
-      // Navigate to the course details
-    };
-
-    
-    const goToTeacher = (teacherId: number) => {
-      const url = `/teacher/${teacherId}`;
-  
-      window.location.href = url;
-    };
-  
     return {
       selectedSort,
       selectedFilter,
@@ -291,8 +278,6 @@ export default defineComponent({
       totalPages,
       displayedPages,
       changePage,
-      goToCourse,
-      goToTeacher,
       activeTab,
       changeTab,
     };
@@ -302,15 +287,19 @@ export default defineComponent({
 
 <style scoped>
 .explore-page {
-    padding: 5px;
-    background-color: #f9f9f9;
-    color: #333;
-  }
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  height: 100vh;
+}
   
-  .header-section {
-    text-align: center;
-    margin-bottom: 5px;
-  }
+  .header-section  {
+  text-align: center;
+  padding: 50px 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  animation: fade-in 1s ease-in-out;
+}
 
 .tabs {
   text-align: left;
@@ -509,6 +498,18 @@ export default defineComponent({
   align-items: center;
   margin: 0 5px; 
   border: 1px solid #ccc;
+}
+
+
+.view {
+  display: inline-block;
+  margin-top: 15px;
+  background: #007bf0;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: background 0.3s ease;
 }
 
 </style>

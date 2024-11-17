@@ -15,10 +15,16 @@ routes.push({
 });
 
 routes.push({
-    path: '/teacher/:teacherId',
-    component: () => import('../pages/teacher/index.vue'),
+    path: '/community/course/:id',
+    // @ts-ignore
+    component: () => import('../pages/community/course/index.vue'),
 });
 
+routes.push({
+    path: '/community/teacher/:id',
+    // @ts-ignore
+    component: () => import('../pages/community/teacher/index.vue'),
+});
 console.log(routes);
 
 export const router = createRouter({
