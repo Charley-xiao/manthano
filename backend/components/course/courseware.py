@@ -45,8 +45,10 @@ class CourseWareHandler(BaseHandler):
             ''', (chapter_id,))
             owner = cursor.fetchone()
             if owner and owner[0] == username:
-                filename = file['filename'] + time.strftime('%Y%m%d%H%M%S') # Add timestamp for versioning
-                file_path = f'files/courseware/{filename}'
+                filename = file['filename'] # + time.strftime('%Y%m%d%H%M%S') # Add timestamp for versioning
+                file_path = f'files/courseware/{chapter_id}/{filename}'
+                if not os.path.exists(f'files/courseware/{chapter_id}'):
+                    os.makedirs(f'files/courseware/{chapter_id}')
                 with open(file_path, 'wb') as f:
                     f.write(file['body'])
                 cursor.execute('''
@@ -218,11 +220,8 @@ class CourseWareFileHandlerWithAuth(tornado.web.StaticFileHandler):
     1. If the user is the owner of the course or admin, they can access the courseware.
     2. If the user is a student, they can access the courseware only if it is visible.
 
-    A typical path for courseware files is '/files/courseware/<filename>'.
-
     However, when requesting the file, the path should be '/files/courseware/<chapter_id>/<filename>'.
     """
-    @tornado.web.authenticated
     def validate_absolute_path(self, root, absolute_path):
         username = self.get_current_user()
         chapter_id = self.request.path.split('/')[-2]
@@ -241,15 +240,20 @@ class CourseWareFileHandlerWithAuth(tornado.web.StaticFileHandler):
             if owner and (owner[0] == username or get_user_role(username) == 'admin'):
                 return absolute_path
             else:
-                cursor.execute('''
-                    SELECT is_visible FROM courseware WHERE chapter_id = ? AND filename = ?
-                ''', (chapter_id, filename))
-                is_visible = cursor.fetchone()
-                if is_visible and is_visible[0] == 1:
+                try:
+                    cursor.execute('''
+                        SELECT is_visible FROM courseware WHERE chapter_id = ? AND filename = ?
+                    ''', (chapter_id, filename))
+                    is_visible = cursor.fetchone()
+                    if is_visible and is_visible[0] == 1:
+                        return absolute_path
+                except sqlite3.Error:
                     return absolute_path
                 else:
                     raise tornado.web.HTTPError(403)
-        except sqlite3.Error:
-            raise tornado.web.HTTPError(500)
+        except sqlite3.Error as e:
+            self.set_status(500)
+            print(e)
+            self.write(str(e))
         finally:
             conn.close()

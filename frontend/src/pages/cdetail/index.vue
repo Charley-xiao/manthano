@@ -155,20 +155,38 @@ const deleteChapter = async (chapterId: string) => {
     }
 };
 
-// Add courseware to a chapter
-const addCourseware = async (chapterId: string, courseware: { name: string; link: string }) => {
+const addCourseware = async (chapterId: string, courseware: { name: string; file: File }) => {
     const chapter = courseDetails.value.chapters.find(ch => ch.id === chapterId);
     if (chapter) {
-        chapter.courseware.push(courseware);
-
         try {
-            await axios.post(`/api/courseware`, { chapterId, courseware });
-            alert('Courseware added successfully!');
+            const formData = new FormData();
+            formData.append('chapterId', chapterId);
+            formData.append('name', courseware.name);
+            formData.append('file', courseware.file); // Attach the selected file
+
+            const response = await axios.post(`/api/courseware`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            // Assuming the response contains the file's public link
+            const uploadedCourseware = {
+                name: response.data.name || courseware.name,
+                link: response.data.link, // URL of the uploaded courseware
+            };
+
+            chapter.courseware.push(uploadedCourseware);
+            alert('Courseware uploaded and added successfully!');
         } catch (error) {
-            console.error('Failed to add courseware:', error);
+            console.error('Failed to upload courseware:', error);
+            alert('Failed to upload courseware.');
         }
+    } else {
+        alert('Chapter not found.');
     }
 };
+
 
 const fetchCourseDetails = async () => {
     try {
@@ -387,6 +405,55 @@ const closeVideoModal = () => {
     alert(`You watched ${videoWatchedTime.value} seconds of the video.`);
 };
 
+const selectedFile = ref<File | null>(null);
+const selectedFileName = ref('');
+const coursewareFileName = ref('');
+
+const handleFileSelection = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+        selectedFile.value = target.files[0];
+        selectedFileName.value = target.files[0].name;
+        coursewareFileName.value = target.files[0].name.split('.').slice(0, -1).join('.'); // Default name without extension
+    }
+};
+
+const uploadCourseware = async (chapterId: string) => {
+    if (!selectedFile.value) {
+        alert('Please select a file to upload.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', selectedFile.value);
+    formData.append('name', coursewareFileName.value);
+    formData.append('chapter_id', chapterId);
+
+    try {
+        const response = await axios.post(`/api/courseware`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        // const uploadedCourseware = {
+        //     name: response.data.name,
+        //     link: response.data.link // Assuming the server returns the file's accessible URL
+        // };
+
+        // await addCourseware(chapterId, uploadedCourseware);
+
+        alert('Courseware uploaded successfully!');
+        // Reset fields
+        selectedFile.value = null;
+        selectedFileName.value = '';
+        coursewareFileName.value = '';
+    } catch (error) {
+        console.error('Failed to upload courseware:', error);
+        alert('Failed to upload courseware.');
+    }
+};
+
 </script>
 
 <template>
@@ -474,10 +541,39 @@ const closeVideoModal = () => {
                         <h4>Courseware</h4>
                         <ul>
                             <li v-for="(file, index) in chapter.courseware" :key="index">
-                                <a :href="file.link" target="_blank">{{ file.name }}</a>
+                                <a :href="`/api/files/courseware/${chapter.id}/${file.name}`" target="_blank">{{ file.name }}</a>
                             </li>
                         </ul>
                     </div>
+
+                    <!-- Courseware Upload Section -->
+                    <div v-if="isOwnerOrAdmin" class="courseware-upload">
+                        <h4>Upload Courseware</h4>
+                        <form @submit.prevent="uploadCourseware(chapter.id)" class="upload-form">
+                            <div class="file-upload-wrapper">
+                                <label for="file-upload" class="file-upload-label">
+                                    <input 
+                                        type="file" 
+                                        id="file-upload" 
+                                        class="file-input" 
+                                        @change="handleFileSelection" 
+                                        required 
+                                    />
+                                    <span class="upload-icon">📁</span>
+                                    <span class="upload-text">
+                                        {{ selectedFileName || 'Choose a file from your computer' }}
+                                    </span>
+                                </label>
+                            </div>
+                            <input 
+                                v-model="coursewareFileName" 
+                                placeholder="Enter a display name for the file" 
+                                class="form-input" 
+                            />
+                            <button type="submit" class="btn primary upload-button">Upload</button>
+                        </form>
+                    </div>
+
                 </div>
             </div>
 
@@ -934,5 +1030,55 @@ const closeVideoModal = () => {
     color: white;
     border: none;
     cursor: pointer;
+}
+
+.file-upload-wrapper {
+    position: relative;
+    margin-bottom: 10px;
+    border: 2px dashed #3498db;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.file-upload-wrapper:hover {
+    background-color: #f0f8ff;
+    border-color: #2980b9;
+}
+
+.file-upload-label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: bold;
+    color: #3498db;
+}
+
+.file-upload-label .upload-icon {
+    font-size: 24px;
+}
+
+.file-upload-label .upload-text {
+    font-size: 16px;
+}
+
+.file-input {
+    display: none;
+}
+
+.upload-button {
+    display: block;
+    margin-top: 10px;
+    background-color: #3498db;
+    color: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.upload-button:hover {
+    background-color: #2980b9;
 }
 </style>
