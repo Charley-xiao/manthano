@@ -58,9 +58,90 @@ const handleDragEnd = () => {
   draggedItem.value = null;
 };
 
+const addCourseRequests = ref<Array<{ id: number; title: string; owner: string; description: string; category: string }>>([]);
+const addTeacherRequests = ref<Array<{ id: number; username: string; email: string }>>([]);
+
+const getAddCourseRequests = async () => {
+  try {
+    const response = await axios.get('/api/add-course-requests');
+    console.log(response.data);
+    addCourseRequests.value = response.data;
+  } catch (error: any) {
+    console.error('An error occurred while fetching add course requests:', error);
+  }
+};
+
+const getAddTeacherRequests = async () => {
+  try {
+    const response = await axios.get('/api/add-teacher-requests');
+    console.log(response.data);
+    addTeacherRequests.value = response.data;
+  } catch (error: any) {
+    console.error('An error occurred while fetching add teacher requests:', error);
+  }
+};
+
+const approveAddCourseRequest = async (request: { id: number }) => {
+  try {
+    // params needed: request_id,  action=approve
+    // await axios.post(`/api/add-course-requests`, { request_id: request.id, action: 'approve' });
+    const params = new URLSearchParams();
+    params.append('request_id', request.id.toString());
+    params.append('action', 'approve');
+    await axios.post(`/api/add-course-requests`, params);
+    getAddCourseRequests();
+  } catch (error: any) {
+    console.error('An error occurred while approving add course request:', error);
+  }
+};
+
+const denyAddCourseRequest = async (request: { id: number }) => {
+  try {
+    // params needed: request_id,  action=deny
+    // await axios.post(`/api/add-course-requests`, { request_id: request.id, action: 'deny' });
+    const params = new URLSearchParams();
+    params.append('request_id', request.id.toString());
+    params.append('action', 'deny');
+    await axios.post(`/api/add-course-requests`, params);
+    getAddCourseRequests();
+  } catch (error: any) {
+    console.error('An error occurred while denying add course request:', error);
+  }
+};
+
+const approveAddTeacherRequest = async (request: { id: number }) => {
+  try {
+    // params needed: request_id,  action=approve
+    // await axios.post(`/api/add-teacher-requests`, { request_id: request.id, action: 'approve' });
+    const params = new URLSearchParams();
+    params.append('request_id', request.id.toString());
+    params.append('action', 'approve');
+    await axios.post(`/api/add-teacher-requests`, params);
+    getAddTeacherRequests();
+  } catch (error: any) {
+    console.error('An error occurred while approving add teacher request:', error);
+  }
+};
+
+const denyAddTeacherRequest = async (request: { id: number }) => {
+  try {
+    // params needed: request_id,  action=deny
+    // await axios.post(`/api/add-teacher-requests`, { request_id: request.id, action: 'deny' });
+    const params = new URLSearchParams();
+    params.append('request_id', request.id.toString());
+    params.append('action', 'deny');
+    await axios.post(`/api/add-teacher-requests`, params);
+    getAddTeacherRequests();
+  } catch (error: any) {
+    console.error('An error occurred while denying add teacher request:', error);
+  }
+};
+
 onMounted(() => {
   currentUsername.value = localStorage.getItem('username') || '';
   getCourses();
+  getAddCourseRequests();
+  getAddTeacherRequests();
 });
 </script>
 
@@ -68,7 +149,7 @@ onMounted(() => {
   <div v-if="role === 'teacher'" class="sticky-button-container">
     <button class="super-funky-button" @click="router.push('/course/add')">Add Course</button>
   </div>
-  <div class="course-grid">
+  <div v-if="role !== 'admin'" class="course-grid">
     <div
       class="course-card"
       v-for="(course, index) in courses"
@@ -86,6 +167,60 @@ onMounted(() => {
       <div class="card-footer">
         <div class="course-link" @click="router.push(`/cdetail/${course.id}`)">
           View Course
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div v-else class="requests-container">
+    <div class="request-section">
+      <h2>Add Course Requests</h2>
+      <div class="request-grid">
+        <div
+          class="request-card"
+          v-for="(request, index) in addCourseRequests"
+          :key="request.id"
+          :style="{ background: getCardBackground(index) }"
+        >
+          <div class="card-content">
+            <h3>{{ request.title }}</h3>
+            <p>{{ request.description }}</p>
+            <p>Owner: {{ request.owner }}</p>
+            <p>Category: {{ request.category }}</p>
+          </div>
+          <div class="card-footer">
+            <button class="action-button approve" @click="approveAddCourseRequest(request)">
+              Approve
+            </button>
+            <button class="action-button deny" @click="denyAddCourseRequest(request)">
+              Deny
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="request-section">
+      <h2>Add Teacher Requests</h2>
+      <div class="request-grid">
+        <div
+          class="request-card"
+          v-for="(request, index) in addTeacherRequests"
+          :key="request.id"
+          :style="{ background: getCardBackground(index) }"
+        >
+          <div class="card-content">
+            <h3>{{ request.username }}</h3>
+            <p>{{ request.email }}</p>
+          </div>
+          <div class="card-footer">
+            <button class="action-button approve" @click="approveAddTeacherRequest(request)">
+              Approve
+            </button>
+            <button class="action-button deny" @click="denyAddTeacherRequest(request)">
+              Deny
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -297,5 +432,110 @@ onMounted(() => {
     font-size: 18px;
     padding: 14px 28px;
   }
+}
+
+/* Request Section Styling */
+.request-section {
+  margin-bottom: 40px;
+  padding: 30px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.request-section h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.request-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.request-card {
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.request-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.request-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.request-card p {
+  font-size: 16px;
+  color: #f1f1f1;
+}
+
+.action-button {
+  font-size: 14px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.action-button.approve {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.action-button.approve:hover {
+  background-color: #218838;
+  transform: translateY(-3px);
+}
+
+.action-button.deny {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.action-button.deny:hover {
+  background-color: #c82333;
+  transform: translateY(-3px);
+}
+
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Add subtle animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.request-card {
+  animation: fadeIn 0.5s ease-in;
 }
 </style>

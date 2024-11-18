@@ -7,3 +7,4 @@ frontend/package-lock.json
 
 */__pycache__
 backend/db.db
+*.bat

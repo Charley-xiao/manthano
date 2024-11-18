@@ -150,3 +150,167 @@ class MyCourseHandler(BaseHandler):
             self.write(str(e))
         finally:
             conn.close()
+
+class AddCourseRequestHandler(BaseHandler):
+    """
+    Handles the requests to add a course.
+    """
+    @tornado.web.authenticated
+    def get(self):
+        """
+        Returns all the requests to add a course.
+        """
+        username = self.get_current_user()
+        role = get_user_role(username)
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            if role == 'admin':
+                cursor.execute('''
+                    SELECT id, title, description, owner, category FROM add_course_requests
+                ''')
+                requests = cursor.fetchall()
+                requests = [{'id': r[0], 'title': r[1], 'description': r[2], 'owner': r[3], 'category': r[4]} for r in requests]
+                self.write(json.dumps(requests))
+            else:
+                self.set_status(403)
+                self.write("Forbidden: You do not have permission to access this page.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+    @tornado.web.authenticated
+    def post(self):
+        """
+        Approves or denies the request to add a course.
+        """
+        username = self.get_current_user()
+        print(f'Request: {self.request.body}')
+        request_id = self.get_argument("request_id")
+        action = self.get_argument("action")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            if get_user_role(username) == 'admin':
+                cursor.execute('''
+                    SELECT owner, title, description, category FROM add_course_requests WHERE id = ?
+                ''', (request_id,))
+                request = cursor.fetchone()
+                if request:
+                    if action == 'approve':
+                        cursor.execute('''
+                            INSERT INTO courses (owner, title, description, category) VALUES (?, ?, ?, ?)
+                        ''', (request[0], request[1], request[2], request[3]))
+                        cursor.execute('''
+                            DELETE FROM add_course_requests WHERE id = ?
+                        ''', (request_id,))
+                        conn.commit()
+                        self.write("Course added successfully.")
+                    elif action == 'deny':
+                        cursor.execute('''
+                            DELETE FROM course_requests WHERE id = ?
+                        ''', (request_id,))
+                        conn.commit()
+                        self.write("Course request denied.")
+                    else:
+                        self.set_status(400)
+                        self.write("Bad request: Invalid action.")
+                else:
+                    self.set_status(404)
+                    self.write("Course request not found.")
+            else:
+                self.set_status(403)
+                self.write("Forbidden: You do not have permission to perform this action.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+class AddTeacherRequestHandler(BaseHandler):
+    """
+    Handles the requests to add a teacher.
+    """
+    @tornado.web.authenticated
+    def get(self):
+        """
+        Returns all the requests to add a teacher.
+        """
+        username = self.get_current_user()
+        role = get_user_role(username)
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            if role == 'admin':
+                cursor.execute('''
+                    SELECT id, username, email FROM add_teacher_requests
+                ''')
+                requests = cursor.fetchall()
+                requests = [{'id': r[0], 'username': r[1], 'email': r[2]} for r in requests]
+                self.write(json.dumps(requests))
+            else:
+                self.set_status(403)
+                self.write("Forbidden: You do not have permission to access this page.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+    @tornado.web.authenticated
+    def post(self):
+        """
+        Approves or denies the request to add a teacher.
+        """
+        username = self.get_current_user()
+        request_id = self.get_argument("request_id")
+        action = self.get_argument("action")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            if get_user_role(username) == 'admin':
+                cursor.execute('''
+                    SELECT username, email FROM add_teacher_requests WHERE id = ?
+                ''', (request_id,))
+                request = cursor.fetchone()
+                if request:
+                    if action == 'approve':
+                        cursor.execute('''
+                            INSERT INTO users (username, email, role) VALUES (?, ?, ?)
+                        ''', (request[0], request[1], 'teacher'))
+                        cursor.execute('''
+                            DELETE FROM add_teacher_requests WHERE id = ?
+                        ''', (request_id,))
+                        conn.commit()
+                        self.write("Teacher added successfully.")
+                    elif action == 'deny':
+                        cursor.execute('''
+                            DELETE FROM add_teacher_requests WHERE id = ?
+                        ''', (request_id,))
+                        conn.commit()
+                        self.write("Teacher request denied.")
+                    else:
+                        self.set_status(400)
+                        self.write("Bad request: Invalid action.")
+                else:
+                    self.set_status(404)
+                    self.write("Teacher request not found.")
+            else:
+                self.set_status(403)
+                self.write("Forbidden: You do not have permission to perform this action.")
+
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()

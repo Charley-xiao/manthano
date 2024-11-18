@@ -69,7 +69,7 @@ from components.inbox import InboxHandler
 from components.user.base import BaseHandler
 from components.user.login import LoginHandler, LogoutHandler, RegisterHandler
 from components.user.teacher import AddTeacherHandler
-from components.user.mycourse import MyCourseHandler
+from components.user.mycourse import MyCourseHandler, AddCourseRequestHandler, AddTeacherRequestHandler
 from components.course.anticheat import VideoAnticheatHandler
 from components.course.courseware import CourseWareHandler, CourseWareFileHandlerWithAuth
 from components.course.mainCourse import AllCoursesHandler, DetailedCourseHandler, AddCourseHandler, CourseProgressHandler
@@ -124,6 +124,8 @@ def make_app():
         (r"/course/progress/\d+", CourseProgressHandler),
         (r"/posts", PostHandler),
         (r"/posts/(\d+)/comments", CommentHandler),
+        (r"/add-course-requests", AddCourseRequestHandler),
+        (r"/add-teacher-requests", AddTeacherRequestHandler),
     ], cookie_secret=SECRET_KEY, login_url="/login")
 
 if __name__ == "__main__":
