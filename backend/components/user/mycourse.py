@@ -215,7 +215,7 @@ class AddCourseRequestHandler(BaseHandler):
                         self.write("Course added successfully.")
                     elif action == 'deny':
                         cursor.execute('''
-                            DELETE FROM course_requests WHERE id = ?
+                            DELETE FROM add_course_requests WHERE id = ?
                         ''', (request_id,))
                         conn.commit()
                         self.write("Course request denied.")
