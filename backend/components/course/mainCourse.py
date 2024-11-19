@@ -309,13 +309,12 @@ class CourseProgressHandler(BaseHandler):
 
         try:
             cursor.execute('''
-                SELECT progress FROM course_progress WHERE course_id = ? AND student = ?
-            ''', (course_id, username))
-            progress = cursor.fetchone()
-            if progress:
-                self.write(json.dumps({"progress": progress[0]}))
-            else:
-                self.write(json.dumps({"progress": 0}))
+                SELECT chapter_id FROM course_progress WHERE username = ? AND chapter_id IN (SELECT id FROM chapters WHERE course_id = ?)
+            ''', (username, course_id))
+            chapters = cursor.fetchall()
+            chapters = {'chapters': chapters}
+            print(chapters)
+            self.write(json.dumps(chapters))
         except sqlite3.Error as e:
             self.set_status(500)
             self.write(str(e))
@@ -326,27 +325,26 @@ class CourseProgressHandler(BaseHandler):
     def post(self):
         """
         Updates the progress of a course for the current user.
+        Essentially, this handler is used to mark a chapter as completed by the student.
 
         Required arguments:
-        - course_id: The id of the course.
-        - progress: The progress of the course.
+        - chapter_id: The id of the chapter.
         """
         username = self.get_current_user()
-        course_id = self.get_argument("course_id")
-        progress = self.get_argument("progress")
+        chapter_id = self.get_argument("chapter_id")
 
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
 
         try:
             cursor.execute('''
-                INSERT INTO course_progress (course_id, student, progress) VALUES (?, ?, ?)
-                ON CONFLICT(course_id, student) DO UPDATE SET progress = excluded.progress
-            ''', (course_id, username, progress))
+                INSERT INTO course_progress (username, chapter_id) VALUES (?, ?)
+            ''', (username, chapter_id))
             conn.commit()
-            self.write("Progress updated successfully.")
+            self.write("Chapter marked as completed successfully.")
         except sqlite3.Error as e:
             self.set_status(500)
             self.write(str(e))
         finally:
             conn.close()
+        

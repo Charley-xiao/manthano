@@ -211,7 +211,7 @@ def create_course_table():
             content TEXT NOT NULL,
             type TEXT NOT NULL DEFAULT 'teaching', -- teaching, homework, project
             course_id INTEGER NOT NULL,
-            published INTEGER NOT NULL DEFAULT 0,
+            published INTEGER NOT NULL DEFAULT 1,
             FOREIGN KEY(course_id) REFERENCES courses(id)
         )
     ''')
@@ -245,6 +245,17 @@ def create_course_table():
             date_submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(course_id) REFERENCES courses(id),
             FOREIGN KEY(student) REFERENCES users(username)
+        )
+    ''')
+
+    # course progress
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS course_progress (
+            chapter_id INTEGER NOT NULL,
+            username TEXT NOT NULL,
+            PRIMARY KEY (chapter_id, username),
+            FOREIGN KEY(chapter_id) REFERENCES chapters(id),
+            FOREIGN KEY(username) REFERENCES users(username)
         )
     ''')
 
@@ -427,4 +438,4 @@ def init_db():
     create_join_course_requests_table()
     create_add_course_requests_table()
     create_posts_table()
-    # add_fake_data()
+    add_fake_data()

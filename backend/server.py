@@ -126,6 +126,7 @@ def make_app():
         (r"/posts/(\d+)/comments", CommentHandler),
         (r"/add-course-requests", AddCourseRequestHandler),
         (r"/add-teacher-requests", AddTeacherRequestHandler),
+        (r"/course/progress", CourseProgressHandler),
     ], cookie_secret=SECRET_KEY, login_url="/login")
 
 if __name__ == "__main__":

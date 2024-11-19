@@ -23,6 +23,7 @@ interface CourseDetails {
             link: string;
         }[];
         isEditing?: boolean;
+        isCompleted?: boolean;
     }[];
 }
 
@@ -241,12 +242,21 @@ const postCourseComment = async () => {
     }
 };
 
-const progress = ref(57);
+const progress = ref(0);
 
 const getProgress = async () => {
     try {
-        const response = await axios.get(`/api/course/progress/${courseId}`);
-        progress.value = response.data;
+        const params = new URLSearchParams();
+        params.append('course_id', courseId.toString());
+        const response = await axios.get(`/api/course/progress`, { params });
+        console.log(response.data)
+        const completedChapters = response.data.chapters;
+        const totalChapters = courseDetails.value.chapters.length;
+        const completedChaptersCount = completedChapters.length;
+        progress.value = (completedChaptersCount / totalChapters) * 100;
+        courseDetails.value.chapters.forEach(chapter => {
+            chapter.isCompleted = completedChapters.includes(chapter.id);
+        });
     } catch (error) {
         console.error('Failed to fetch course progress:', error);
     }
@@ -293,6 +303,7 @@ onMounted(() => {
     currentUsername.value = localStorage.getItem('username') || '';
     fetchCourseDetails();
     fetchCourseComments();
+    getProgress();
     document.addEventListener("visibilitychange", handleVisibilityChange);
 });
 
@@ -397,12 +408,21 @@ const showVideo = (videoUrl: string) => {
 };
 
 // Close video modal
-const closeVideoModal = () => {
+const closeVideoModal = async () => {
     if (!enforceMinimumViewingTime()) return;
     isVideoModalOpen.value = false;
     clearInterval(videoInterval!);  // Stop video tracking
     clearInterval(idleInterval!);  // Stop idle tracking
-    alert(`You watched ${videoWatchedTime.value} seconds of the video.`);
+    // alert(`You watched ${videoWatchedTime.value} seconds of the video.`);
+    // record progress: mark this chapter as completed
+    try {
+        const params = new URLSearchParams();
+        params.append('chapter_id', playingVideoNumber.value.toString());
+        await axios.post(`/api/course/progress`, params);
+        console.log('Chapter progress recorded successfully!');
+    } catch (error) {
+        console.error('Failed to record chapter progress:', error);
+    }
 };
 
 const selectedFile = ref<File | null>(null);
@@ -529,6 +549,8 @@ const uploadCourseware = async (chapterId: string) => {
             <div class="chapter-list">
                 <div v-for="chapter in filteredChapters(activeTab)" :key="chapter.id" class="chapter-card">
                     <h3>{{ chapter.title }}</h3>
+                    <div v-if="chapter.isCompleted" class="chapter-completed">Completed</div>
+                    <div v-else class="chapter-completed not-completed">Not Completed</div>
                     <!-- If the user clicks this button, the page pops up the video in the front -->
                     <div v-if="chapter.type === 'teaching'">
                         <button @click="showVideo(chapter.content)" class="btn primary">Play Video</button>
@@ -1080,5 +1102,19 @@ const uploadCourseware = async (chapterId: string) => {
 
 .upload-button:hover {
     background-color: #2980b9;
+}
+
+.chapter-completed {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+    font-size: 14px;
+    display: inline-block;
+    background-color: #2ecc71; /* Default to green for completed */
+    margin-bottom: 20px;
+
+    &.not-completed {
+        background-color: #e74c3c; /* Red for not completed */
+    }
 }
 </style>

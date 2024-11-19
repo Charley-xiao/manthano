@@ -172,7 +172,7 @@ onMounted(() => {
     </div>
   </div>
 
-  <div v-else class="requests-container">
+  <div class="requests-container">
     <div class="request-section">
       <h2>Add Course Requests</h2>
       <div class="request-grid">

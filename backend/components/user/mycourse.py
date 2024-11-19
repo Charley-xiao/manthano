@@ -5,6 +5,7 @@ import tornado.web
 from components.user.base import BaseHandler
 from database import DATABASE, get_user_role
 from components.sendEmail import send_email
+import bcrypt
 
 class MyCourseHandler(BaseHandler):
     """
@@ -280,14 +281,14 @@ class AddTeacherRequestHandler(BaseHandler):
         try:
             if get_user_role(username) == 'admin':
                 cursor.execute('''
-                    SELECT username, email FROM add_teacher_requests WHERE id = ?
+                    SELECT username, email, password_hash FROM add_teacher_requests WHERE id = ?
                 ''', (request_id,))
                 request = cursor.fetchone()
                 if request:
                     if action == 'approve':
                         cursor.execute('''
-                            INSERT INTO users (username, email, role) VALUES (?, ?, ?)
-                        ''', (request[0], request[1], 'teacher'))
+                            INSERT INTO users (username, email, role, password_hash) VALUES (?, ?, ?, ?)
+                        ''', (request[0], request[1], 'teacher', request[2]))
                         cursor.execute('''
                             DELETE FROM add_teacher_requests WHERE id = ?
                         ''', (request_id,))
