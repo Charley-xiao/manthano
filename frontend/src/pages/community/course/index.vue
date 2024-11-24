@@ -51,6 +51,17 @@ const course = ref<Course>(
     rating: 1.4
   })
 
+const newPost = ref<Post>({
+  id: 0,
+  course_id: NaN,
+  title: '',
+  sender_name: '',
+  content: '',
+  date_submitted: '',
+  likes: 0,
+  tag: ''
+});
+
 async function fetchPosts() {
   const response = await axios.get('/api/posts');
   console.log(response.data.posts);
@@ -120,6 +131,7 @@ async function submitRating() {
             <span v-for="n in 5" :key="n" @click="rate(n)" :class="{'star filled': n <= filledStars, 'star empty': n > filledStars}">&#9733;</span>
           </div>
         </div>
+        <textarea v-model="newPost.content" placeholder="Share your opinion on rating..." required></textarea>
         <div class="button">
           <button @click="submitRating" class="subbmit">Submit</button>
         </div>
@@ -149,7 +161,7 @@ async function submitRating() {
 }
 
 .button {
-  margin-left: 65px;
+  margin-left: 10px;
 }
 
 .filled {
@@ -337,6 +349,26 @@ body {
   bottom: 30px;
   right: 30px;
   z-index: 100;
+}
+
+.star_container {
+  width: 600px;
+}
+
+.star_container textarea {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid #bdc3c7;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.star_container input:focus,
+.star_container textarea:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.3);
 }
 
 .course-rating {

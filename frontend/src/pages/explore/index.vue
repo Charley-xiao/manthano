@@ -68,7 +68,7 @@
             v-for="page in displayedPages"
             :key="page"
             @click="changePage(page)"
-            class="button-round"
+            :class="{'button-round': true, 'selected-button': page === currentPage}"
           >
             {{ page }}
           </button>
@@ -102,7 +102,7 @@
 
       <div class="course-grid">
         <div
-          v-for="teacher in sortedTeachers"
+          v-for="teacher in paginatedTeahcers"
           :key="teacher.id"
           class="course-card"
         >
@@ -119,7 +119,30 @@
           </div>
         </div>
       </div>
+
+      <div class="choose">
+        <div class="centered-container">
+          <button
+            v-for="page in displayedPages"
+            :key="page"
+            @click="changePage(page)"
+            :class="{'button-round': true, 'selected-button': page === currentPage}"
+          >
+            {{ page }}
+          </button>
+        </div>
+      </div>
+
     </div>
+
+    <footer>
+      <p>&copy; 2024 Study Forum. Built for learners.</p>
+      <nav>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+      </nav>
+      <br><br><br><br><br>
+    </footer>
   </div>
 </template>
 
@@ -133,6 +156,14 @@ export default defineComponent({
 
     const changeTab = (tab: string) => {
       activeTab.value = tab;
+      selectedSort.value = 'trending';
+      selectedFilter.value = 'All';
+      currentPage.value = 1;
+      if (tab === 'courses'){
+        itemsPerPage.value = 8;
+      }else{
+        itemsPerPage.value = 4;
+      }
     };
 
     const selectedSort = ref<string>('trending');
@@ -213,6 +244,12 @@ export default defineComponent({
         instructor: 'John Doe',
         rating: 4.5,
       },
+       {
+        id: 13,
+        title: 'Introduction to TypeScript',
+        instructor: 'John Doe',
+        rating: 4.5,
+      },
      ]);
        
      const teachers = ref([
@@ -225,6 +262,34 @@ export default defineComponent({
       },
       {
         id: 2,
+        instructor: 'B',
+        thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
+        intro: 'This is a sample introduction',
+         rating: 4.5,
+       },
+      {
+        id: 3,
+        instructor: 'A',
+        thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
+        intro: 'This is a sample introduction',
+        rating: 1.4,
+      },
+      {
+        id: 4,
+        instructor: 'B',
+        thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
+        intro: 'This is a sample introduction',
+         rating: 4.5,
+       },
+      {
+        id: 5,
+        instructor: 'A',
+        thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
+        intro: 'This is a sample introduction',
+        rating: 1.4,
+      },
+      {
+        id: 6,
         instructor: 'B',
         thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
         intro: 'This is a sample introduction',
@@ -249,8 +314,18 @@ export default defineComponent({
       return sortedCourses.value.slice(startIndex, endIndex);
     });
   
+    const paginatedTeahcers = computed(() => {
+      const startIndex = (currentPage.value - 1) * itemsPerPage.value;
+      const endIndex = startIndex + itemsPerPage.value;
+      return sortedTeachers.value.slice(startIndex, endIndex);
+    });
+
     const totalPages = computed(() => {
-      return Math.ceil(sortedCourses.value.length / itemsPerPage.value);
+      if (activeTab.value === 'courses'){
+        return Math.ceil(sortedCourses.value.length / itemsPerPage.value);
+      } else {
+        return Math.ceil(sortedTeachers.value.length / itemsPerPage.value);
+      }
     });
 
     const displayedPages = computed(() => {
@@ -275,11 +350,13 @@ export default defineComponent({
       sortedTeachers,
       sortCourses,
       paginatedCourses,
+      paginatedTeahcers,
       totalPages,
       displayedPages,
       changePage,
       activeTab,
       changeTab,
+      currentPage,
     };
   },
 });
@@ -290,7 +367,8 @@ export default defineComponent({
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  height: 100vh;
+  height: 135vh;
+  
 }
   
   .header-section  {
@@ -384,11 +462,7 @@ export default defineComponent({
     gap: 20px;
     margin-left: 20px;
     margin-right: 50px;
-  }
-  .course-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    
   }
   
   .course-card {
@@ -498,7 +572,18 @@ export default defineComponent({
   align-items: center;
   margin: 0 5px; 
   border: 1px solid #ccc;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  font-size: 14px; 
+  font-family: Arial;
 }
+.selected-button {
+  background-color: lightgray;
+}
+.button-round:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  }
 
 
 .view {
@@ -510,6 +595,25 @@ export default defineComponent({
   border-radius: 10px;
   text-decoration: none;
   transition: background 0.3s ease;
+}
+
+footer {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 0.85rem;
+  color: #555;
+  animation: fade-in 1.2s ease-in-out;
+}
+
+footer nav a {
+  margin: 0 10px;
+  text-decoration: none;
+  color: #007BFF;
+  font-weight: 600;
+}
+
+footer nav a:hover {
+  color: #0056b3;
 }
 
 </style>
