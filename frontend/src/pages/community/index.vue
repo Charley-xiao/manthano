@@ -14,21 +14,39 @@ interface Post {
 }
 
 const posts = ref<Post[]>([]);
-const popularTopics = ref(['Mathematics', 'Science', 'Literature', 'Study Techniques']);
 
 async function fetchPosts() {
   const response = await axios.get('/api/posts');
-  console.log(response.data.posts);
-  posts.value = response.data.posts;
+  const data = response.data;
+  posts.value = data.posts;
+  console.table(posts.value)
 }
 
-onMounted(() => {
-  fetchPosts();
+const tags = ref(['Academic', 'Career', 'Lifestyle', 'Tech', 'Health']);
+
+const colors = [
+  "linear-gradient(135deg, #667eea, #764ba2)",
+  "linear-gradient(135deg, #ff6a00, #ee0979)",
+  "linear-gradient(135deg, #42e695, #3bb2b8)",
+  "linear-gradient(135deg, #ff512f, #dd2476)",
+  "linear-gradient(135deg, #24c6dc, #514a9d)"
+];
+
+onMounted(async () => {
+  await fetchPosts();
+
+  const cardHeaders: NodeListOf<HTMLElement> = document.querySelectorAll('div.card-header');
+
+  cardHeaders.forEach(cardHeader => {
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    cardHeader.style.background = randomColor;
+  });
 });
+
 </script>
 
 <template>
-    <div class="sticky-button-container">
+  <div class="sticky-button-container">
     <button class="super-funky-button" @click="$router.push('/community/write')">New Post</button>
   </div>
   <div id="main-page" class="main-container">
@@ -58,7 +76,7 @@ onMounted(() => {
               <span class="post-tag">{{ post.tag }}</span>
             </div>
             <p class="post-excerpt">{{ post.content.substring(0, 80) }}...</p>
-            
+
             <!-- Updated Meta Information -->
             <div class="post-meta">
               <div class="meta-item">
@@ -80,14 +98,26 @@ onMounted(() => {
         </div>
       </section>
 
-      <!-- Popular Topics -->
-      <section class="popular-topics">
-        <h2>Popular Topics</h2>
-        <div class="topics-grid">
-          <div class="topic pulse" v-for="topic in popularTopics" :key="topic">
-            {{ topic }}
-          </div>
-        </div>
+      <section class="write-post">
+        <h2>
+          <router-link to="/community/write">Write Your Own Post</router-link>
+        </h2>
+      </section>
+
+      <section class="tag">
+        <h2>Tags</h2>
+        <ul>
+          <li v-for="tag in tags" :key="tag">{{ tag }}</li>
+        </ul>
+      </section>
+
+      <section class="study-tips">
+        <h2>Study Tips</h2>
+        <ul>
+          <li>Stay organized with a planner 📅</li>
+          <li>Use active recall techniques 🧠</li>
+          <li>Take regular breaks for better focus ⏳</li>
+        </ul>
       </section>
     </main>
 
@@ -232,7 +262,8 @@ body {
 }
 
 .icon.sender {
-  background-image: url('/icons/user.svg'); /* Placeholder SVG URL */
+  background-image: url('/icons/user.svg');
+  /* Placeholder SVG URL */
 }
 
 .icon.date {
@@ -367,9 +398,12 @@ footer nav a:hover {
 
 /* Pulse Animation */
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 10px 30px rgba(42, 230, 149, 0.5), 0 0 0 0 rgba(42, 230, 149, 0.3);
   }
+
   50% {
     box-shadow: 0 15px 45px rgba(42, 230, 149, 0.7), 0 0 20px 10px rgba(42, 230, 149, 0);
   }
@@ -377,9 +411,17 @@ footer nav a:hover {
 
 /* Gradient Shift Animation */
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Slide Down on Load */
@@ -387,6 +429,7 @@ footer nav a:hover {
   from {
     transform: translateX(-50%) translateY(-100%);
   }
+
   to {
     transform: translateX(-50%) translateY(0);
   }
@@ -397,6 +440,7 @@ footer nav a:hover {
   .sticky-button-container {
     top: 10px;
   }
+
   .super-funky-button {
     font-size: 18px;
     padding: 14px 28px;
@@ -409,6 +453,7 @@ footer nav a:hover {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -420,6 +465,7 @@ footer nav a:hover {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -427,9 +473,12 @@ footer nav a:hover {
 }
 
 @keyframes pop {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.1);
   }
@@ -443,4 +492,12 @@ footer nav a:hover {
     transform: scale(1.05);
   }
 } */
+
+.tag ul {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  list-style-type: none;
+  padding: 0;
+}
 </style>

@@ -2,7 +2,7 @@
 backend/secret
 backend/config.toml
 *.pyc
-backend/db
+*db
 frontend/package-lock.json
 
 */__pycache__

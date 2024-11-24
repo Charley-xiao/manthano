@@ -60,6 +60,18 @@ class Post:
     def __str__(self):
         return f"Post(id={self.id}, title='{self.title}', course_id={self.course_id}, sender_name='{self.sender_name}', content='{self.content}', likes={self.likes}, tag='{self.tag}')"
 
+class Rating:
+    def __init__(self, star, difficulty, workload, grading, gain, comment):
+        self.star = star
+        self.difficulty = difficulty
+        self.workload = workload
+        self.grading = grading
+        self.gain = gain
+        self.comment = comment
+
+    def __str__(self):
+        return f"Rating(star={self.star}, difficulty={self.difficulty}, workload={self.workload}, grading={self.grading}, gain={self.gain}, comment='{self.comment}')"
+
 
 def create_user_table():
     conn = sqlite3.connect(DATABASE)
@@ -336,6 +348,46 @@ def add_post(course_id, title, sender_name, content, likes, tag):
     conn.commit()
     return True
 
+def create_rating_table():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS rating (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id INTEGER NOT NULL,
+            sender_name TEXT NOT NULL,
+            star INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+            difficulty TEXT NOT NULL,
+            workload TEXT NOT NULL,
+            grading TEXT NOT NULL,
+            gain TEXT NOT NULL,
+            comment TEXT NOT NULL,
+            likes INTEGER NOT NULL,
+            date_submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(course_id) REFERENCES courses(id),
+            FOREIGN KEY(sender_name) REFERENCES users(username)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def add_rating(star, difficulty, workload, grading, gain, comment, course_id):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO rating (star, difficulty, workload, grading, gain, comment, likes, course_id) VALUES (?, ?, ?, ?, ?, ?, 0, ?)',
+                   (star, difficulty, workload, grading, gain, comment, course_id))
+    conn.commit()
+    conn.close()
+
+def get_rating(course_id):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM rating WHERE course_id=?', (course_id,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    return [Rating(*row[1:]) for row in rows]
+
 def add_fake_data():
     # Add some users with varied passwords and realistic emails
     add_user('admin', 'StrongAdminPass2024!', 'admin@schoolplatform.edu', 'admin')
@@ -387,30 +439,30 @@ def add_fake_data():
     cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('python_basics.mp4', programming_id))
 
     # Add some detailed posts
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', 
-                   ('Study Group Forming', cs101_id, 'Jane Doe', 
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
+                   ('Study Group Forming', cs101_id, 'Jane Doe',
                     'Hello everyone, I’m forming a study group for CS101. \n\n'
                     'The goal of our group will be to explore key concepts such as programming basics, '
                     'problem-solving strategies, and working through Python exercises together. I believe that learning '
                     'in a group setting can enhance understanding through different perspectives and discussions. \n\n'
                     'We’ll meet weekly on Tuesdays and Thursdays for an hour each. Each session will involve a brief recap '
                     'of the week’s lectures, followed by collaborative problem-solving. Bring your questions, and let’s help each other excel!\n\n'
-                    'Please comment below if you are interested, and we can finalize the meeting schedule. Looking forward to learning together!', 
+                    'Please comment below if you are interested, and we can finalize the meeting schedule. Looking forward to learning together!',
                     15, 'Plain'))
 
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', 
-                   ('Python Tips & Tricks', cs101_id, 'John Doe', 
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
+                   ('Python Tips & Tricks', cs101_id, 'John Doe',
                     'Hey everyone, \n\n'
                     'As we dive deeper into Python, I thought it would be helpful to share some tips and tricks that have been a game-changer for me. \n\n'
                     '1. **List Comprehensions**: Simplify your loops and make your code more Pythonic.\n'
                     '2. **Debugging with pdb**: Use the built-in Python debugger to step through your code.\n'
                     '3. **Virtual Environments**: Always set up a virtual environment for your projects to manage dependencies.\n\n'
                     'I’ve also found that breaking down complex problems into smaller functions makes the code more readable and easier to test. '
-                    'Let’s use this thread to share more tips and discuss how we can write cleaner and more efficient code. What are your favorite Python hacks?', 
+                    'Let’s use this thread to share more tips and discuss how we can write cleaner and more efficient code. What are your favorite Python hacks?',
                     25, 'Hot'))
 
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', 
-                   ('Mastering Binary Trees', cs201_id, 'Alice Wong', 
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
+                   ('Mastering Binary Trees', cs201_id, 'Alice Wong',
                     'Hi all, \n\n'
                     'In this post, I’d like to dive into binary trees, a foundational concept in data structures that will benefit us greatly '
                     'in our CS201 journey and beyond. \n\n'
@@ -423,7 +475,7 @@ def add_fake_data():
                     '### Practical Applications\n'
                     'Binary trees are used in scenarios such as database indexing, network routing, and even some AI algorithms. I’ve also found them '
                     'in file compression algorithms like Huffman encoding. \n\n'
-                    'Let’s discuss how we can make these concepts intuitive. Share your thoughts or questions below!', 
+                    'Let’s discuss how we can make these concepts intuitive. Share your thoughts or questions below!',
                     40, 'Hot'))
 
     conn.commit()
@@ -438,4 +490,5 @@ def init_db():
     create_join_course_requests_table()
     create_add_course_requests_table()
     create_posts_table()
+    create_rating_table()
     add_fake_data()

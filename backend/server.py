@@ -73,7 +73,7 @@ from components.user.mycourse import MyCourseHandler, AddCourseRequestHandler, A
 from components.course.anticheat import VideoAnticheatHandler
 from components.course.courseware import CourseWareHandler, CourseWareFileHandlerWithAuth
 from components.course.mainCourse import AllCoursesHandler, DetailedCourseHandler, AddCourseHandler, CourseProgressHandler
-from components.course.derived import CourseCommentsHandler, CourseNotifHandler, CourseLikeHandler, CourseRecommendHandler, EvaluationHandler
+from components.course.derived import CourseCommentsHandler, CourseNotifHandler, CourseLikeHandler, CourseRecommendHandler, CourseRatingHandler
 from components.post.post import PostHandler, CommentHandler
 
 class MainHandler(BaseHandler):
@@ -120,13 +120,13 @@ def make_app():
         (r"/files/courseware/(.*)", CourseWareFileHandlerWithAuth, {"path": "files/courseware"}),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
         (r"/course/all", AllCoursesHandler),
-        (r"/evaluation", EvaluationHandler),
         (r"/course/progress/\d+", CourseProgressHandler),
         (r"/posts", PostHandler),
-        (r"/posts/(\d+)/comments", CommentHandler),
+        (r"/post/(\d+)/comments", CommentHandler),
         (r"/add-course-requests", AddCourseRequestHandler),
         (r"/add-teacher-requests", AddTeacherRequestHandler),
         (r"/course/progress", CourseProgressHandler),
+        (r"/rating", CourseRatingHandler)
     ], cookie_secret=SECRET_KEY, login_url="/login")
 
 if __name__ == "__main__":
