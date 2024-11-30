@@ -121,8 +121,12 @@ const addChapter = async () => {
     courseDetails.value.chapters.push(newChapterDetails);
 
     try {
-        await axios.post(`/api/courses/${courseId}`, newChapterDetails);
-        alert('Chapter added successfully!');
+        const params = new URLSearchParams();
+        params.append('title', newChapterDetails.title);
+        params.append('type', newChapterDetails.type);
+        params.append('content', newChapterDetails.content);
+        await axios.post(`/api/courses/${courseId}`, params);
+        // alert('Chapter added successfully!');
     } catch (error) {
         console.error('Failed to add chapter:', error);
     }
@@ -149,8 +153,10 @@ const deleteChapter = async (chapterId: string) => {
     courseDetails.value.chapters = courseDetails.value.chapters.filter(ch => ch.id !== chapterId);
 
     try {
-        await axios.delete(`/api/courses/${courseId}`, { params: { id: chapterId } });
-        alert('Chapter deleted successfully!');
+        const params = new URLSearchParams();
+        params.append('chapter_id', chapterId);
+        await axios.delete(`/api/courses/${courseId}`, { params });
+        // alert('Chapter deleted successfully!');
     } catch (error) {
         console.error('Failed to delete chapter:', error);
     }
@@ -363,6 +369,7 @@ const enforceMinimumViewingTime = () => {
 const startTrackingVideoTime = () => {
     videoInterval = setInterval(() => {
         videoWatchedTime.value += 1;
+        console.log(videoWatchedTime.value);
         if (videoWatchedTime.value >= videoDuration.value * 0.9) {
             alert("You have met the required viewing time!");
             clearInterval(videoInterval!);
@@ -382,6 +389,7 @@ const startTrackingIdleTime = () => {
 
 // Handle video play event
 const handleVideoPlay = () => {
+    console.log('Video started!');
     videoStarted.value = true;
     idleTime.value = 0;  // Reset idle time
     startTrackingVideoTime();  // Start counting watched time
@@ -538,7 +546,7 @@ const uploadCourseware = async (chapterId: string) => {
                     </form>
                     <ul class="student-list">
                         <li v-for="student in courseDetails.students" :key="student" class="student-item">
-                            <span>{{ student }}</span>
+                            <span>{{ student[0] }}</span>
                             <button @click="removeStudent(student)" class="btn delete">Remove</button>
                         </li>
                     </ul>

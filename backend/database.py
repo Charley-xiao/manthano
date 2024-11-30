@@ -1,6 +1,7 @@
 import sqlite3
 import bcrypt
 import re
+import os 
 
 DATABASE = 'db.db'
 
@@ -356,7 +357,7 @@ def create_rating_table():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             course_id INTEGER NOT NULL,
             sender_name TEXT NOT NULL,
-            star INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+            star INTEGER NOT NULL CHECK (star >= 1 AND star <= 5),
             difficulty TEXT NOT NULL,
             workload TEXT NOT NULL,
             grading TEXT NOT NULL,
@@ -414,12 +415,15 @@ def add_fake_data():
     cs201_id = cursor.fetchone()[0]
 
     # Add some chapters for CS101
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Getting Started', 'Welcome to Computer Science', 'teaching', cs101_id))
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Intro to Programming', 'Understanding Python Basics', 'teaching', cs101_id))
-
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Getting Started', 'https://www.youtube.com/embed/6ARjrl74nc4', 'teaching', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Intro to Programming', 'https://player.bilibili.com/player.html?isOutside=true&aid=113525263434587&bvid=BV1HuBvYMEdF&cid=26898860143&p=1', 'teaching', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Python Basics', 'https://www.youtube.com/embed/8DvywoWv6fI', 'homework', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Python Functions', 'https://www.youtube.com/embed/9Os0o3wzS_I', 'homework', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Python Project 1', 'https://www.youtube.com/embed/8DvywoWv6fI', 'project', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Python Project 2', 'https://www.youtube.com/embed/9Os0o3wzS_I', 'project', cs101_id))
     # Add some chapters for CS201
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Data Structures 101', 'Understanding Stacks and Queues', 'teaching', cs201_id))
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Tree Structures', 'Binary Trees and Traversals', 'teaching', cs201_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Data Structures 101', 'https://www.youtube.com/embed/AWclMLWpTEs', 'teaching', cs201_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Tree Structures', 'https://www.youtube.com/embed/2f3gB3zSL08', 'teaching', cs201_id))
 
     # Add students to courses
     cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs101_id, 'jane.doe'))
@@ -483,6 +487,7 @@ def add_fake_data():
 
 
 def init_db():
+    os.remove(DATABASE)
     create_user_table()
     create_add_teacher_request_table()
     create_inbox_table()
