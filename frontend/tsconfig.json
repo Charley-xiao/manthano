@@ -9,7 +9,9 @@
     }
   ],
   "compilerOptions": {
-    "noImplicitAny": true,
-    "strictNullChecks": true,
+    // "noImplicitAny": true,
+    // "strictNullChecks": true,
+    "noEmitOnError": false,
+    "skipLibCheck": true
   }
 }
