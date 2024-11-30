@@ -1,7 +1,0 @@
-secret = "b1e9337186b8a4f1341643e1ca06dc8a"
-
-[email]
-sender = "1218133157@qq.com"
-port = "465"
-host = "smtp.qq.com"
-password = "vmtivbbvdrnjbadi"
