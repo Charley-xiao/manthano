@@ -19,6 +19,7 @@ class AllCoursesHandler(BaseHandler):
                 SELECT id, title, description FROM courses
             ''')
             courses = cursor.fetchall()
+            courses = [{'id': course[0], 'title': course[1], 'description': course[2]} for course in courses]
             self.write(json.dumps(courses))
         except sqlite3.Error as e:
             self.set_status(500)
