@@ -153,6 +153,7 @@ class DetailedCourseHandler(BaseHandler):
                     SELECT student FROM course_students WHERE course_id = ?
                 ''', (course_id,))
                 students = cursor.fetchall()
+                students = [student[0] for student in students]
                 course = list(course)
                 course.append(students)
 

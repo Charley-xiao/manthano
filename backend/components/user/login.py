@@ -3,7 +3,7 @@ import uuid
 import json
 import tornado.web
 from components.user.base import BaseHandler, active_sessions
-from database import validate_user, add_user, add_teacher_request, get_users_by_role
+from database import validate_user, add_user, add_teacher_request, get_users_by_role, get_users_by_role_with_id
 from components.sendEmail import send_email
 
 class LoginHandler(BaseHandler):
@@ -81,3 +81,14 @@ class LogoutHandler(BaseHandler):
     def get(self):
         self.clear_cookie("user")
         self.redirect("/login")
+
+
+class UserSearchHandler(BaseHandler):
+    """
+    /users/search?query=<search_query>
+    """
+    def get(self):
+        query = self.get_argument("query")
+        results = get_users_by_role_with_id('student')
+        results = [user for user in results if query.lower() in user['username'].lower()]
+        self.write(json.dumps(results))

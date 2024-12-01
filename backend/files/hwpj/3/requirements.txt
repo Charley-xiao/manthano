@@ -1,0 +1,5 @@
+pandas==2.2.3
+python_bcrypt==0.3.2
+scikit_learn==1.5.2
+toml==0.10.2
+tornado==6.4.1

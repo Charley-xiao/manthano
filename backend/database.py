@@ -138,6 +138,15 @@ def get_users_by_role(role):
 
     return [User(*row) for row in rows]
 
+def get_users_by_role_with_id(role):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute(f'SELECT id, username, email, role FROM users WHERE role="{role}"')
+    rows = cursor.fetchall()
+    conn.close()
+
+    return [{"id": row[0], "username": row[1]} for row in rows]
+
 def create_add_teacher_request_table():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
@@ -269,6 +278,15 @@ def create_course_table():
             PRIMARY KEY (chapter_id, username),
             FOREIGN KEY(chapter_id) REFERENCES chapters(id),
             FOREIGN KEY(username) REFERENCES users(username)
+        )
+    ''')
+
+    # INSERT INTO hwpj (chapter_id, filename) VALUES (?, ?)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS hwpj (
+            chapter_id INTEGER NOT NULL,
+            filename TEXT NOT NULL,
+            FOREIGN KEY(chapter_id) REFERENCES chapters(id)
         )
     ''')
 

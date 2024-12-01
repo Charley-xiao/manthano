@@ -24,6 +24,7 @@ interface CourseDetails {
         }[];
         isEditing?: boolean;
         isCompleted?: boolean;
+        published?: boolean;
     }[];
 }
 
@@ -275,18 +276,18 @@ const toggleStudentSection = () => {
     isStudentSectionOpen.value = !isStudentSectionOpen.value;
 };
 
-const addStudent = async () => {
-    if (!newStudent.value.trim()) {
+const addStudent = async (username: string) => {
+    if (!username.trim()) {
         alert('Student username cannot be empty');
         return;
     }
 
-    courseDetails.value.students.push(newStudent.value);
+    courseDetails.value.students.push(username);
 
     try {
-        await axios.post(`/api/courses/${courseId}/students`, { username: newStudent.value });
+        await axios.post(`/api/courses/${courseId}/students`, { username: username });
         alert('Student added successfully!');
-        newStudent.value = '';
+        // newStudent.value = '';
     } catch (error) {
         console.error('Failed to add student:', error);
     }
@@ -482,6 +483,83 @@ const uploadCourseware = async (chapterId: string) => {
     }
 };
 
+const changeVisibility = async (chapterId: string) => {
+    const chapter = courseDetails.value.chapters.find(ch => ch.id === chapterId);
+    if (chapter) {
+        chapter.published = !chapter.published;
+        const params = new URLSearchParams();
+        params.append('chapter_id', chapterId);
+        params.append('published', chapter.published ? 'true' : 'false');
+        try {
+            await axios.put(`/api/courses/${courseId}`, params);
+            // alert('Chapter visibility updated successfully!');
+        } catch (error) {
+            console.error('Failed to update chapter visibility:', error);
+        }
+    }
+};
+
+const searchQuery = ref('');
+
+interface SearchResult {
+    id: string;
+    username: string;
+}
+
+const searchResults = ref<SearchResult[]>([]);
+
+const searchStudents = async () => {
+  if (!searchQuery.value.trim()) {
+    alert('Search query cannot be empty');
+    return;
+  }
+
+  try {
+    const response = await axios.get('/api/users/search', {
+      params: { query: searchQuery.value },
+    });
+    searchResults.value = response.data;
+  } catch (error) {
+    console.error('Failed to search students:', error);
+  }
+};
+
+const uploadHomeworkProject = async (chapterId: string) => {
+    if (!selectedFile.value) {
+        alert('Please select a file to upload.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', selectedFile.value);
+    formData.append('name', coursewareFileName.value);
+    formData.append('course_id', courseId);
+    formData.append('chapter_id', chapterId);
+
+    try {
+        const response = await axios.post(`/api/hwpj`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        // const uploadedCourseware = {
+        //     name: response.data.name,
+        //     link: response.data.link // Assuming the server returns the file's accessible URL
+        // };
+
+        // await addCourseware(chapterId, uploadedCourseware);
+
+        alert('Homework/project submitted successfully!');
+        // Reset fields
+        selectedFile.value = null;
+        selectedFileName.value = '';
+        coursewareFileName.value = '';
+    } catch (error) {
+        console.error('Failed to submit homework/project:', error);
+        alert('Failed to submit homework/project.');
+    }
+};
 </script>
 
 <template>
@@ -529,6 +607,7 @@ const uploadCourseware = async (chapterId: string) => {
                             <button @click="chapter.isEditing = !chapter.isEditing" class="btn edit">{{
                                 chapter.isEditing ? 'Save' : 'Edit' }}</button>
                             <button @click="deleteChapter(chapter.id)" class="btn delete">Delete</button>
+                            <button @click="changeVisibility(chapter.id)" class="btn primary">{{ chapter.published ? 'Unpublish' : 'Publish' }}</button>
                         </div>
                     </li>
                 </ul>
@@ -536,20 +615,38 @@ const uploadCourseware = async (chapterId: string) => {
 
             <div v-if="isOwnerOrAdmin" class="manage-students">
                 <h2 @click="toggleStudentSection" class="collapsible-header">
-                    Manage Students
-                    <span :class="{ 'arrow-up': isStudentSectionOpen, 'arrow-down': !isStudentSectionOpen }"></span>
+                Manage Students
+                <span :class="{ 'arrow-up': isStudentSectionOpen, 'arrow-down': !isStudentSectionOpen }"></span>
                 </h2>
                 <div v-if="isStudentSectionOpen" class="collapsible-content">
-                    <form @submit.prevent="addStudent" class="student-form">
-                        <input v-model="newStudent" placeholder="Student Username" class="form-input" required />
-                        <button type="submit" class="btn primary">Add Student</button>
-                    </form>
-                    <ul class="student-list">
-                        <li v-for="student in courseDetails.students" :key="student" class="student-item">
-                            <span>{{ student[0] }}</span>
-                            <button @click="removeStudent(student)" class="btn delete">Remove</button>
-                        </li>
+                <div class="search-student">
+                    <input
+                    v-model="searchQuery"
+                    placeholder="Search students by username"
+                    class="form-input search-input"
+                    />
+                    <button @click="searchStudents" class="btn primary">Search</button>
+                </div>
+                <div v-if="searchResults.length" class="search-results">
+                    <h3>Search Results:</h3>
+                    <ul>
+                    <li v-for="student in searchResults" :key="student.id" class="search-item">
+                        <span>{{ student.username }}</span>
+                        <button @click="addStudent(student.username)" class="btn primary">Add</button>
+                    </li>
                     </ul>
+                </div>
+                <form @submit.prevent="addStudent(newStudent)" class="student-form">
+                    <input v-model="newStudent" placeholder="Student Username" class="form-input" required />
+                    <button type="submit" class="btn primary">Add Student</button>
+                </form>
+                <h3>Enrolled Students</h3>
+                <ul class="student-list">
+                    <li v-for="student in courseDetails.students" :key="student" class="student-item">
+                    <span>{{ student }}</span>
+                    <button @click="removeStudent(student)" class="btn delete">Remove</button>
+                    </li>
+                </ul>
                 </div>
             </div>
 
@@ -602,6 +699,44 @@ const uploadCourseware = async (chapterId: string) => {
                             />
                             <button type="submit" class="btn primary upload-button">Upload</button>
                         </form>
+                    </div>
+
+                    <!-- Homework and Project Upload Section (for students) -->
+                    <div v-if="!isOwnerOrAdmin" class="courseware-upload">
+                        <h4>Submit {{ chapter.type }}</h4>
+                        <form @submit.prevent="uploadHomeworkProject(chapter.id)" class="upload-form">
+                            <div class="file-upload-wrapper">
+                                <label for="file-upload" class="file-upload-label">
+                                    <input 
+                                        type="file" 
+                                        id="file-upload" 
+                                        class="file-input" 
+                                        @change="handleFileSelection" 
+                                        required 
+                                    />
+                                    <span class="upload-icon">📁</span>
+                                    <span class="upload-text">
+                                        {{ selectedFileName || 'Choose a file from your computer' }}
+                                    </span>
+                                </label>
+                            </div>
+                            <input 
+                                v-model="coursewareFileName" 
+                                placeholder="Enter a display name for the file" 
+                                class="form-input" 
+                            />
+                            <button type="submit" class="btn primary upload-button">Submit</button>
+                        </form>
+                    </div>
+
+                    <!-- Homework and Project Upload Section (for instructors) -->
+                    <div v-if="isOwnerOrAdmin && (chapter.type === 'homework' || chapter.type === 'project')" class="courseware-upload">
+                        <h4>View {{ chapter.type }} Submissions</h4>
+                        <ul>
+                            <li v-for="(file, index) in chapter.courseware" :key="index">
+                                <a :href="`/api/files/hwpj/${chapter.id}/${file.name}`" target="_blank">{{ file.name }}</a>
+                            </li>
+                        </ul>
                     </div>
 
                 </div>
@@ -1124,5 +1259,33 @@ const uploadCourseware = async (chapterId: string) => {
     &.not-completed {
         background-color: #e74c3c; /* Red for not completed */
     }
+}
+
+.search-student {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.search-results {
+  margin-bottom: 20px;
+}
+
+.search-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
 }
 </style>

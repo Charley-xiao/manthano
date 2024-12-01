@@ -67,11 +67,11 @@ init_db()
 from components.sendEmail import config
 from components.inbox import InboxHandler
 from components.user.base import BaseHandler
-from components.user.login import LoginHandler, LogoutHandler, RegisterHandler
+from components.user.login import LoginHandler, LogoutHandler, RegisterHandler, UserSearchHandler
 from components.user.teacher import AddTeacherHandler
 from components.user.mycourse import MyCourseHandler, AddCourseRequestHandler, AddTeacherRequestHandler
 from components.course.anticheat import VideoAnticheatHandler
-from components.course.courseware import CourseWareHandler, CourseWareFileHandlerWithAuth
+from components.course.courseware import CourseWareHandler, CourseWareFileHandlerWithAuth, HomeworkProjectHandler
 from components.course.mainCourse import AllCoursesHandler, DetailedCourseHandler, AddCourseHandler, CourseProgressHandler
 from components.course.derived import CourseCommentsHandler, CourseNotifHandler, CourseLikeHandler, CourseRecommendHandler, CourseRatingHandler
 from components.post.post import PostHandler, CommentHandler
@@ -117,6 +117,7 @@ def make_app():
         (r"/courses/recommend", CourseRecommendHandler),
         (r"/anticheat", VideoAnticheatHandler),
         (r"/courseware", CourseWareHandler),
+        (r"/hwpj", HomeworkProjectHandler),
         (r"/files/courseware/(.*)", CourseWareFileHandlerWithAuth, {"path": "files/courseware"}),
         (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
         (r"/course/all", AllCoursesHandler),
@@ -126,7 +127,8 @@ def make_app():
         (r"/add-course-requests", AddCourseRequestHandler),
         (r"/add-teacher-requests", AddTeacherRequestHandler),
         (r"/course/progress", CourseProgressHandler),
-        (r"/rating", CourseRatingHandler)
+        (r"/rating", CourseRatingHandler),
+        (r"/users/search", UserSearchHandler),
     ], cookie_secret=SECRET_KEY, login_url="/login")
 
 if __name__ == "__main__":
