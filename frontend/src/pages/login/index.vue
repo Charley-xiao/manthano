@@ -23,6 +23,7 @@ const login = async () => {
     if (response.data.success) {
       isLoggedIn.value = true;
       localStorage.setItem('username', username.value);
+      localStorage.setItem('role', response.data.role);
       router.push('/course');
       // window.location.reload();
     } else {

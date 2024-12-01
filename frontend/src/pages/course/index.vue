@@ -8,7 +8,6 @@ const router = useRouter();
 const courses = ref<Array<{ id: number; title: string; description: string; color?: string }>>([]);
 const draggedItem = ref<{ id: number; index: number } | null>(null);
 const currentUsername = ref('');
-const role = ref('');
 
 const colors = [
   "linear-gradient(135deg, #667eea, #764ba2)",
@@ -29,11 +28,11 @@ const getCourses = async () => {
     for (let i = 0; i < courses.value.length; i++) {
       courses.value[i].color = getCardBackground(i);
     }
-    // fetch the first course and see if the user is a teacher
+    /*// fetch the first course and see if the user is a teacher
     if (courses.value.length > 0) {
       const response = await axios.get(`/api/courses/${courses.value[0].id}`);
       role.value = response.data.owner === currentUsername.value ? 'teacher' : 'student';
-    }
+    }*/
   } catch (error: any) {
     console.error('An error occurred while fetching courses:', error);
   }
@@ -73,6 +72,7 @@ const getAddCourseRequests = async () => {
 
 const getAddTeacherRequests = async () => {
   try {
+    console.log('getting add teacher requests');
     const response = await axios.get('/api/add-teacher-requests');
     console.log(response.data);
     addTeacherRequests.value = response.data;
@@ -119,7 +119,7 @@ const approveAddTeacherRequest = async (request: { id: number }) => {
     await axios.post(`/api/add-teacher-requests`, params);
     getAddTeacherRequests();
   } catch (error: any) {
-    console.error('An error occurred while approving add teacher request:', error);
+    console.dir('An error occurred while approving add teacher request:', error);
   }
 };
 
@@ -133,15 +133,20 @@ const denyAddTeacherRequest = async (request: { id: number }) => {
     await axios.post(`/api/add-teacher-requests`, params);
     getAddTeacherRequests();
   } catch (error: any) {
-    console.error('An error occurred while denying add teacher request:', error);
+    console.dir('An error occurred while denying add teacher request:', error);
   }
 };
 
+const role = ref(localStorage.getItem('role'));
 onMounted(() => {
   currentUsername.value = localStorage.getItem('username') || '';
   getCourses();
-  getAddCourseRequests();
-  getAddTeacherRequests();
+  if (role.value === 'admin') {
+    getAddCourseRequests();
+    getAddTeacherRequests();
+  } else {
+    console.log('role:', role.value);
+  }
 });
 </script>
 
@@ -150,16 +155,9 @@ onMounted(() => {
     <button class="super-funky-button" @click="router.push('/course/add')">Add Course</button>
   </div>
   <div v-if="role !== 'admin'" class="course-grid">
-    <div
-      class="course-card"
-      v-for="(course, index) in courses"
-      :key="course.id"
-      :style="{ background: course.color }"
-      draggable="true"
-      @dragstart="handleDragStart(course, index)"
-      @dragover="(event) => handleDragOver(event, index)"
-      @dragend="handleDragEnd"
-    >
+    <div class="course-card" v-for="(course, index) in courses" :key="course.id" :style="{ background: course.color }"
+      draggable="true" @dragstart="handleDragStart(course, index)" @dragover="(event) => handleDragOver(event, index)"
+      @dragend="handleDragEnd">
       <div class="card-content">
         <h2>{{ course.title }}</h2>
         <p>{{ course.description }}</p>
@@ -172,16 +170,12 @@ onMounted(() => {
     </div>
   </div>
 
-  <div class="requests-container">
+  <div v-if="role === 'admin'" class="requests-container">
     <div class="request-section">
       <h2>Add Course Requests</h2>
       <div class="request-grid">
-        <div
-          class="request-card"
-          v-for="(request, index) in addCourseRequests"
-          :key="request.id"
-          :style="{ background: getCardBackground(index) }"
-        >
+        <div class="request-card" v-for="(request, index) in addCourseRequests" :key="request.id"
+          :style="{ background: getCardBackground(index) }">
           <div class="card-content">
             <h3>{{ request.title }}</h3>
             <p>{{ request.description }}</p>
@@ -203,12 +197,8 @@ onMounted(() => {
     <div class="request-section">
       <h2>Add Teacher Requests</h2>
       <div class="request-grid">
-        <div
-          class="request-card"
-          v-for="(request, index) in addTeacherRequests"
-          :key="request.id"
-          :style="{ background: getCardBackground(index) }"
-        >
+        <div class="request-card" v-for="(request, index) in addTeacherRequests" :key="request.id"
+          :style="{ background: getCardBackground(index) }">
           <div class="card-content">
             <h3>{{ request.username }}</h3>
             <p>{{ request.email }}</p>
@@ -398,9 +388,12 @@ onMounted(() => {
 
 /* Pulse Animation */
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 10px 30px rgba(42, 230, 149, 0.5), 0 0 0 0 rgba(42, 230, 149, 0.3);
   }
+
   50% {
     box-shadow: 0 15px 45px rgba(42, 230, 149, 0.7), 0 0 20px 10px rgba(42, 230, 149, 0);
   }
@@ -408,9 +401,17 @@ onMounted(() => {
 
 /* Gradient Shift Animation */
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Slide Down on Load */
@@ -418,6 +419,7 @@ onMounted(() => {
   from {
     transform: translateX(-50%) translateY(-100%);
   }
+
   to {
     transform: translateX(-50%) translateY(0);
   }
@@ -428,6 +430,7 @@ onMounted(() => {
   .sticky-button-container {
     top: 10px;
   }
+
   .super-funky-button {
     font-size: 18px;
     padding: 14px 28px;
@@ -529,6 +532,7 @@ onMounted(() => {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
