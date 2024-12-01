@@ -30,7 +30,7 @@ const posts = ref<Post[]>([
     content: "Sample content.",
     date_submitted: "2024-11-17",
     likes: 25,
-    tag: "CS101"
+    tag: "Teacher Wang"
   },{
     id: 2,
     course_id: 101,
@@ -39,14 +39,14 @@ const posts = ref<Post[]>([
     content: "Sample content 2.",
     date_submitted: "2024-11-17",
     likes: 25,
-    tag: "CS101"
+    tag: "Teacher Wang"
   }
 ]);
 
 const teacher = ref<Teacher>(
   {
     id: 1,
-    title: "CS101",
+    title: "Teacher Wang",
     instructor: "A",
     rating: 1.4
   })
@@ -161,7 +161,7 @@ async function submitRating() {
 }
 
 .button {
-  margin-left: 65px;
+  margin-left: 10px;
 }
 
 .filled {
@@ -350,7 +350,6 @@ body {
   right: 30px;
   z-index: 100;
 }
-
 
 .star_container {
   width: 600px;

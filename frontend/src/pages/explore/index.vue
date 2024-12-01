@@ -126,7 +126,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
-
+import axios from "axios";
 export default defineComponent({
   name: 'ExplorePage',
   setup() {
@@ -144,7 +144,7 @@ export default defineComponent({
       }
     };
 
-    const selectedSort = ref<string>('trending');
+    const selectedSort = ref<string>('newest');
     const selectedFilter = ref<string>('All');
     const currentPage = ref(1);
     const itemsPerPage = ref(8);
@@ -154,7 +154,7 @@ export default defineComponent({
         id: 1,
         title: 'Introduction to TypeScript',
         instructor: 'John Doe',
-        rating: 4.5,
+        rating: 2.5,
       },
       {
         id: 2,
@@ -172,19 +172,19 @@ export default defineComponent({
         id: 4,
         title: 'Advanced Vue.js Techniques',
         instructor: 'Jane Smith',
-        rating: 4.7,
+        rating: 3.7,
       },
       {
         id: 5,
         title: 'Introduction to TypeScript',
         instructor: 'John Doe',
-        rating: 4.5,
+        rating: 5.5,
       },
       {
         id: 6,
         title: 'Advanced Vue.js Techniques',
         instructor: 'Jane Smith',
-        rating: 4.7,
+        rating: 4.2,
       },
       {
         id: 7,
@@ -196,7 +196,7 @@ export default defineComponent({
         id: 8,
         title: 'Introduction to TypeScript',
         instructor: 'John Doe',
-        rating: 4.5,
+        rating: 4.1,
       },
       {
         id: 9,
@@ -214,7 +214,7 @@ export default defineComponent({
         id: 11,
         title: 'Advanced Vue.js Techniques',
         instructor: 'Jane Smith',
-        rating: 4.7,
+        rating: 1.7,
       },
       {
         id: 12,
@@ -226,7 +226,7 @@ export default defineComponent({
         id: 13,
         title: 'Introduction to TypeScript',
         instructor: 'John Doe',
-        rating: 4.5,
+        rating: 0.5,
       },
     ]);
 
@@ -277,12 +277,17 @@ export default defineComponent({
 
     const sortedCourses = ref([...courses.value]);
     const sortedTeachers = ref([...teachers.value]);
-
+    
     const sortCourses = () => {
-      if (selectedSort.value === 'trending') {
-        // Sort by trending logic
-      } else if (selectedSort.value === 'newest') {
-        // Sort by newest logic
+      if (selectedSort.value === 'newest') {
+        sortedCourses.value = [...courses.value];
+        sortedTeachers.value = [...teachers.value];
+      } else if (selectedSort.value === 'rating') {
+        sortedCourses.value = [...courses.value].sort((a, b) => b.rating - a.rating);
+        sortedTeachers.value = [...teachers.value].sort((a, b) => b.rating - a.rating);
+      } else if (selectedSort.value === 'trending') {
+        sortedCourses.value = [...courses.value].sort((a, b) => (b.rating - b.id * 0.5) - (a.rating - a.id * 0.5));
+        sortedTeachers.value = [...teachers.value].sort((a, b) => (b.rating - b.id * 0.5) - (a.rating - a.id * 0.5));
       }
     };
 

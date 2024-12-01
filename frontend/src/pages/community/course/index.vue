@@ -13,6 +13,19 @@ interface Post {
   tag: string;
 }
 
+interface Rating {
+  id: number;
+  course_id: number;
+  sender_name: string;
+  star: number;
+  difficulty: string;
+  workload: string;
+  grading: string;
+  gain: string;
+  comment: string;
+  date_submitted: string;
+  likes: number;
+}
 
 interface Course {
   id: number;
@@ -43,6 +56,34 @@ const posts = ref<Post[]>([
   }
 ]);
 
+const ratings = ref<Rating[]>([
+  {
+    id: 1,
+    course_id: NaN,
+    sender_name: 'AA',
+    star: 4,
+    difficulty: 'Low',
+    workload: 'Low',
+    grading: 'Low',
+    gain: 'Low',
+    comment: 'abababa',
+    date_submitted: '2024-11-11',
+    likes: 2
+  },{
+    id: 2,
+    course_id: NaN,
+    sender_name: 'A',
+    star: 4,
+    difficulty: 'High',
+    workload: 'Low',
+    grading: 'Low',
+    gain: 'Low',
+    comment: 'very very easy',
+    date_submitted: '2024-11-11',
+    likes: 4
+  }
+]);
+
 const course = ref<Course>(
   {
     id: 1,
@@ -51,16 +92,54 @@ const course = ref<Course>(
     rating: 1.4
   })
 
-const newPost = ref<Post>({
+const newRating = ref<Rating>({
   id: 0,
   course_id: NaN,
-  title: '',
-  sender_name: '',
-  content: '',
-  date_submitted: '',
-  likes: 0,
-  tag: ''
+  sender_name: 'AA',
+  star: 5,
+  difficulty: 'Low',
+  workload: 'Low',
+  grading: 'Low',
+  gain: 'Low',
+  comment: '',
+  date_submitted: '2024-11-11',
+  likes: 0
 });
+
+
+async function submitRating() {
+  const post = {
+    course_id: newRating.value.course_id,
+    sender_name: localStorage.getItem('username') || 'Anonymous',
+    comment: newRating.value.comment,
+    star: newRating.value.star,
+    difficulty: newRating.value.difficulty,
+    workload: newRating.value.workload,
+    grading: newRating.value.grading,
+    gain: newRating.value.gain,
+  };
+
+  try {
+    await axios.post('/api/rating', post);
+    alert('Rating added successfully!');
+    newRating.value={
+      id: 0,
+      course_id: NaN,
+      sender_name: '',
+      star: 5,
+      difficulty: 'Low',
+      workload: 'Low',
+      grading: 'Low',
+      gain: 'Low',
+      comment: '',
+      date_submitted: '',
+      likes: 0
+    }
+  } catch (error) {
+    console.error('Failed to rate:', error);
+    alert('Failed to rate. Please try again.');
+  }
+}
 
 async function fetchPosts() {
   const response = await axios.get('/api/posts');
@@ -68,20 +147,21 @@ async function fetchPosts() {
   posts.value = response.data.posts;
 }
 
+
+async function fetchRating() {
+  const response = await axios.get('/api/get_rating');//need to do
+  console.log(response.data.posts);
+  ratings.value = response.data.posts;
+}
+
 onMounted(() => {
   fetchPosts();
+  fetchRating();
 });
 
-const filledStars = ref(0);
-
 function rate(stars: number) {
-  filledStars.value = stars;
+  newRating.value.star = stars;
 }
-
-async function submitRating() {
-  console.log('Rating submitted:', filledStars.value);
-}
-
 
 </script>
 
@@ -95,6 +175,58 @@ async function submitRating() {
 
     <main>
       <section class="recent-posts">
+
+        <h2>Rating post</h2>
+        <div class="posts-grid">
+          <div class="post-card enhanced" v-for="post in ratings" :key="post.id">
+            <div class="post-header">
+              <div>
+                <span v-for="n in 5" :key="n" :class="{'ratestar filled': n <= post.star, 'ratestar empty': n > post.star}">&#9733;</span>
+              </div>
+            </div>
+            <p class="post-excerpt">{{ post.comment.substring(0, 80) }}</p>
+            
+            
+            <div class="post-meta">
+              <div class="meta-item">
+                <i class="icon difficulty"></i>
+                <span>Difficulty: {{ post.difficulty }}</span>
+              </div>
+              <div class="meta-item">
+                <i class="icon workload"></i>
+                <span>Workload: {{ post.workload }}</span>
+              </div>
+            </div>
+            
+            <div class="post-meta">
+              <div class="meta-item">
+                <i class="icon gain"></i>
+                <span>Gain: {{ post.gain }}</span>
+              </div>
+              <div class="meta-item">
+                <i class="icon grading"></i>
+                <span>Grading: {{ post.grading }}</span>
+              </div>
+            </div>
+
+            <div class="post-meta">
+              <div class="meta-item">
+                <i class="icon sender"></i>
+                <span>{{ post.sender_name }}</span>
+              </div>
+              <div class="meta-item">
+                <i class="icon date"></i>
+                <span>{{ new Date(post.date_submitted).toLocaleDateString() }}</span>
+              </div>
+              <div class="meta-item">
+                <i class="icon likes"></i>
+                <span>{{ post.likes }} Likes</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
         <h2>Course post</h2>
         <div class="posts-grid">
           <div class="post-card enhanced" v-for="post in posts" :key="post.id">
@@ -125,13 +257,47 @@ async function submitRating() {
       </section>
       
       <div class="star_container">
+        <h2>Give a rating</h2>
         <div class="stars">
-          <h2>Give a rating</h2>
           <div>
-            <span v-for="n in 5" :key="n" @click="rate(n)" :class="{'star filled': n <= filledStars, 'star empty': n > filledStars}">&#9733;</span>
+            <span v-for="n in 5" :key="n" @click="rate(n)" :class="{'star filled': n <= newRating.star, 'star empty': n > newRating.star}">&#9733;</span>
           </div>
         </div>
-        <textarea v-model="newPost.content" placeholder="Share your opinion on rating..." required></textarea>
+        <div class="rating_optations">
+          <label for="difficulty">Difficulty:&nbsp;</label>
+            <select id="difficulty" v-model="newRating.difficulty" class="input3d-flip">
+                <option value="Very low">Very low</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="Very high">Very high</option>
+                <option value="High">High</option>
+            </select>
+          <label for="workload">Workload:</label>
+            <select id="workload" v-model="newRating.workload" class="input3d-flip">
+                <option value="Very low">Very low</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="Very high">Very high</option>
+                <option value="High">High</option>
+            </select>
+          <label for="grading">Grading:&nbsp;&nbsp;</label>
+            <select id="grading" v-model="newRating.grading" class="input3d-flip">
+                <option value="Very low">Very low</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="Very high">Very high</option>
+                <option value="High">High</option>
+            </select>
+          <label for="gain">Gain:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+            <select id="gain" v-model="newRating.gain" class="input3d-flip">
+                <option value="Very low">Very low</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="Very high">Very high</option>
+                <option value="High">High</option>
+            </select>
+        </div>
+        <textarea v-model="newRating.comment" placeholder="Share your opinion on rating..." required></textarea>
         <div class="button">
           <button @click="submitRating" class="subbmit">Submit</button>
         </div>
@@ -150,18 +316,40 @@ async function submitRating() {
   align-items: center;
 }
 
-
-.stars {
-  margin-right: 10px;
+.rating_optations > *{
+  padding-left: 20px;
 }
 
+.input3d-flip {
+  width: 180px;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+  transition: transform 0.4s ease-in-out, box-shadow 0.3s ease;
+}
+
+
+.stars {
+  display: flex;
+  justify-content: center;
+}
 .star {
+  margin-right: 10px;
   cursor: pointer;
   font-size: 50px;
 }
 
+.ratestar {
+  margin-right: 10px;
+  cursor: pointer;
+  font-size: 40px;
+}
+
 .button {
-  margin-left: 10px;
+  display: flex;
+  justify-content: center;
 }
 
 .filled {
@@ -179,7 +367,7 @@ async function submitRating() {
   color: white;
   padding: 10px 15px;
   border-radius: 10px;
-  text-decoration: none;
+  text-decoration: none; 
   font-weight: bold;
   transition: background 0.3s ease;
   border: none; 
@@ -350,6 +538,7 @@ body {
   right: 30px;
   z-index: 100;
 }
+
 
 .star_container {
   width: 600px;
