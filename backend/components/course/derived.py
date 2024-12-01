@@ -244,7 +244,7 @@ class CourseRatingHandler(BaseHandler):
 
         try:
             cursor.execute('''
-                INSERT INTO rating (course_id, sender_name, star, difficulty, workload, grading, gain, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                INSERT INTO rating (course_id, sender_name, star, difficulty, workload, grading, gain, comment, likes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)''',
                 (course_id, username, star, difficulty, workload, grading, gain, comment))
             conn.commit()
             self.write("Comment added successfully.")
