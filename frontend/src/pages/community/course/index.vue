@@ -2,9 +2,14 @@
 import axios from "axios";
 import { ref, onMounted } from "vue";
 
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const courseId = route.params.id[0];
+
 interface Post {
   id: number;
-  course_id: number;
+  course_id: string;
   title: string;
   sender_name: string;
   content: string;
@@ -15,7 +20,7 @@ interface Post {
 
 interface Rating {
   id: number;
-  course_id: number;
+  course_id: string;
   sender_name: string;
   star: number;
   difficulty: string;
@@ -37,7 +42,7 @@ interface Course {
 const posts = ref<Post[]>([
   {
     id: 1,
-    course_id: 101,
+    course_id: "101",
     title: "Sample Post Title",
     sender_name: "A",
     content: "Sample content.",
@@ -46,7 +51,7 @@ const posts = ref<Post[]>([
     tag: "CS101"
   },{
     id: 2,
-    course_id: 101,
+    course_id: "101",
     title: "Sample Post Title 2",
     sender_name: "B",
     content: "Sample content 2.",
@@ -59,7 +64,7 @@ const posts = ref<Post[]>([
 const ratings = ref<Rating[]>([
   {
     id: 1,
-    course_id: NaN,
+    course_id: courseId,
     sender_name: 'AA',
     star: 4,
     difficulty: 'Low',
@@ -71,7 +76,7 @@ const ratings = ref<Rating[]>([
     likes: 2
   },{
     id: 2,
-    course_id: NaN,
+    course_id: courseId,
     sender_name: 'A',
     star: 4,
     difficulty: 'High',
@@ -94,7 +99,7 @@ const course = ref<Course>(
 
 const newRating = ref<Rating>({
   id: 0,
-  course_id: NaN,
+  course_id: courseId,
   sender_name: 'AA',
   star: 5,
   difficulty: 'Low',
@@ -108,23 +113,23 @@ const newRating = ref<Rating>({
 
 
 async function submitRating() {
-  const post = {
-    course_id: newRating.value.course_id,
-    sender_name: localStorage.getItem('username') || 'Anonymous',
-    comment: newRating.value.comment,
-    star: newRating.value.star,
-    difficulty: newRating.value.difficulty,
-    workload: newRating.value.workload,
-    grading: newRating.value.grading,
-    gain: newRating.value.gain,
-  };
+
+  const params = new URLSearchParams();
+  params.append('sender_name', localStorage.getItem('username') || 'Anonymous');
+  params.append('course_id', newRating.value.course_id);
+  params.append('comment', newRating.value.comment);
+  params.append('star', newRating.value.star.toString());
+  params.append('difficulty', newRating.value.difficulty);
+  params.append('workload', newRating.value.workload);
+  params.append('grading', newRating.value.grading);
+  params.append('gain', newRating.value.gain);
 
   try {
-    await axios.post('/api/rating', post);
+    await axios.post('/api/rating', params);
     alert('Rating added successfully!');
     newRating.value={
       id: 0,
-      course_id: NaN,
+      course_id: courseId,
       sender_name: '',
       star: 5,
       difficulty: 'Low',
@@ -136,8 +141,9 @@ async function submitRating() {
       likes: 0
     }
   } catch (error) {
+    alert(params);
     console.error('Failed to rate:', error);
-    alert('Failed to rate. Please try again.');
+    //alert('Failed to rate. Please try again.');
   }
 }
 
@@ -149,9 +155,9 @@ async function fetchPosts() {
 
 
 async function fetchRating() {
-  const response = await axios.get('/api/get_rating');//need to do
-  console.log(response.data.posts);
-  ratings.value = response.data.posts;
+  //const response = await axios.get('/api/get_rating');//need to do
+  //console.log(response.data.posts);
+  //ratings.value = response.data.posts;
 }
 
 onMounted(() => {

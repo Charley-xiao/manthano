@@ -125,7 +125,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref, computed,onMounted } from 'vue';
 import axios from "axios";
 export default defineComponent({
   name: 'ExplorePage',
@@ -274,6 +274,18 @@ export default defineComponent({
         rating: 4.5,
       },
     ]);
+
+    
+    onMounted(() => {
+      fetchCourses();
+    });
+
+    
+    async function fetchCourses() {
+      const response = await axios.get('/api/course/all');
+      console.log(response.data.posts);
+      courses.value = response.data.posts;
+    }
 
     const sortedCourses = ref([...courses.value]);
     const sortedTeachers = ref([...teachers.value]);
