@@ -314,3 +314,66 @@ class CourseRatingHandler(BaseHandler):
             self.write(str(e))
         finally:
             conn.close()
+
+from ..sendEmail import send_email
+class CourseSendNotificationHandler(BaseHandler):
+    """
+    Sends email notifications to the students of a course.
+    """
+    @tornado.web.authenticated
+    def post(self):
+        """
+        Sends a notification to the students of a course.
+
+        Required arguments:
+        - course_id: The id of the course.
+        - subject: The subject of the email.
+        - body: The body of the email.
+        - priority: The priority of the email.
+        """
+        username = self.get_current_user()
+        course_id = self.get_argument("course_id")
+        body = self.get_argument("body")
+        priority = self.get_argument("priority", 0)
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT owner FROM courses WHERE id = ?
+            ''', (course_id,))
+            owner = cursor.fetchone()
+            if owner and owner[0] == username:
+                # Get the name of the course
+                cursor.execute('''
+                    SELECT title FROM courses WHERE id = ?
+                ''', (course_id,))
+                course_name = cursor.fetchone()[0]
+                subject = f'Notification from {course_name}'
+                # TABLE: course_students: course_id, student (student is the username)
+                # TABLE: users: username, email
+                cursor.execute('''
+                    SELECT student FROM course_students WHERE course_id = ?
+                ''', (course_id,))
+                students = cursor.fetchall()
+                for student in students:
+                    cursor.execute('''
+                        SELECT email FROM users WHERE username = ?
+                    ''', (student[0],))
+                    email = cursor.fetchone()
+                    if email:
+                        send_email(email[0], subject, body)
+                        cursor.execute('''
+                            INSERT INTO messages (sender, receiver, subject, body, timestamp, read, type, priority) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        ''', (username, student[0], subject, body, time.strftime('%Y-%m-%d %H:%M:%S'), 0, 'course', priority))
+                conn.commit()
+                self.write("Notification sent to the course successfully.")
+            else:
+                self.set_status(403)
+                self.write("Forbidden: You do not have permission to send notifications to this course.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()

@@ -560,6 +560,27 @@ const uploadHomeworkProject = async (chapterId: string) => {
         alert('Failed to submit homework/project.');
     }
 };
+
+const notificationContent = ref('');
+
+const sendNotification = async () => {
+    if (!notificationContent.value.trim()) {
+        alert('Notification content cannot be empty');
+        return;
+    }
+
+    try {
+        const params = new URLSearchParams();
+        params.append('body', notificationContent.value);
+        params.append('course_id', courseId);
+        await axios.post(`/api/courses/${courseId}/notifications`, params);
+        alert('Notification sent successfully!');
+        notificationContent.value = '';
+    } catch (error) {
+        console.error('Failed to send notification:', error);
+        alert('Failed to send notification.');
+    }
+};
 </script>
 
 <template>
@@ -645,6 +666,12 @@ const uploadHomeworkProject = async (chapterId: string) => {
                             <button @click="removeStudent(student)" class="btn delete">Remove</button>
                         </li>
                     </ul>
+                    <h3>Notification</h3>
+                    <form @submit.prevent="sendNotification" class="notification-form">
+                        <textarea v-model="notificationContent" placeholder="Enter notification message" class="form-input" required></textarea>
+                        <button type="submit" class="btn primary">Send Notification</button>
+                    </form>
+                     
                 </div>
             </div>
 
@@ -1269,5 +1296,26 @@ const uploadHomeworkProject = async (chapterId: string) => {
     background-color: #f9f9f9;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     margin-bottom: 10px;
+}
+
+.notification-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.notification-form .form-input {
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.3s;
+}
+
+.notification-form .form-input:focus {
+    border-color: #3498db;
+    outline: none;
 }
 </style>
