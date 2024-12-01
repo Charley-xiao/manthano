@@ -422,9 +422,60 @@ def add_fake_data():
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
-    # Add some courses by ms.smith
-    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)', ('CS201', 'Advanced Data Structures', 'ms.smith', 'Computer Science'))
-    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)', ('CS101', 'Intro to Computer Science', 'ms.smith', 'Computer Science'))
+    # Add some courses by ms.smith and mr.johnson
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('CS201', 'Advanced Data Structures', 'ms.smith', 'Computer Science'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('CS101', 'Intro to Computer Science', 'ms.smith', 'Computer Science'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('MA101', 'Algebra Basics', 'ms.smith', 'Mathematics'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('PH101', 'Introduction to Philosophy', 'mr.johnson', 'Philosophy'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('PH201', 'Ethics and Morality', 'mr.johnson', 'Philosophy'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('MA201', 'Calculus I', 'ms.smith', 'Mathematics'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('MA202', 'Calculus II', 'ms.smith', 'Mathematics'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('PH301', 'Philosophy of Mind', 'mr.johnson', 'Philosophy'))
+    # Add more detailed courses
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('BIO101', 'Introduction to Biology', 'mr.johnson', 'Biology'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('BIO201', 'Genetics and Evolution', 'mr.johnson', 'Biology'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('CHEM101', 'General Chemistry', 'ms.smith', 'Chemistry'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('CHEM201', 'Organic Chemistry', 'ms.smith', 'Chemistry'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('PHY101', 'Physics I: Mechanics', 'mr.johnson', 'Physics'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('PHY201', 'Physics II: Electromagnetism', 'mr.johnson', 'Physics'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('ENG101', 'English Literature', 'ms.smith', 'Literature'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('ENG201', 'Creative Writing', 'ms.smith', 'Literature'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('HIS101', 'World History', 'mr.johnson', 'History'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('HIS201', 'Modern History', 'mr.johnson', 'History'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('ART101', 'Introduction to Art', 'ms.smith', 'Art'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('ART201', 'Art History', 'ms.smith', 'Art'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('MUS101', 'Music Theory', 'mr.johnson', 'Music'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('MUS201', 'History of Music', 'mr.johnson', 'Music'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('PSY101', 'Introduction to Psychology', 'ms.smith', 'Psychology'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('PSY201', 'Cognitive Psychology', 'ms.smith', 'Psychology'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('SOC101', 'Introduction to Sociology', 'mr.johnson', 'Sociology'))
+    cursor.execute('INSERT INTO courses (title, description, owner, category) VALUES (?, ?, ?, ?)',
+                   ('SOC201', 'Social Psychology', 'mr.johnson', 'Sociology'))
 
     # Fetch the course IDs to add chapters and students
     cursor.execute('SELECT id FROM courses WHERE title = "CS101"')
@@ -433,34 +484,187 @@ def add_fake_data():
     cs201_id = cursor.fetchone()[0]
 
     # Add some chapters for CS101
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Getting Started', 'https://www.youtube.com/embed/6ARjrl74nc4', 'teaching', cs101_id))
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Intro to Programming', 'https://player.bilibili.com/player.html?isOutside=true&aid=113525263434587&bvid=BV1HuBvYMEdF&cid=26898860143&p=1', 'teaching', cs101_id))
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Python Basics', 'https://www.youtube.com/embed/8DvywoWv6fI', 'homework', cs101_id))
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Python Functions', 'https://www.youtube.com/embed/9Os0o3wzS_I', 'homework', cs101_id))
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Python Project 1', 'https://www.youtube.com/embed/8DvywoWv6fI', 'project', cs101_id))
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Python Project 2', 'https://www.youtube.com/embed/9Os0o3wzS_I', 'project', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Getting Started', 'https://www.youtube.com/embed/6ARjrl74nc4', 'teaching', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Intro to Programming', 'https://player.bilibili.com/player.html?isOutside=true&aid=113525263434587&bvid=BV1HuBvYMEdF&cid=26898860143&p=1', 'teaching', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Python Basics', 'https://www.youtube.com/embed/8DvywoWv6fI', 'homework', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Python Functions', 'https://www.youtube.com/embed/9Os0o3wzS_I', 'homework', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Python Project 1', 'https://www.youtube.com/embed/8DvywoWv6fI', 'project', cs101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Python Project 2', 'https://www.youtube.com/embed/9Os0o3wzS_I', 'project', cs101_id))
     # Add some chapters for CS201
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Data Structures 101', 'https://www.youtube.com/embed/AWclMLWpTEs', 'teaching', cs201_id))
-    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)', ('Tree Structures', 'https://www.youtube.com/embed/2f3gB3zSL08', 'teaching', cs201_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Data Structures 101', 'https://www.youtube.com/embed/AWclMLWpTEs', 'teaching', cs201_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Tree Structures', 'https://www.youtube.com/embed/2f3gB3zSL08', 'teaching', cs201_id))
+
+    # Fetch the course IDs to add chapters for more courses
+    cursor.execute('SELECT id FROM courses WHERE title = "MA101"')
+    ma101_id = cursor.fetchone()[0]
+    cursor.execute('SELECT id FROM courses WHERE title = "PH101"')
+    ph101_id = cursor.fetchone()[0]
+
+    # Add some chapters for MA101
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Algebra Basics', 'https://www.youtube.com/embed/1', 'teaching', ma101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Linear Equations', 'https://www.youtube.com/embed/2', 'homework', ma101_id))
+
+    # Add some chapters for PH101
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Introduction to Philosophy', 'https://www.youtube.com/embed/3', 'teaching', ph101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Ethics and Morality', 'https://www.youtube.com/embed/4', 'project', ph101_id))
+
+    # Fetch the course IDs to add chapters for more courses
+    cursor.execute('SELECT id FROM courses WHERE title = "BIO101"')
+    bio101_id = cursor.fetchone()[0]
+    cursor.execute('SELECT id FROM courses WHERE title = "CHEM101"')
+    chem101_id = cursor.fetchone()[0]
+
+    # Add some chapters for BIO101
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Introduction to Biology', 'https://www.youtube.com/embed/5', 'teaching', bio101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Genetics Basics', 'https://www.youtube.com/embed/6', 'homework', bio101_id))
+
+    # Add some chapters for CHEM101
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('General Chemistry', 'https://www.youtube.com/embed/7', 'teaching', chem101_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Organic Chemistry Basics', 'https://www.youtube.com/embed/8', 'project', chem101_id))
+
+    # Fetch the course IDs to add chapters for additional courses (e.g., MA201)
+    cursor.execute('SELECT id FROM courses WHERE title = "MA201"')
+    ma201_id = cursor.fetchone()[0]
+    cursor.execute('SELECT id FROM courses WHERE title = "PH201"')
+    ph201_id = cursor.fetchone()[0]
+
+    # Add chapters for MA201
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Limits and Continuity', 'https://www.youtube.com/embed/9', 'teaching', ma201_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Derivatives', 'https://www.youtube.com/embed/10', 'homework', ma201_id))
+
+    # Add chapters for PH201
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Moral Philosophy', 'https://www.youtube.com/embed/11', 'teaching', ph201_id))
+    cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
+                   ('Applied Ethics', 'https://www.youtube.com/embed/12', 'project', ph201_id))
 
     # Add students to courses
     cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs101_id, 'jane.doe'))
     cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs101_id, 'john.doe'))
     cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs201_id, 'jane.doe'))
     cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (ma101_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (ma101_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (ph101_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (ph101_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (bio101_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (bio101_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (chem101_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (chem101_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (ma201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (ma201_id, 'alice.wong'))
 
-    # Add some courseware
-    cursor.execute('SELECT id FROM chapters WHERE title = "Getting Started"')
-    intro_id = cursor.fetchone()[0]
-    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('welcome_guide.pdf', intro_id))
-    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('welcome_video.mp4', intro_id))
+    # Add courseware for additional chapters
 
-    cursor.execute('SELECT id FROM chapters WHERE title = "Intro to Programming"')
-    programming_id = cursor.fetchone()[0]
-    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('python_intro.pdf', programming_id))
-    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)', ('python_basics.mp4', programming_id))
+    # Fetch the chapter IDs for CS101 chapters
+    cursor.execute('SELECT id FROM chapters WHERE title = "Python Basics"')
+    python_basics_id = cursor.fetchone()[0]
+    cursor.execute('SELECT id FROM chapters WHERE title = "Python Functions"')
+    python_functions_id = cursor.fetchone()[0]
+    cursor.execute('SELECT id FROM chapters WHERE title = "Python Project 1"')
+    python_project1_id = cursor.fetchone()[0]
+    cursor.execute('SELECT id FROM chapters WHERE title = "Python Project 2"')
+    python_project2_id = cursor.fetchone()[0]
+
+    # Add courseware for Python Basics
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('python_basics_notes.pdf', python_basics_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('python_basics_slides.pptx', python_basics_id))
+
+    # Add courseware for Python Functions
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('python_functions_notes.pdf', python_functions_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('python_functions_examples.zip', python_functions_id))
+
+    # Add courseware for Python Project 1
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('project1_description.pdf', python_project1_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('project1_sample_code.py', python_project1_id))
+
+    # Add courseware for Python Project 2
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('project2_description.pdf', python_project2_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('project2_sample_code.py', python_project2_id))
+
+    # Fetch the chapter IDs for CS201 chapters
+    cursor.execute('SELECT id FROM chapters WHERE title = "Data Structures 101"')
+    data_structures_id = cursor.fetchone()[0]
+    cursor.execute('SELECT id FROM chapters WHERE title = "Tree Structures"')
+    tree_structures_id = cursor.fetchone()[0]
+
+    # Add courseware for Data Structures 101
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('data_structures_notes.pdf', data_structures_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('data_structures_slides.pptx', data_structures_id))
+
+    # Add courseware for Tree Structures
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('tree_structures_notes.pdf', tree_structures_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('tree_structures_examples.zip', tree_structures_id))
+
+    # Fetch the chapter IDs for MA101 chapters
+    cursor.execute('SELECT id FROM chapters WHERE title = "Algebra Basics"')
+    algebra_basics_id = cursor.fetchone()[0]
+    cursor.execute('SELECT id FROM chapters WHERE title = "Linear Equations"')
+    linear_equations_id = cursor.fetchone()[0]
+
+    # Add courseware for Algebra Basics
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('algebra_basics_notes.pdf', algebra_basics_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('algebra_basics_practice_questions.pdf', algebra_basics_id))
+
+    # Add courseware for Linear Equations
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('linear_equations_notes.pdf', linear_equations_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('linear_equations_homework.pdf', linear_equations_id))
+
+    # Fetch the chapter IDs for PH101 chapters
+    cursor.execute('SELECT id FROM chapters WHERE title = "Introduction to Philosophy"')
+    intro_philosophy_id = cursor.fetchone()[0]
+    cursor.execute('SELECT id FROM chapters WHERE title = "Ethics and Morality"')
+    ethics_morality_id = cursor.fetchone()[0]
+
+    # Add courseware for Introduction to Philosophy
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('intro_philosophy_readings.pdf', intro_philosophy_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('intro_philosophy_slides.pptx', intro_philosophy_id))
+
+    # Add courseware for Ethics and Morality
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('ethics_morality_case_studies.pdf', ethics_morality_id))
+    cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
+                   ('ethics_morality_assignment.docx', ethics_morality_id))
 
     # Add some detailed posts
+
+    # Posts for CS101
     cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
                    ('Study Group Forming', cs101_id, 'Jane Doe',
                     'Hello everyone, I’m forming a study group for CS101. \n\n'
@@ -483,6 +687,7 @@ def add_fake_data():
                     'Let’s use this thread to share more tips and discuss how we can write cleaner and more efficient code. What are your favorite Python hacks?',
                     25, 'Hot'))
 
+    # Posts for CS201
     cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
                    ('Mastering Binary Trees', cs201_id, 'Alice Wong',
                     'Hi all, \n\n'
@@ -499,6 +704,66 @@ def add_fake_data():
                     'in file compression algorithms like Huffman encoding. \n\n'
                     'Let’s discuss how we can make these concepts intuitive. Share your thoughts or questions below!',
                     40, 'Hot'))
+
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
+                   ('Help with Linked Lists', cs201_id, 'John Doe',
+                    'Hello CS201 classmates, \n\n'
+                    'I\'m having trouble understanding how linked lists work, particularly when it comes to inserting and deleting nodes. '
+                    'Does anyone have a good resource or can explain it in a way that\'s easy to grasp? Maybe we can form a study group to tackle this topic.',
+                    12, 'Plain'))
+
+    # Posts for MA101
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
+                   ('Quadratic Equations Help', ma101_id, 'John Doe',
+                    'Hi everyone, \n\n'
+                    'I\'m struggling a bit with solving quadratic equations, especially when it comes to completing the square and using the quadratic formula. '
+                    'Does anyone have any tips or resources that could help clarify these methods? I think understanding this is crucial for our upcoming exam. '
+                    'Any assistance would be greatly appreciated!',
+                    10, 'Plain'))
+
+    # Posts for PH101
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
+                   ('Philosophy Discussion Group', ph101_id, 'Alice Wong',
+                    'Hello PH101 classmates, \n\n'
+                    'I\'m organizing a casual discussion group where we can delve deeper into the philosophical concepts covered in our lectures. '
+                    'Our first topic will be "The Nature of Reality" as discussed by Plato and Aristotle. It would be great to hear diverse perspectives '
+                    'and interpretations. Let me know if you\'re interested, and we can decide on a time that works for everyone.',
+                    20, 'Plain'))
+
+    # Posts for BIO101
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
+                   ('Interesting Biology Article', bio101_id, 'Jane Doe',
+                    'Hey everyone, \n\n'
+                    'I came across an intriguing article on CRISPR gene editing and its potential to cure genetic diseases. '
+                    'Here\'s the link: [CRISPR Breakthrough](https://example.com/crispr-article). '
+                    'I thought it relates well to our recent lectures on genetics. Let\'s discuss the ethical implications and future possibilities in class!',
+                    30, 'Hot'))
+
+    # Posts for CHEM101
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
+                   ('Lab Safety Reminder', chem101_id, 'Ms. Smith',
+                    'Dear students, \n\n'
+                    'As we approach our first laboratory session, I want to remind everyone about the importance of lab safety. '
+                    'Please review the safety guidelines provided in the course materials, and make sure to wear appropriate protective gear. '
+                    'If you have any questions or concerns, feel free to reach out to me before the lab session.',
+                    50, 'Announcement'))
+
+    # Posts for MA201
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
+                   ('Understanding Limits', ma201_id, 'Alice Wong',
+                    'Hi everyone, \n\n'
+                    'Limits can be a bit tricky to understand, especially when dealing with approaching infinity or undefined points. '
+                    'I found a helpful video that explains the concept clearly: [Understanding Limits](https://example.com/limits-video). '
+                    'Hope this helps others too!',
+                    22, 'Plain'))
+
+    # Posts for PH201
+    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
+                   ('Ethical Dilemmas Discussion', ph201_id, 'Mr. Johnson',
+                    'Dear students, \n\n'
+                    'For our next class, please prepare to discuss various ethical dilemmas. Think about scenarios where moral principles may conflict, '
+                    'and consider the reasoning behind different ethical decisions. I encourage you to bring real-world examples to enrich our discussion.',
+                    35, 'Announcement'))
 
     conn.commit()
     conn.close()
