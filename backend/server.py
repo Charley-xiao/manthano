@@ -129,7 +129,7 @@ def make_app():
         (r"/course/progress", CourseProgressHandler),
         (r"/rating", CourseRatingHandler),
         (r"/users/search", UserSearchHandler),
-    ], cookie_secret=SECRET_KEY, login_url="/login")
+    ], cookie_secret=SECRET_KEY, login_url="/login", debug=True)
 
 if __name__ == "__main__":
     app = make_app()

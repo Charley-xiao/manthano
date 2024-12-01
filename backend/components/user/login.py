@@ -3,7 +3,7 @@ import uuid
 import json
 import tornado.web
 from components.user.base import BaseHandler, active_sessions
-from database import validate_user, add_user, add_teacher_request, get_users_by_role, get_users_by_role_with_id
+from database import validate_user, add_user, add_teacher_request, get_users_by_role, get_user_role, get_users_by_role_with_id
 from components.sendEmail import send_email
 
 class LoginHandler(BaseHandler):
@@ -24,8 +24,10 @@ class LoginHandler(BaseHandler):
             active_sessions[username] = session_id
             self.set_secure_cookie("user", username)
             self.set_secure_cookie("session_id", session_id)
+            role = get_user_role(username)
             self.write(json.dumps({
-                'success': True
+                'success': True,
+                'role': role
             }))
         else:
             self.write(json.dumps({
