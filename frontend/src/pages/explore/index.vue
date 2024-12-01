@@ -95,8 +95,8 @@
             </div>
           </div>
           <div class="course-info">
-            <h3>{{ teacher.instructor }}</h3>
-            <p>{{ teacher.intro }}</p>
+            <h3>{{ teacher.username }}</h3>
+            <p>{{ teacher.description }}</p>
             <div class="course-rating">Rating: {{ teacher.rating }} ★</div>
           </div>
         </div>
@@ -125,11 +125,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed,onMounted } from 'vue';
+import { defineComponent, ref, computed, onMounted} from 'vue';
 import axios from "axios";
 export default defineComponent({
   name: 'ExplorePage',
   setup() {
+    
     const activeTab = ref<string>('courses');
 
     const changeTab = (tab: string) => {
@@ -144,6 +145,12 @@ export default defineComponent({
       }
     };
 
+    onMounted(async () => {
+      await fetchCourses();
+      await fetchTeachers();
+      sortCourses();
+    });
+    
     const selectedSort = ref<string>('newest');
     const selectedFilter = ref<string>('All');
     const currentPage = ref(1);
@@ -152,7 +159,7 @@ export default defineComponent({
     const courses = ref([
       {
         id: 1,
-        title: 'Introduction to TypeScript',
+        title: 'descriptionduction to TypeScript',
         instructor: 'John Doe',
         rating: 2.5,
       },
@@ -162,135 +169,56 @@ export default defineComponent({
         instructor: 'Jane Smith',
         rating: 4.7,
       },
-      {
-        id: 3,
-        title: 'Introduction to TypeScript',
-        instructor: 'John Doe',
-        rating: 4.5,
-      },
-      {
-        id: 4,
-        title: 'Advanced Vue.js Techniques',
-        instructor: 'Jane Smith',
-        rating: 3.7,
-      },
-      {
-        id: 5,
-        title: 'Introduction to TypeScript',
-        instructor: 'John Doe',
-        rating: 5.5,
-      },
-      {
-        id: 6,
-        title: 'Advanced Vue.js Techniques',
-        instructor: 'Jane Smith',
-        rating: 4.2,
-      },
-      {
-        id: 7,
-        title: 'Introduction to TypeScript',
-        instructor: 'John Doe',
-        rating: 4.5,
-      },
-      {
-        id: 8,
-        title: 'Introduction to TypeScript',
-        instructor: 'John Doe',
-        rating: 4.1,
-      },
-      {
-        id: 9,
-        title: 'Advanced Vue.js Techniques',
-        instructor: 'Jane Smith',
-        rating: 4.7,
-      },
-      {
-        id: 10,
-        title: 'Introduction to TypeScript',
-        instructor: 'John Doe',
-        rating: 4.5,
-      },
-      {
-        id: 11,
-        title: 'Advanced Vue.js Techniques',
-        instructor: 'Jane Smith',
-        rating: 1.7,
-      },
-      {
-        id: 12,
-        title: 'Introduction to TypeScript',
-        instructor: 'John Doe',
-        rating: 4.5,
-      },
-      {
-        id: 13,
-        title: 'Introduction to TypeScript',
-        instructor: 'John Doe',
-        rating: 0.5,
-      },
     ]);
 
     const teachers = ref([
       {
         id: 1,
-        instructor: 'A',
+        username: 'A',
         thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
-        intro: 'This is a sample introduction',
+        description: 'This is a sample descriptionduction',
         rating: 1.4,
       },
       {
         id: 2,
-        instructor: 'B',
+        username: 'B',
         thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
-        intro: 'This is a sample introduction',
-        rating: 4.5,
-      },
-      {
-        id: 3,
-        instructor: 'A',
-        thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
-        intro: 'This is a sample introduction',
-        rating: 1.4,
-      },
-      {
-        id: 4,
-        instructor: 'B',
-        thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
-        intro: 'This is a sample introduction',
-        rating: 4.5,
-      },
-      {
-        id: 5,
-        instructor: 'A',
-        thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
-        intro: 'This is a sample introduction',
-        rating: 1.4,
-      },
-      {
-        id: 6,
-        instructor: 'B',
-        thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
-        intro: 'This is a sample introduction',
+        description: 'This is a sample descriptionduction',
         rating: 4.5,
       },
     ]);
 
     
-    onMounted(() => {
-      fetchCourses();
-    });
 
     
-    async function fetchCourses() {
-      const response = await axios.get('/api/course/all');
-      console.log(response.data.posts);
-      courses.value = response.data.posts;
-    }
+    const fetchCourses = async () => {
+      try {
+          const response = await axios.get(`/api/course/all`);
+          courses.value = response.data;
+          console.log('Teacher details:', courses.value);
+
+      } catch (error) {
+          console.error('Failed to fetch course details:', error);
+      }
+    };
+
+    const fetchTeachers = async () => {
+      try {
+          const response = await axios.get(`/api/teacher/all`);
+          teachers.value = response.data;
+          console.log('Teacher details:', teachers.value);
+
+      } catch (error) {
+          console.error('Failed to fetch teacher details:', error);
+      }
+    };
 
     const sortedCourses = ref([...courses.value]);
     const sortedTeachers = ref([...teachers.value]);
     
     const sortCourses = () => {
+      console.log('Teacher sort details:', teachers.value);
+      console.log('Course sort details:', courses.value);
       if (selectedSort.value === 'newest') {
         sortedCourses.value = [...courses.value];
         sortedTeachers.value = [...teachers.value];
