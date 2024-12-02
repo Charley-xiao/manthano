@@ -25,6 +25,13 @@ routes.push({
     // @ts-ignore
     component: () => import('../pages/community/teacher/index.vue'),
 });
+
+routes.push({
+    path: '/community/post/:id',
+    // @ts-ignore
+    component: () => import('../pages/community/post/index.vue'),
+});
+
 console.log(routes);
 
 export const router = createRouter({

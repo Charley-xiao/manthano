@@ -89,7 +89,33 @@ class CommentHandler(tornado.web.RequestHandler):
     Handler for adding comments to posts.
     """
 
-    @tornado.web.authenticated
+    def get(self, post_id):
+        """Retrieve all comments for a specific post."""
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT commenter_name, comment_content FROM comments
+                WHERE post_id = ?
+            ''', (post_id,))
+            comments = cursor.fetchall()
+
+            comment_list = []
+            for comment in comments:
+                comment_list.append({
+                    'commenter_name': comment[0],
+                    'comment_content': comment[1]
+                })
+
+            self.write({'comments': comment_list})
+        except sqlite3.Error:
+            self.set_status(500)
+            self.write({'error': 'Database error'})
+        finally:
+            conn.close()
+
+    # @tornado.web.authenticated
     def post(self, post_id):
         """Add a comment to a specific post."""
         data = tornado.escape.json_decode(self.request.body)

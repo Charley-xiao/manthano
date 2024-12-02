@@ -56,21 +56,11 @@ onMounted(async () => {
     </header>
 
     <main>
-      <!-- Featured Post Section -->
-      <section class="featured-post" v-if="posts.length > 0">
-        <h2>Featured Post</h2>
-        <div class="featured-card fade-in">
-          <h3>{{ posts[0].title }}</h3>
-          <p>{{ posts[0].content.substring(0, 120) }}...</p>
-          <router-link :to="'/community/post/' + posts[0].id" class="read-more">Read More</router-link>
-        </div>
-      </section>
-
       <!-- Recent Posts Grid -->
       <section class="recent-posts">
         <h2>Recent Discussions</h2>
         <div class="posts-grid">
-          <div class="post-card enhanced" v-for="post in posts.slice(1)" :key="post.id">
+          <div class="post-card enhanced" v-for="post in posts.slice(0, 3)" :key="post.id">
             <div class="post-header">
               <h3>{{ post.title }}</h3>
               <span class="post-tag">{{ post.tag }}</span>
@@ -98,26 +88,9 @@ onMounted(async () => {
         </div>
       </section>
 
-      <section class="write-post">
-        <h2>
-          <router-link to="/community/write">Write Your Own Post</router-link>
-        </h2>
-      </section>
-
-      <section class="tag">
-        <h2>Tags</h2>
-        <ul>
-          <li v-for="tag in tags" :key="tag">{{ tag }}</li>
-        </ul>
-      </section>
-
-      <section class="study-tips">
-        <h2>Study Tips</h2>
-        <ul>
-          <li>Stay organized with a planner 📅</li>
-          <li>Use active recall techniques 🧠</li>
-          <li>Take regular breaks for better focus ⏳</li>
-        </ul>
+      <h2>Tags</h2>
+      <section class="tag-container">
+        <div class="tag" v-for="(tag, index) in tags" :key="index" :style="`--i: ${index + 1}`">{{ tag }}</div>
       </section>
     </main>
 
@@ -165,6 +138,17 @@ body {
 .header p {
   font-size: 1rem;
   margin-top: 10px;
+}
+
+h2 {
+  font-size: 1.8rem;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #333;
+  /* set a soft font */
+  font-family: 'Times New Roman', Times, serif;
 }
 
 /* Featured Post */
@@ -493,11 +477,89 @@ footer nav a:hover {
   }
 } */
 
-.tag ul {
+.tag-container {
+  position: relative;
   display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  list-style-type: none;
-  padding: 0;
+  width: 100%;
+  height: 500px;
+}
+
+.tag-container::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 0;
+  background: linear-gradient(135deg, #667eea 30%, #764ba2);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: .3s 0.01ms ease-in;
+}
+
+.tag-container:hover {
+  width: 100%;
+}
+
+.tag-container:hover::before {
+  height: 200px;
+  transition: .5s .6s ease-in;
+}
+
+.tag {
+  position: absolute;
+  width: 235px;
+  aspect-ratio: 3/4;
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+  font-size: 2.5em;
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  font-weight: 900;
+  line-height: 300px;
+  text-align: center;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.8);
+  margin: 0 5px;
+  left: 50%;
+  top: 50%;
+  transform: rotate(calc(var(--i) * 5deg)) translate(-50%, -50%);
+  transform-origin: center;
+  transition: .5s calc(var(--i) * 0.3s) ease;
+  z-index: 0;
+}
+
+.tag:nth-child(even) {
+  transform: rotate(calc(var(--i) * -5deg)) translate(-50%, -50%);
+}
+
+.tag-container:hover {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tag-container:hover .tag {
+  transform-origin: center center;
+  transform: rotate(calc(var(--i) * 0deg)) translate(-349%, -50%) translateX(calc(var(--i) * 235px));
+  transition-delay: calc(var(--i) * 0s);
+  font-size: 3em;
+  line-height: 300px;
+  scale: 1.1;
+  backdrop-filter: blur(12px);
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.5);
+  color: black;
+  -webkit-box-reflect: below 4px linear-gradient(to bottom, transparent 80%, rgba(0, 0, 0, 0.5));
+  z-index: 1;
+}
+
+.tag-container:hover .tag:not(:hover) {
+  background: rgba(252, 254, 254, .3);
+  font-size: 2em;
+  line-height: 200px;
+  scale: 1;
+  border: 2px solid #b3b3b3;
+  -webkit-text-stroke: 1px rgba(252, 254, 254, .8);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  z-index: 0;
 }
 </style>

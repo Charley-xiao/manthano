@@ -1,7 +1,7 @@
 import sqlite3
 import bcrypt
 import re
-import os 
+import os
 
 DATABASE = 'db.db'
 
@@ -674,7 +674,7 @@ def add_fake_data():
                     'We’ll meet weekly on Tuesdays and Thursdays for an hour each. Each session will involve a brief recap '
                     'of the week’s lectures, followed by collaborative problem-solving. Bring your questions, and let’s help each other excel!\n\n'
                     'Please comment below if you are interested, and we can finalize the meeting schedule. Looking forward to learning together!',
-                    15, 'Plain'))
+                    15, 'Tech'))
 
     cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
                    ('Python Tips & Tricks', cs101_id, 'John Doe',
@@ -685,7 +685,7 @@ def add_fake_data():
                     '3. **Virtual Environments**: Always set up a virtual environment for your projects to manage dependencies.\n\n'
                     'I’ve also found that breaking down complex problems into smaller functions makes the code more readable and easier to test. '
                     'Let’s use this thread to share more tips and discuss how we can write cleaner and more efficient code. What are your favorite Python hacks?',
-                    25, 'Hot'))
+                    25, 'Academic'))
 
     # Posts for CS201
     cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
@@ -703,14 +703,14 @@ def add_fake_data():
                     'Binary trees are used in scenarios such as database indexing, network routing, and even some AI algorithms. I’ve also found them '
                     'in file compression algorithms like Huffman encoding. \n\n'
                     'Let’s discuss how we can make these concepts intuitive. Share your thoughts or questions below!',
-                    40, 'Hot'))
+                    40, 'Health'))
 
     cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
                    ('Help with Linked Lists', cs201_id, 'John Doe',
                     'Hello CS201 classmates, \n\n'
                     'I\'m having trouble understanding how linked lists work, particularly when it comes to inserting and deleting nodes. '
                     'Does anyone have a good resource or can explain it in a way that\'s easy to grasp? Maybe we can form a study group to tackle this topic.',
-                    12, 'Plain'))
+                    12, 'Career'))
 
     # Posts for MA101
     cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
@@ -719,7 +719,7 @@ def add_fake_data():
                     'I\'m struggling a bit with solving quadratic equations, especially when it comes to completing the square and using the quadratic formula. '
                     'Does anyone have any tips or resources that could help clarify these methods? I think understanding this is crucial for our upcoming exam. '
                     'Any assistance would be greatly appreciated!',
-                    10, 'Plain'))
+                    10, 'Tech'))
 
     # Posts for PH101
     cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
@@ -728,7 +728,7 @@ def add_fake_data():
                     'I\'m organizing a casual discussion group where we can delve deeper into the philosophical concepts covered in our lectures. '
                     'Our first topic will be "The Nature of Reality" as discussed by Plato and Aristotle. It would be great to hear diverse perspectives '
                     'and interpretations. Let me know if you\'re interested, and we can decide on a time that works for everyone.',
-                    20, 'Plain'))
+                    20, 'Lifestyle'))
 
     # Posts for BIO101
     cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
@@ -737,7 +737,7 @@ def add_fake_data():
                     'I came across an intriguing article on CRISPR gene editing and its potential to cure genetic diseases. '
                     'Here\'s the link: [CRISPR Breakthrough](https://example.com/crispr-article). '
                     'I thought it relates well to our recent lectures on genetics. Let\'s discuss the ethical implications and future possibilities in class!',
-                    30, 'Hot'))
+                    30, 'Health'))
 
     # Posts for CHEM101
     cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
@@ -746,7 +746,7 @@ def add_fake_data():
                     'As we approach our first laboratory session, I want to remind everyone about the importance of lab safety. '
                     'Please review the safety guidelines provided in the course materials, and make sure to wear appropriate protective gear. '
                     'If you have any questions or concerns, feel free to reach out to me before the lab session.',
-                    50, 'Announcement'))
+                    50, 'Academic'))
 
     # Posts for MA201
     cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
@@ -755,7 +755,7 @@ def add_fake_data():
                     'Limits can be a bit tricky to understand, especially when dealing with approaching infinity or undefined points. '
                     'I found a helpful video that explains the concept clearly: [Understanding Limits](https://example.com/limits-video). '
                     'Hope this helps others too!',
-                    22, 'Plain'))
+                    22, 'Health'))
 
     # Posts for PH201
     cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
@@ -763,7 +763,7 @@ def add_fake_data():
                     'Dear students, \n\n'
                     'For our next class, please prepare to discuss various ethical dilemmas. Think about scenarios where moral principles may conflict, '
                     'and consider the reasoning behind different ethical decisions. I encourage you to bring real-world examples to enrich our discussion.',
-                    35, 'Announcement'))
+                    35, 'Academic'))
 
     conn.commit()
     conn.close()

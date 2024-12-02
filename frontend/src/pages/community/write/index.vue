@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import axios from "axios";
-import { ref } from "vue";
+
+const router = useRouter();
 
 interface Post {
   id: number;
@@ -12,14 +13,17 @@ interface Post {
   tag: string;
 }
 
+// tag can only be one of these values
+const tags = ['Health', 'Academic', 'Career', 'Lifestyle', 'Tech', 'Other'];
+
 const newPost = ref<Post>({
   id: 0,
-  course_id: NaN,
+  course_id: 0,
   title: '',
   sender_name: '',
   content: '',
   likes: 0,
-  tag: ''
+  tag: 'Academic'
 });
 
 async function createPost() {
@@ -30,11 +34,13 @@ async function createPost() {
     content: newPost.value.content,
     tag: newPost.value.tag
   };
+  console.dir(post);
 
   try {
     await axios.post('/api/posts', post);
     alert('Post added successfully!');
     resetForm();
+    router.push('/community');
   } catch (error) {
     console.error('Failed to add post:', error);
     alert('Failed to add post. Please try again.');
@@ -49,9 +55,24 @@ function resetForm() {
     sender_name: '',
     content: '',
     likes: 0,
-    tag: ''
+    tag: 'Academic'
   };
 }
+
+const courseMap = ref<{ [key: string]: number }>({});
+
+async function getTitle() {
+  const courses = await axios.get('/api/my/course');
+  console.log(courses.data);
+  courses.data.forEach((course: { title: string; id: number;[key: string]: any }) => {
+    courseMap.value[course.title] = course.id;
+  });
+  console.log(courseMap.value);
+}
+
+onMounted(() => {
+  getTitle();
+});
 </script>
 
 <template>
@@ -66,9 +87,13 @@ function resetForm() {
         <h2>Create a Post</h2>
         <form @submit.prevent="createPost" class="post-form">
           <input v-model="newPost.title" placeholder="Post Title" required />
-          <input v-model="newPost.course_id" placeholder="Course ID" type="number" required />
+          <select name="" id="" v-model="newPost.course_id" required>
+            <option v-for="(value, key) in courseMap" :key="key" :value="value">{{ key }}</option>
+          </select>
           <textarea v-model="newPost.content" placeholder="Share your tips or questions..." required></textarea>
-          <input v-model="newPost.tag" placeholder="Tag (e.g., Math, Science)" required />
+          <select v-model="newPost.tag" required>
+            <option v-for="tag in tags" :key="tag" :value="tag">{{ tag }}</option>
+          </select>
           <button type="submit" class="submit-button">Submit</button>
         </form>
       </section>
@@ -128,8 +153,9 @@ function resetForm() {
 }
 
 .post-form input,
-.post-form textarea {
-  width: 100%;
+.post-form textarea,
+.post-form select {
+  position: relative;
   padding: 12px;
   font-size: 1rem;
   border: 1px solid #bdc3c7;
@@ -138,7 +164,8 @@ function resetForm() {
 }
 
 .post-form input:focus,
-.post-form textarea:focus {
+.post-form textarea:focus,
+.post-form select:focus {
   border-color: #3498db;
   outline: none;
   box-shadow: 0 0 6px rgba(52, 152, 219, 0.3);
@@ -187,6 +214,7 @@ function resetForm() {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
