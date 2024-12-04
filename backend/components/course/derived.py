@@ -247,7 +247,6 @@ class CourseRatingHandler(BaseHandler):
                 INSERT INTO rating (course_id, sender_name, star, difficulty, workload, grading, gain, comment, likes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)''',
                 (course_id, username, star, difficulty, workload, grading, gain, comment))
             conn.commit()
-            self.write("Comment added successfully.")
         except sqlite3.Error as e:
             self.set_status(500)
             self.write(str(e))
@@ -266,7 +265,7 @@ class CourseRatingHandler(BaseHandler):
 
         try:
             cursor.execute('''
-                SELECT sender_name, star, difficulty, workload, grading, gain, comment, date_submitted FROM course_comments WHERE course_id = ?
+                SELECT sender_name, star, difficulty, workload, grading, gain, comment, date_submitted FROM rating WHERE course_id = ?
             ''', (course_id,))
             rating = cursor.fetchall()
             rates = [{'sender_name': rate[0], 'star': rate[1], 'difficulty': rate[2], 'workload': rate[3], 'grading': rate[4], 'gain': rate[5],
