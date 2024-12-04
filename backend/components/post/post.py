@@ -1,5 +1,6 @@
 import tornado.web
 import sqlite3
+import json
 from database import DATABASE, add_post, get_post_comments, add_post_comment
 
 class PostHandler(tornado.web.RequestHandler):
@@ -113,9 +114,11 @@ class CommentHandler(tornado.web.RequestHandler):
             self.write({'error': 'Database error'})
 
     # @tornado.web.authenticated
-    def post(self, post_id, floor):
+    def post(self, post_id):
         """Add a comment to a specific post."""
+
         data = tornado.escape.json_decode(self.request.body)
+        floor = data.get('floor')
         commenter_name = data.get('commenter_name')
         comment_content = data.get('comment_content')
 

@@ -38,7 +38,7 @@ async function createPost() {
 
   try {
     await axios.post('/api/posts', post);
-    alert('Post added successfully!');
+    // alert('Post added successfully!');
     resetForm();
     router.push('/community');
   } catch (error) {
