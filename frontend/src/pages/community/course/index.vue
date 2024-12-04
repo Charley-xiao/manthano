@@ -140,6 +140,7 @@ async function submitRating() {
       date_submitted: '',
       likes: 0
     }
+    fetchRating();
   } catch (error) {
     alert(params);
     console.error('Failed to rate:', error);
@@ -155,10 +156,18 @@ async function fetchPosts() {
 
 
 async function fetchRating() {
-  const response = await axios.get('/api/rating');
-  console.log("SUC?");
-  console.log(response.data.posts);
-  ratings.value = response.data.posts;
+  const params = new URLSearchParams();
+  params.append('course_id', courseId);
+
+  try {
+    const response = await axios.get('/api/rating', {params: params});
+    console.log("suc");
+    console.log(response.data);
+    ratings.value = response.data;
+  } catch (error) {
+      alert(params);
+      console.error('Failed to get rate:', error);
+    }
 }
 
 onMounted(() => {
