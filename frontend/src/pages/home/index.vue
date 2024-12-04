@@ -15,12 +15,12 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref, onBeforeUnmount } from 'vue';
+import { onMounted, ref, onBeforeUnmount } from 'vue';
 import { isLoggedIn } from '../../store/index.d';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
+import { OrbitControls } from '@three-ts/orbit-controls';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import helvetikerFont from 'three/examples/fonts/helvetiker_regular.typeface.json'; // Load default font
 
 

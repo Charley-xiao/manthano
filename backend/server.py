@@ -34,9 +34,11 @@ Set specific indicators for teaching evaluation: such as the reasonableness of h
 Pretty UI.
 """
 
+from tornado.web import RequestHandler, StaticFileHandler
 from database import DATABASE, validate_user, add_user, get_user_role, get_users_by_role, User, add_teacher_request
 from database import init_db
 import argparse
+import os
 import json
 # from recommender import recommend_courses_with_content
 from functools import wraps
@@ -99,6 +101,9 @@ class AdminHandler(BaseHandler):
 
 SECRET_KEY = config['secret']
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Path to `backend/`
+FRONTEND_DIST_PATH = os.path.join(BASE_DIR, "../frontend/dist")  # Path to `frontend/dist`
+
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
@@ -131,6 +136,8 @@ def make_app():
         (r"/rating", CourseRatingHandler),
         (r"/users/search", UserSearchHandler),
         (r"/teacher/all", AllTeacherHandler),
+        (r"/static/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH}), # serve static files
+        (r"/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH, "default_filename": "index.html"}), # Serve PWA (SPA fallback)
     ], cookie_secret=SECRET_KEY, login_url="/login", debug=True)
 
 if __name__ == "__main__":

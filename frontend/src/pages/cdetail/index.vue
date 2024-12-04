@@ -163,7 +163,7 @@ const deleteChapter = async (chapterId: string) => {
     }
 };
 
-const addCourseware = async (chapterId: string, courseware: { name: string; file: File }) => {
+/*const addCourseware = async (chapterId: string, courseware: { name: string; file: File }) => {
     const chapter = courseDetails.value.chapters.find(ch => ch.id === chapterId);
     if (chapter) {
         try {
@@ -193,7 +193,7 @@ const addCourseware = async (chapterId: string, courseware: { name: string; file
     } else {
         alert('Chapter not found.');
     }
-};
+};*/
 
 
 const fetchCourseDetails = async () => {
@@ -238,7 +238,7 @@ const postCourseComment = async () => {
     params.append('user', currentUsername.value);
     params.append('content', commentContent.value);
     params.append('timestamp', new Date().toISOString());
-    params.append('course_id', newComment.course_id);
+    params.append('course_id', courseId as string);
 
     try {
         await axios.post(`/api/courses/${courseId}/comments`, params);
@@ -347,8 +347,8 @@ const videoStarted = ref(false);
 const videoWatchedTime = ref(0);  // Track how much time has been watched
 const idleTime = ref(0);  // Track how long the user has been idle
 const videoDuration = ref(0); // Total video duration
-let videoInterval: NodeJS.Timer | null = null;  // For tracking video time
-let idleInterval: NodeJS.Timer | null = null;  // For tracking idle time
+let videoInterval: ReturnType<typeof setInterval> | null = null;  // For tracking video time
+let idleInterval: ReturnType<typeof setInterval> | null = null;  // For tracking idle time
 
 // Ensure the user cannot leave the page or switch tabs while watching
 const handleVisibilityChange = () => {
@@ -459,11 +459,11 @@ const uploadCourseware = async (chapterId: string) => {
     formData.append('chapter_id', chapterId);
 
     try {
-        const response = await axios.post(`/api/courseware`, formData, {
+        /*const response = await axios.post(`/api/courseware`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-        });
+        });*/
 
         // const uploadedCourseware = {
         //     name: response.data.name,
@@ -533,15 +533,15 @@ const uploadHomeworkProject = async (chapterId: string) => {
     const formData = new FormData();
     formData.append('file', selectedFile.value);
     formData.append('name', coursewareFileName.value);
-    formData.append('course_id', courseId);
+    formData.append('course_id', courseId as string);
     formData.append('chapter_id', chapterId);
 
     try {
-        const response = await axios.post(`/api/hwpj`, formData, {
+        /*const response = await axios.post(`/api/hwpj`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-        });
+        });*/
 
         // const uploadedCourseware = {
         //     name: response.data.name,
@@ -572,7 +572,7 @@ const sendNotification = async () => {
     try {
         const params = new URLSearchParams();
         params.append('body', notificationContent.value);
-        params.append('course_id', courseId);
+        params.append('course_id', courseId as string);
         await axios.post(`/api/courses/${courseId}/notifications`, params);
         alert('Notification sent successfully!');
         notificationContent.value = '';
@@ -668,10 +668,11 @@ const sendNotification = async () => {
                     </ul>
                     <h3>Notification</h3>
                     <form @submit.prevent="sendNotification" class="notification-form">
-                        <textarea v-model="notificationContent" placeholder="Enter notification message" class="form-input" required></textarea>
+                        <textarea v-model="notificationContent" placeholder="Enter notification message"
+                            class="form-input" required></textarea>
                         <button type="submit" class="btn primary">Send Notification</button>
                     </form>
-                     
+
                 </div>
             </div>
 

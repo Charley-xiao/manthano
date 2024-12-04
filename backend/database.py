@@ -364,6 +364,7 @@ def add_post(course_id, title, sender_name, content, likes, tag):
     # finally:
     #     conn.close()
     cursor.execute('INSERT INTO posts (course_id, title, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', (course_id, title, sender_name, content, likes, tag))
+    cursor.execute('INSERT INTO post_comments (post_id, floor, commenter_name, comment_content) VALUES (?, ?, ?, ?)', (cursor.lastrowid, 1, sender_name, content))
     conn.commit()
     return True
 
@@ -406,6 +407,43 @@ def get_rating(course_id):
     conn.close()
 
     return [Rating(*row[1:]) for row in rows]
+
+def create_post_comments_table():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS post_comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id INTEGER NOT NULL,
+            floor INTEGER NOT NULL,
+            commenter_name TEXT NOT NULL,
+            comment_content TEXT NOT NULL,
+            date_submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(post_id) REFERENCES posts(id),
+            FOREIGN KEY(commenter_name) REFERENCES users(username)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def add_post_comment(post_id, floor, commenter_name, comment_content):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO post_comments (post_id, floor, commenter_name, comment_content) VALUES (?, ?, ?, ?)',
+                   (post_id, floor, commenter_name, comment_content))
+    conn.commit()
+    conn.close()
+
+    return True
+
+def get_post_comments(post_id):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM post_comments WHERE post_id=?', (post_id,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    return rows
 
 def add_fake_data():
     # Add some users with varied passwords and realistic emails
@@ -487,7 +525,7 @@ def add_fake_data():
     cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
                    ('Getting Started', 'https://www.youtube.com/embed/6ARjrl74nc4', 'teaching', cs101_id))
     cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
-                   ('Intro to Programming', 'https://player.bilibili.com/player.html?isOutside=true&aid=113525263434587&bvid=BV1HuBvYMEdF&cid=26898860143&p=1', 'teaching', cs101_id))
+                   ('Intro to Programming', 'https://player.bilibili.com/player.html?isOutside=true&aid=113567458135663&bvid=BV16tz6YWEfz&cid=27099594855&p=1', 'teaching', cs101_id))
     cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
                    ('Python Basics', 'https://www.youtube.com/embed/8DvywoWv6fI', 'homework', cs101_id))
     cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
@@ -662,11 +700,13 @@ def add_fake_data():
     cursor.execute('INSERT INTO courseware (filename, chapter_id) VALUES (?, ?)',
                    ('ethics_morality_assignment.docx', ethics_morality_id))
 
+    conn.commit()
+    conn.close()
+
     # Add some detailed posts
 
     # Posts for CS101
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
-                   ('Study Group Forming', cs101_id, 'Jane Doe',
+    add_post(cs101_id, 'Study Group Forming', 'Jane Doe',
                     'Hello everyone, I’m forming a study group for CS101. \n\n'
                     'The goal of our group will be to explore key concepts such as programming basics, '
                     'problem-solving strategies, and working through Python exercises together. I believe that learning '
@@ -674,22 +714,18 @@ def add_fake_data():
                     'We’ll meet weekly on Tuesdays and Thursdays for an hour each. Each session will involve a brief recap '
                     'of the week’s lectures, followed by collaborative problem-solving. Bring your questions, and let’s help each other excel!\n\n'
                     'Please comment below if you are interested, and we can finalize the meeting schedule. Looking forward to learning together!',
-                    15, 'Tech'))
+                    15, 'Tech')
 
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
-                   ('Python Tips & Tricks', cs101_id, 'John Doe',
-                    'Hey everyone, \n\n'
-                    'As we dive deeper into Python, I thought it would be helpful to share some tips and tricks that have been a game-changer for me. \n\n'
-                    '1. **List Comprehensions**: Simplify your loops and make your code more Pythonic.\n'
-                    '2. **Debugging with pdb**: Use the built-in Python debugger to step through your code.\n'
-                    '3. **Virtual Environments**: Always set up a virtual environment for your projects to manage dependencies.\n\n'
-                    'I’ve also found that breaking down complex problems into smaller functions makes the code more readable and easier to test. '
-                    'Let’s use this thread to share more tips and discuss how we can write cleaner and more efficient code. What are your favorite Python hacks?',
-                    25, 'Academic'))
+    add_post(cs101_id, 'Python Project Help', 'John Doe',
+                    'Hi CS101 classmates, \n\n'
+                    'I’m seeking assistance with the Python project due next week. I’m having trouble with the logic for the '
+                    'data processing section. If anyone has experience with file handling and data manipulation in Python, '
+                    'I would greatly appreciate your guidance. \n\n'
+                    'I’m open to forming a small project group to tackle this challenge together. Please reach out if you’re interested in collaborating. '
+                    'Let’s help each other succeed!', 8, 'Career')
 
     # Posts for CS201
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
-                   ('Mastering Binary Trees', cs201_id, 'Alice Wong',
+    add_post(cs201_id, 'Mastering Binary Trees', 'Alice Wong',
                     'Hi all, \n\n'
                     'In this post, I’d like to dive into binary trees, a foundational concept in data structures that will benefit us greatly '
                     'in our CS201 journey and beyond. \n\n'
@@ -703,70 +739,60 @@ def add_fake_data():
                     'Binary trees are used in scenarios such as database indexing, network routing, and even some AI algorithms. I’ve also found them '
                     'in file compression algorithms like Huffman encoding. \n\n'
                     'Let’s discuss how we can make these concepts intuitive. Share your thoughts or questions below!',
-                    40, 'Health'))
+                    40, 'Health')
 
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
-                   ('Help with Linked Lists', cs201_id, 'John Doe',
+    add_post(cs201_id, 'Help with Linked Lists', 'John Doe',
                     'Hello CS201 classmates, \n\n'
                     'I\'m having trouble understanding how linked lists work, particularly when it comes to inserting and deleting nodes. '
                     'Does anyone have a good resource or can explain it in a way that\'s easy to grasp? Maybe we can form a study group to tackle this topic.',
-                    12, 'Career'))
+                    12, 'Career')
 
     # Posts for MA101
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
-                   ('Quadratic Equations Help', ma101_id, 'John Doe',
+    add_post(ma101_id, 'Quadratic Equations Help', 'John Doe',
                     'Hi everyone, \n\n'
                     'I\'m struggling a bit with solving quadratic equations, especially when it comes to completing the square and using the quadratic formula. '
                     'Does anyone have any tips or resources that could help clarify these methods? I think understanding this is crucial for our upcoming exam. '
                     'Any assistance would be greatly appreciated!',
-                    10, 'Tech'))
+                    10, 'Tech')
 
     # Posts for PH101
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
-                   ('Philosophy Discussion Group', ph101_id, 'Alice Wong',
+    add_post(ph101_id, 'Philosophy Discussion Group', 'Alice Wong',
                     'Hello PH101 classmates, \n\n'
                     'I\'m organizing a casual discussion group where we can delve deeper into the philosophical concepts covered in our lectures. '
                     'Our first topic will be "The Nature of Reality" as discussed by Plato and Aristotle. It would be great to hear diverse perspectives '
                     'and interpretations. Let me know if you\'re interested, and we can decide on a time that works for everyone.',
-                    20, 'Lifestyle'))
+                    20, 'Lifestyle')
 
     # Posts for BIO101
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
-                   ('Interesting Biology Article', bio101_id, 'Jane Doe',
+    add_post(bio101_id, 'Genetics Research Article', 'Jane Doe',
                     'Hey everyone, \n\n'
                     'I came across an intriguing article on CRISPR gene editing and its potential to cure genetic diseases. '
                     'Here\'s the link: [CRISPR Breakthrough](https://example.com/crispr-article). '
                     'I thought it relates well to our recent lectures on genetics. Let\'s discuss the ethical implications and future possibilities in class!',
-                    30, 'Health'))
+                    30, 'Health')
 
     # Posts for CHEM101
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
-                   ('Lab Safety Reminder', chem101_id, 'Ms. Smith',
+    add_post(chem101_id, 'Lab Safety Reminder', 'Ms. Smith',
                     'Dear students, \n\n'
                     'As we approach our first laboratory session, I want to remind everyone about the importance of lab safety. '
                     'Please review the safety guidelines provided in the course materials, and make sure to wear appropriate protective gear. '
                     'If you have any questions or concerns, feel free to reach out to me before the lab session.',
-                    50, 'Academic'))
+                    50, 'Academic')
 
     # Posts for MA201
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
-                   ('Understanding Limits', ma201_id, 'Alice Wong',
+    add_post(ma201_id, 'Understanding Limits', 'Alice Wong',
                     'Hi everyone, \n\n'
                     'Limits can be a bit tricky to understand, especially when dealing with approaching infinity or undefined points. '
                     'I found a helpful video that explains the concept clearly: [Understanding Limits](https://example.com/limits-video). '
                     'Hope this helps others too!',
-                    22, 'Health'))
+                    22, 'Health')
 
     # Posts for PH201
-    cursor.execute('INSERT INTO posts (title, course_id, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)',
-                   ('Ethical Dilemmas Discussion', ph201_id, 'Mr. Johnson',
+    add_post(ph201_id, 'Ethical Dilemmas Discussion', 'Mr. Johnson',
                     'Dear students, \n\n'
                     'For our next class, please prepare to discuss various ethical dilemmas. Think about scenarios where moral principles may conflict, '
                     'and consider the reasoning behind different ethical decisions. I encourage you to bring real-world examples to enrich our discussion.',
-                    35, 'Academic'))
-
-    conn.commit()
-    conn.close()
+                    35, 'Academic')
 
 
 def init_db():
@@ -778,5 +804,6 @@ def init_db():
     create_join_course_requests_table()
     create_add_course_requests_table()
     create_posts_table()
+    create_post_comments_table()
     create_rating_table()
     add_fake_data()

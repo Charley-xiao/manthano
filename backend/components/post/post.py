@@ -1,6 +1,6 @@
 import tornado.web
 import sqlite3
-from database import DATABASE, add_post
+from database import DATABASE, add_post, get_post_comments, add_post_comment
 
 class PostHandler(tornado.web.RequestHandler):
     """
@@ -84,57 +84,44 @@ class PostHandler(tornado.web.RequestHandler):
             self.set_status(500)
             self.write({'error': 'Database error'})
 
+
+
 class CommentHandler(tornado.web.RequestHandler):
     """
     Handler for adding comments to posts.
+
+    CREATE TABLE IF NOT EXISTS post_comments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id INTEGER NOT NULL,
+            floor INTEGER NOT NULL,
+            commenter_name TEXT NOT NULL,
+            comment_content TEXT NOT NULL,
+            date_submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(post_id) REFERENCES posts(id),
+            FOREIGN KEY(commenter_name) REFERENCES users(username)
+        )
     """
 
     def get(self, post_id):
         """Retrieve all comments for a specific post."""
-        conn = sqlite3.connect(DATABASE)
-        cursor = conn.cursor()
 
         try:
-            cursor.execute('''
-                SELECT commenter_name, comment_content FROM comments
-                WHERE post_id = ?
-            ''', (post_id,))
-            comments = cursor.fetchall()
-
-            comment_list = []
-            for comment in comments:
-                comment_list.append({
-                    'commenter_name': comment[0],
-                    'comment_content': comment[1]
-                })
-
-            self.write({'comments': comment_list})
+            comments = get_post_comments(post_id)
+            self.write({'comments': comments})
         except sqlite3.Error:
             self.set_status(500)
             self.write({'error': 'Database error'})
-        finally:
-            conn.close()
 
     # @tornado.web.authenticated
-    def post(self, post_id):
+    def post(self, post_id, floor):
         """Add a comment to a specific post."""
         data = tornado.escape.json_decode(self.request.body)
-        commenter_name = self.get_current_user()  # Assuming the current user is the commenter
+        commenter_name = data.get('commenter_name')
         comment_content = data.get('comment_content')
 
-        conn = sqlite3.connect(DATABASE)
-        cursor = conn.cursor()
-
-        try:
-            cursor.execute('''
-                INSERT INTO comments (post_id, commenter_name, comment_content)
-                VALUES (?, ?, ?, ?)
-            ''', (post_id, commenter_name, comment_content))
-            conn.commit()
+        if add_post_comment(post_id, floor, commenter_name, comment_content):
             self.set_status(201)
             self.write({'message': 'Comment added successfully'})
-        except sqlite3.Error:
+        else:
             self.set_status(500)
             self.write({'error': 'Database error'})
-        finally:
-            conn.close()
