@@ -22,19 +22,15 @@
           <select v-model="selectedSort" @change="sortCourses">
             <option value="trending">Trending</option>
             <option value="newest">Newest</option>
-            <option value="popularity">Popularity</option>
             <option value="rating">Rating</option>
           </select>
         </div>
 
         <div class="sort-select-right">
-          <label for="sort">Filter by: </label>
-          <select v-model="selectedFilter" @change="sortCourses">
-            <option value="All">All</option>
-            <option value="CS">Computer science</option>
-            <option value="Math">Math</option>
-            <option value="Physics">Physics</option>
-          </select>
+          <div class="search-bar">
+            <input type="text" v-model="searchCourse" placeholder="Search...">
+            <button @click="filterCourses" class="search-icon">🔍</button>
+          </div>
         </div>
       </div>
 
@@ -70,19 +66,15 @@
           <select v-model="selectedSort" @change="sortCourses">
             <option value="trending">Trending</option>
             <option value="newest">Newest</option>
-            <option value="popularity">Popularity</option>
             <option value="rating">Rating</option>
           </select>
         </div>
 
         <div class="sort-select-right">
-          <label for="sort">Filter by: </label>
-          <select v-model="selectedFilter" @change="sortCourses">
-            <option value="All">All</option>
-            <option value="CS">Computer science</option>
-            <option value="Math">Math</option>
-            <option value="Physics">Physics</option>
-          </select>
+          <div class="search-bar">
+            <input type="text" v-model="searchCourse" placeholder="Search...">
+            <button @click="filterCourses" class="search-icon">🔍</button>
+          </div>
         </div>
       </div>
 
@@ -138,20 +130,24 @@ export default defineComponent({
       selectedSort.value = 'trending';
       selectedFilter.value = 'All';
       currentPage.value = 1;
+      searchCourse.value = '';
       if (tab === 'courses') {
         itemsPerPage.value = 8;
       } else {
         itemsPerPage.value = 4;
       }
+      filterCourses();
     };
 
     onMounted(async () => {
       await fetchCourses();
       await fetchTeachers();
+      filterCourses();
       sortCourses();
     });
     
     const selectedSort = ref<string>('newest');
+    const searchCourse = ref<string>('');
     const selectedFilter = ref<string>('All');
     const currentPage = ref(1);
     const itemsPerPage = ref(8);
@@ -215,19 +211,36 @@ export default defineComponent({
 
     const sortedCourses = ref([...courses.value]);
     const sortedTeachers = ref([...teachers.value]);
+    const filteredCourses = ref([...courses.value]);
+    const filteredTeachers = ref([...teachers.value]);
     
+    const filterCourses = () => {
+      if (!searchCourse) {
+        filteredCourses.value = [...courses.value]; 
+        filteredTeachers.value = [...teachers.value]; 
+      } else {
+        filteredCourses.value = courses.value.filter(course =>
+          course.title.includes(searchCourse.value)
+        );
+        filteredTeachers.value = teachers.value.filter(teacher =>
+          teacher.username.includes(searchCourse.value)
+        );
+      }
+      sortCourses();
+    }
+
     const sortCourses = () => {
       console.log('Teacher sort details:', teachers.value);
       console.log('Course sort details:', courses.value);
       if (selectedSort.value === 'newest') {
-        sortedCourses.value = [...courses.value];
-        sortedTeachers.value = [...teachers.value];
+        sortedCourses.value = [...filteredCourses.value];
+        sortedTeachers.value = [...filteredTeachers.value];
       } else if (selectedSort.value === 'rating') {
-        sortedCourses.value = [...courses.value].sort((a, b) => b.rating - a.rating);
-        sortedTeachers.value = [...teachers.value].sort((a, b) => b.rating - a.rating);
+        sortedCourses.value = [...filteredCourses.value].sort((a, b) => b.rating - a.rating);
+        sortedTeachers.value = [...filteredTeachers.value].sort((a, b) => b.rating - a.rating);
       } else if (selectedSort.value === 'trending') {
-        sortedCourses.value = [...courses.value].sort((a, b) => (b.rating - b.id * 0.5) - (a.rating - a.id * 0.5));
-        sortedTeachers.value = [...teachers.value].sort((a, b) => (b.rating - b.id * 0.5) - (a.rating - a.id * 0.5));
+        sortedCourses.value = [...filteredCourses.value].sort((a, b) => (b.rating - b.id * 0.5) - (a.rating - a.id * 0.5));
+        sortedTeachers.value = [...filteredTeachers.value].sort((a, b) => (b.rating - b.id * 0.5) - (a.rating - a.id * 0.5));
       }
     };
 
@@ -268,6 +281,8 @@ export default defineComponent({
     return {
       selectedSort,
       selectedFilter,
+      searchCourse,
+      filterCourses,
       filters,
       sortedCourses,
       sortedTeachers,
@@ -286,6 +301,32 @@ export default defineComponent({
 </script>
 
 <style scoped>
+
+ .search-bar {
+    display: flex;
+    align-items: center;
+}
+
+.search-bar input[type="text"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+} 
+
+.search-bar button {
+    background-color: #f8f9fa;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    margin-left: -35px; 
+}
+
+.fa-search {
+    color: #555;
+} 
+
+
 .explore-page {
   max-width: 1200px;
   margin: 0 auto;

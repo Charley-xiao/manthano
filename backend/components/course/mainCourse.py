@@ -19,8 +19,30 @@ class AllCoursesHandler(BaseHandler):
                 SELECT id, title, description FROM courses
             ''')
             courses = cursor.fetchall()
-            courses = [{'id': course[0], 'title': course[1], 'description': course[2]} for course in courses]
-            self.write(json.dumps(courses))
+            update_courses = []
+
+            cursor.execute('''
+                SELECT course_id
+                FROM rating
+            ''')
+            course_ids = cursor.fetchall()
+
+            for course in courses:
+                star = 2+course[0]*23%31*1.0/10.0
+                for course_id in course_ids:
+                    if course_id == course[0]:
+                        cursor.execute('''
+                            SELECT AVG(star) AS average_star
+                            FROM rating
+                            WHERE course_id = ?
+                        ''', (course_id))
+
+                        star = cursor.fetchall()[0]
+                        print(star)
+
+                update_courses.append({'id': course[0], 'title': course[1], 'description': course[2], 'rating': star})
+
+            self.write(json.dumps(update_courses))
         except sqlite3.Error as e:
             self.set_status(500)
             self.write(str(e))

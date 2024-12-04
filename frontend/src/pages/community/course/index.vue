@@ -155,9 +155,10 @@ async function fetchPosts() {
 
 
 async function fetchRating() {
-  //const response = await axios.get('/api/get_rating');//need to do
-  //console.log(response.data.posts);
-  //ratings.value = response.data.posts;
+  const response = await axios.get('/api/rating');
+  console.log("SUC?");
+  console.log(response.data.posts);
+  ratings.value = response.data.posts;
 }
 
 onMounted(() => {

@@ -94,7 +94,6 @@ class AllTeacherHandler(BaseHandler):
         """
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
-        print("SUC?")
         try:
             cursor.execute('''
                 SELECT id, username FROM users WHERE role = "teacher"
