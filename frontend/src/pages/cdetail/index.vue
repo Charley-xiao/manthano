@@ -283,10 +283,14 @@ const addStudent = async (username: string) => {
     }
 
     courseDetails.value.students.push(username);
+    const params = new URLSearchParams();
+    params.append('username', username);
+    params.append('course_id', courseId as string);
+    params.append('student', username);
 
     try {
-        await axios.post(`/api/courses/${courseId}/students`, { username: username });
-        alert('Student added successfully!');
+        await axios.post(`/api/courses/${courseId}/students`, params);
+        // alert('Student added successfully!');
         // newStudent.value = '';
     } catch (error) {
         console.error('Failed to add student:', error);
@@ -296,9 +300,12 @@ const addStudent = async (username: string) => {
 const removeStudent = async (student: string) => {
     courseDetails.value.students = courseDetails.value.students.filter(s => s !== student);
 
+    const params = new URLSearchParams();
+    params.append('student', student);
+
     try {
-        await axios.delete(`/api/courses/${courseId}/students`, { data: { username: student } });
-        alert('Student removed successfully!');
+        await axios.delete(`/api/courses/${courseId}/students`, { params });
+        // alert('Student removed successfully!');
     } catch (error) {
         console.error('Failed to remove student:', error);
     }
@@ -721,7 +728,7 @@ const sendNotification = async () => {
                     </div>
 
                     <!-- Homework and Project Upload Section (for students) -->
-                    <div v-if="!isOwnerOrAdmin" class="courseware-upload">
+                    <div v-if="!isOwnerOrAdmin && chapter.type!=='teaching'" class="courseware-upload">
                         <h4>Submit {{ chapter.type }}</h4>
                         <form @submit.prevent="uploadHomeworkProject(chapter.id)" class="upload-form">
                             <div class="file-upload-wrapper">

@@ -19,6 +19,9 @@ async function fetchPosts() {
   const response = await axios.get('/api/posts');
   const data = response.data;
   posts.value = data.posts;
+  posts.value.sort((a, b) => {
+    return new Date(b.date_submitted).getTime() - new Date(a.date_submitted).getTime();
+  });
   console.table(posts.value)
 }
 

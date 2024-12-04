@@ -372,3 +372,71 @@ class CourseProgressHandler(BaseHandler):
         finally:
             conn.close()
         
+
+class AddCourseStudentHandler(BaseHandler):
+    """
+    POST /courses/<course_id>/students
+    """
+    @tornado.web.authenticated
+    def post(self):
+        """
+        Adds a student to the course.
+        """
+        username = self.get_current_user()
+        course_id = re.search(r'/(\d+)', self.request.path).group(1)
+        student = self.get_argument("student")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT owner FROM courses WHERE id = ?
+            ''', (course_id,))
+            owner = cursor.fetchone()
+            if owner and owner[0] == username:
+                cursor.execute('''
+                    INSERT INTO course_students (course_id, student) VALUES (?, ?)
+                ''', (course_id, student))
+                conn.commit()
+                self.write("Student added to the course successfully.")
+            else:
+                self.set_status(403)
+                self.write("Forbidden: You do not have permission to add students to this course.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+    @tornado.web.authenticated
+    def delete(self):
+        """
+        Removes a student from the course.
+        """
+        username = self.get_current_user()
+        course_id = re.search(r'/(\d+)', self.request.path).group(1)
+        student = self.get_argument("student")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT owner FROM courses WHERE id = ?
+            ''', (course_id,))
+            owner = cursor.fetchone()
+            if owner and owner[0] == username:
+                cursor.execute('''
+                    DELETE FROM course_students WHERE course_id = ? AND student = ?
+                ''', (course_id, student))
+                conn.commit()
+                self.write("Student removed from the course successfully.")
+            else:
+                self.set_status(403)
+                self.write("Forbidden: You do not have permission to remove students from this course.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()

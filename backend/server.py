@@ -74,7 +74,7 @@ from components.user.teacher import AddTeacherHandler, AllTeacherHandler
 from components.user.mycourse import MyCourseHandler, AddCourseRequestHandler, AddTeacherRequestHandler
 from components.course.anticheat import VideoAnticheatHandler
 from components.course.courseware import CourseWareHandler, CourseWareFileHandlerWithAuth, HomeworkProjectHandler
-from components.course.mainCourse import AllCoursesHandler, DetailedCourseHandler, AddCourseHandler, CourseProgressHandler
+from components.course.mainCourse import AllCoursesHandler, DetailedCourseHandler, AddCourseHandler, CourseProgressHandler, AddCourseStudentHandler
 from components.course.derived import CourseCommentsHandler, CourseNotifHandler, CourseLikeHandler, CourseRecommendHandler, CourseRatingHandler, CourseSendNotificationHandler
 from components.post.post import PostHandler, CommentHandler
 
@@ -114,6 +114,7 @@ def make_app():
         (r"/inbox", InboxHandler),
         (r"/courses/\d+/comments", CourseCommentsHandler),
         (r"/courses/\d+/notifications", CourseSendNotificationHandler),
+        (r"/courses/\d+/students", AddCourseStudentHandler),
         (r"/my/course", MyCourseHandler),
         (r"/add/teacher", AddTeacherHandler),
         (r"/add/course", AddCourseHandler),
