@@ -105,6 +105,43 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Path to `backend/`
 FRONTEND_DIST_PATH = os.path.join(BASE_DIR, "../frontend/dist")  # Path to `frontend/dist`
 
 def make_app():
+    # configure the route of the server by adding '/api' to the beginning of the route
+    return tornado.web.Application([
+        (r"/api/", MainHandler),
+        (r"/api/login", LoginHandler),
+        (r"/api/register", RegisterHandler),
+        (r"/api/admin", AdminHandler),
+        (r"/api/logout", LogoutHandler),
+        (r"/api/inbox", InboxHandler),
+        (r"/api/courses/\d+/comments", CourseCommentsHandler),
+        (r"/api/courses/\d+/notifications", CourseSendNotificationHandler),
+        (r"/api/courses/\d+/students", AddCourseStudentHandler),
+        (r"/api/my/course", MyCourseHandler),
+        (r"/api/add/teacher", AddTeacherHandler),
+        (r"/api/add/course", AddCourseHandler),
+        (r"/api/courses/\d+", DetailedCourseHandler),
+        (r"/api/courses/notif", CourseNotifHandler), # deprecated
+        (r"/api/courses/like", CourseLikeHandler),
+        (r"/api/courses/recommend", CourseRecommendHandler),
+        (r"/api/anticheat", VideoAnticheatHandler),
+        (r"/api/courseware", CourseWareHandler),
+        (r"/api/hwpj", HomeworkProjectHandler),
+        (r"/api/files/courseware/(.*)", CourseWareFileHandlerWithAuth, {"path": "files/courseware"}),
+        (r"/api/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
+        (r"/api/course/all", AllCoursesHandler),
+        (r"/api/course/progress/\d+", CourseProgressHandler),
+        (r"/api/posts", PostHandler),
+        (r"/api/post/(\d+)/comments", CommentHandler),
+        (r"/api/add-course-requests", AddCourseRequestHandler),
+        (r"/api/add-teacher-requests", AddTeacherRequestHandler),
+        (r"/api/course/progress", CourseProgressHandler),
+        (r"/api/rating", CourseRatingHandler),
+        (r"/api/users/search", UserSearchHandler),
+        (r"/api/teacher/all", AllTeacherHandler),
+        (r"/static/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH}), # serve static files
+        (r"/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH, "default_filename": "index.html"}), # Serve PWA (SPA fallback)
+    ], cookie_secret=SECRET_KEY, login_url="/api/login", debug=True)
+
     return tornado.web.Application([
         (r"/", MainHandler),
         (r"/login", LoginHandler),

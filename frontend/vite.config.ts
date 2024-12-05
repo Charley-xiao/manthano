@@ -3,8 +3,18 @@ import vue from '@vitejs/plugin-vue'
 import ViteAutoImport from 'unplugin-auto-import/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// configure for the production build, see https://vitejs.dev/config/
+
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  base: mode === 'development' ? '/' : 'http://localhost:9265',
+  build: {
+    // Configure build options
+    rollupOptions: {
+
+    }
+  },
+
   plugins: [
     vue(),
     ViteAutoImport({
@@ -57,8 +67,9 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:9265',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        // rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
-  }
+  },
 })
+)

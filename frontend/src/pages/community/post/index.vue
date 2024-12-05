@@ -15,6 +15,9 @@ interface Comment {
 const comments = ref<Comment[]>([]);
 
 const submitComment = async () => {
+    if (!newComment.value.comment_content?.trim()) {
+        return;
+    }
     newComment.value = {
         post_id: postId,
         floor: comments.value.length + 1,
