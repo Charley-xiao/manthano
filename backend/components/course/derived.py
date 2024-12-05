@@ -244,7 +244,7 @@ class CourseRatingHandler(BaseHandler):
 
         try:
             cursor.execute('''
-                INSERT INTO rating (course_id, sender_name, star, difficulty, workload, grading, gain, comment, likes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)''',
+                INSERT INTO rating (course_id, sender_name, star, difficulty, workload, grading, gain, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
                 (course_id, username, star, difficulty, workload, grading, gain, comment))
             conn.commit()
         except sqlite3.Error as e:

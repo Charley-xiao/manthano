@@ -2,6 +2,7 @@ import sqlite3
 import bcrypt
 import re
 import os
+import random 
 
 DATABASE = 'db.db'
 
@@ -391,11 +392,11 @@ def create_rating_table():
     conn.commit()
     conn.close()
 
-def add_rating(star, difficulty, workload, grading, gain, comment, course_id):
+def add_rating(sender_name, star, difficulty, workload, grading, gain, comment, course_id):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO rating (star, difficulty, workload, grading, gain, comment, course_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                   (star, difficulty, workload, grading, gain, comment, course_id))
+    cursor.execute('INSERT INTO rating (sender_name, star, difficulty, workload, grading, gain, comment, course_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                   (sender_name, star, difficulty, workload, grading, gain, comment, course_id))
     conn.commit()
     conn.close()
 
@@ -803,6 +804,70 @@ def add_fake_data():
                     'For our next class, please prepare to discuss various ethical dilemmas. Think about scenarios where moral principles may conflict, '
                     'and consider the reasoning behind different ethical decisions. I encourage you to bring real-world examples to enrich our discussion.',
                     35, 'Academic')
+    
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+
+    # Fetch all courses
+    cursor.execute('SELECT id, title FROM courses')
+    courses = cursor.fetchall()
+
+    # Fetch all students
+    cursor.execute('SELECT username FROM users WHERE role = "student"')
+    students = [row[0] for row in cursor.fetchall()]
+
+    # Possible options for difficulty, workload, grading, gain
+    difficulty_options = ['Easy', 'Medium', 'Hard', 'Very Hard']
+    workload_options = ['Light', 'Moderate', 'Heavy', 'Extremely Heavy']
+    grading_options = ['Easy Grading', 'Fair Grading', 'Hard Grading']
+    gain_options = ['High Gain', 'Moderate Gain', 'Low Gain']
+    comment_samples = [
+        'Great course overall. The content was engaging and well-structured.',
+        'The professor was very knowledgeable and approachable.',
+        'I found the assignments challenging but rewarding.',
+        'The course material was relevant and up-to-date.',
+        'I enjoyed the group projects and discussions.',
+        'The workload was manageable, but the exams were tough.',
+        'The course helped me develop new skills and perspectives.',
+        'I would recommend this course to others.',
+        'The course was well-organized and informative.',
+        'The lectures were clear and concise.',
+        'I struggled with the pace of the course.',
+        'The professor provided excellent feedback.',
+        'The course content was too advanced for beginners.',
+        'I appreciated the real-world applications discussed.',
+        'The exams were fair and covered the material well.',
+        'The course was too theoretical for my taste.',
+        'I enjoyed the interactive elements of the course.',
+        'The professor was very engaging and made the material interesting.',
+        'The course workload was heavier than expected.',
+        'I learned a lot from the group projects.',
+        'The course could use more practical examples.',
+        'The professor was always available for questions.',
+        'I wish there were more opportunities for hands-on learning.',
+        'The course readings were insightful and thought-provoking.',
+    ]
+
+    # For each course, add ratings from students
+    for course in courses:
+        course_id = course[0]
+        course_title = course[1]
+        
+        # Decide how many ratings to add per course (e.g., between 5 and 20)
+        num_ratings = random.randint(5, 20)
+        # Randomly select students to rate the course
+        rating_students = random.sample(students, min(num_ratings, len(students)))
+        
+        for student in rating_students:
+            star = random.randint(1, 5)
+            difficulty = random.choice(difficulty_options)
+            workload = random.choice(workload_options)
+            grading = random.choice(grading_options)
+            gain = random.choice(gain_options)
+            comment = random.choice(comment_samples)
+            add_rating(student, star, difficulty, workload, grading, gain, comment, course_id)
+
+    conn.close()
 
 
 def init_db():

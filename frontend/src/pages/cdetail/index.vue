@@ -203,6 +203,10 @@ const fetchCourseDetails = async () => {
         console.log('Course details:', courseDetails.value);
 
         isOwnerOrAdmin.value = (response.data.owner === currentUsername.value) || response.data.isAdmin;
+
+        if (courseDetails.value.chapters.length === 0) {
+            courseDetails.value.type = 'closed';
+        }
     } catch (error) {
         console.error('Failed to fetch course details:', error);
     }

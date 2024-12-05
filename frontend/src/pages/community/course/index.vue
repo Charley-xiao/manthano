@@ -88,7 +88,7 @@ async function submitRating() {
 
   try {
     await axios.post('/api/rating', params);
-    alert('Rating added successfully!');
+    // alert('Rating added successfully!');
     newRating.value = {
       id: 0,
       course_id: courseId,
@@ -132,6 +132,7 @@ async function fetchRating() {
   try {
     const response = await axios.get('/api/rating', { params: params });
     console.log('rating detail:', response.data);
+    ratings.value = [];
     response.data.forEach((rating: any) => {
       console.log(rating);
       ratings.value.push({
@@ -377,6 +378,7 @@ const sendRequestToJoinCourse = () => {
 .half {
   background: linear-gradient(90deg, gold 50%, transparent 50%);
   -webkit-background-clip: text;
+  background-clip: text;
   color: transparent;
 }
 
