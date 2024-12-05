@@ -140,7 +140,7 @@ def make_app():
         (r"/api/rating", CourseRatingHandler),
         (r"/api/users/search", UserSearchHandler),
         (r"/api/teacher/all", AllTeacherHandler),
-        (r"/teacher/getname", GetTeacherHandler),
+        (r"/api/teacher/getname", GetTeacherHandler),
         (r"/static/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH}), # serve static files
         (r"/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH, "default_filename": "index.html"}), # Serve PWA (SPA fallback)
     ], cookie_secret=SECRET_KEY, login_url="/api/login", debug=True)

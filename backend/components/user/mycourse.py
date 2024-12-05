@@ -16,7 +16,11 @@ class MyCourseHandler(BaseHandler):
         """
         Returns all the courses of the user.
         """
-        username = self.get_current_user()
+        
+        username = self.get_argument("username",default=None)
+        if username == None:
+            username = self.get_current_user()
+            
         role = get_user_role(username)
 
         conn = sqlite3.connect(DATABASE)

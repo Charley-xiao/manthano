@@ -4,18 +4,10 @@ import { ref, onMounted } from "vue";
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 
-interface Post {
-  id: number;
-  course_id: number;
-  title: string;
-  sender_name: string;
-  content: string;
-  date_submitted: string;
-  likes: number;
-  tag: string;
-}
-
+const courses = ref<Array<{ id: number; title: string; description: string; color?: string }>>([]);
+const draggedItem = ref<{ id: number; index: number } | null>(null);
 
 interface Teacher {
   id: number;
@@ -23,27 +15,6 @@ interface Teacher {
   rating: number;
 }
 
-const posts = ref<Post[]>([
-  {
-    id: 1,
-    course_id: 101,
-    title: "Sample Post Title",
-    sender_name: "A",
-    content: "Sample content.",
-    date_submitted: "2024-11-17",
-    likes: 25,
-    tag: "Teacher Wang"
-  },{
-    id: 2,
-    course_id: 101,
-    title: "Sample Post Title 2",
-    sender_name: "B",
-    content: "Sample content 2.",
-    date_submitted: "2024-11-17",
-    likes: 25,
-    tag: "Teacher Wang"
-  }
-]);
 
 const teacher = ref<Teacher>(
   {
@@ -52,16 +23,33 @@ const teacher = ref<Teacher>(
     rating: 1.4
   })
 
-const newPost = ref<Post>({
-  id: 0,
-  course_id: NaN,
-  title: '',
-  sender_name: '',
-  content: '',
-  date_submitted: '',
-  likes: 0,
-  tag: ''
-});
+const colors = [
+  "linear-gradient(135deg, #667eea, #764ba2)",
+  "linear-gradient(135deg, #ff6a00, #ee0979)",
+  "linear-gradient(135deg, #42e695, #3bb2b8)",
+  "linear-gradient(135deg, #ff512f, #dd2476)",
+  "linear-gradient(135deg, #24c6dc, #514a9d)"
+];
+
+
+const getCardBackground = (index: number) => {
+  return colors[index % colors.length];
+};
+
+
+const getCourses = async () => {
+  const params = new URLSearchParams();
+  params.append('username', teacher.value.name);
+  try {
+    const response = await axios.get('/api/my/course', {params: params});
+    courses.value = response.data;
+    for (let i = 0; i < courses.value.length; i++) {
+      courses.value[i].color = getCardBackground(i);
+    }
+  } catch (error: any) {
+    console.error('An error occurred while fetching courses:', error);
+  }
+};
 
 async function fetchTeacher() {
   const params = new URLSearchParams();
@@ -71,33 +59,36 @@ async function fetchTeacher() {
     const response = await axios.get('/api/teacher/getname', {params: params});
     console.log(response.data);
     teacher.value = response.data[0];
+    getCourses();
   } catch (error) {
-      alert(params);
       console.error('Failed to get name:', error);
     }
 }
 
-async function fetchPosts() {
-  const response = await axios.get('/api/posts');
-  console.log(response.data.posts);
-  posts.value = response.data.posts;
-}
 
 onMounted(() => {
-  fetchPosts();
   fetchTeacher();
 });
 
-const filledStars = ref(0);
 
-function rate(stars: number) {
-  filledStars.value = stars;
-}
+const handleDragStart = (course: { id: number }, index: number) => {
+  draggedItem.value = { id: course.id, index };
+};
 
-async function submitRating() {
-  console.log('Rating submitted:', filledStars.value);
-}
+const handleDragOver = (event: DragEvent, index: number) => {
+  event.preventDefault(); // Allow dropping
+  const draggedOverIndex = draggedItem.value?.index;
+  if (draggedOverIndex !== index) {
+    const draggedCourse = courses.value[draggedOverIndex!];
+    courses.value.splice(draggedOverIndex!, 1);
+    courses.value.splice(index, 0, draggedCourse);
+    draggedItem.value = { id: draggedCourse.id, index };
+  }
+};
 
+const handleDragEnd = () => {
+  draggedItem.value = null;
+};
 
 </script>
 
@@ -109,46 +100,19 @@ async function submitRating() {
     </header>
 
     <main>
-      <section class="recent-posts">
-        <h2>Teacher post</h2>
-        <div class="posts-grid">
-          <div class="post-card enhanced" v-for="post in posts" :key="post.id">
-            <div class="post-header">
-              <h3>{{ post.title }}</h3>
-              <span class="post-tag">{{ post.tag }}</span>
+      <div class="course-grid">
+        <div class="course-card" v-for="(course, index) in courses" :key="course.id" :style="{ background: course.color }"
+          draggable="true" @dragstart="handleDragStart(course, index)" @dragover="(event) => handleDragOver(event, index)"
+          @dragend="handleDragEnd">
+          <div class="card-content">
+            <h2>{{ course.title }}</h2>
+            <p>{{ course.description }}</p>
+          </div>s
+          <div class="card-footer">
+            <div class="course-link" @click="router.push(`/cdetail/${course.id}`)">
+              View Course
             </div>
-            <p class="post-excerpt">{{ post.content.substring(0, 80) }}...</p>
-            
-            <div class="post-meta">
-              <div class="meta-item">
-                <i class="icon sender"></i>
-                <span>{{ post.sender_name }}</span>
-              </div>
-              <div class="meta-item">
-                <i class="icon date"></i>
-                <span>{{ new Date(post.date_submitted).toLocaleDateString() }}</span>
-              </div>
-              <div class="meta-item">
-                <i class="icon likes"></i>
-                <span>{{ post.likes }} Likes</span>
-              </div>
-            </div>
-
-            <router-link :to="'/community/post/' + post.id" class="read-more">Read More</router-link>
           </div>
-        </div>
-      </section>
-      
-      <div class="star_container">
-        <div class="stars">
-          <h2>Give a rating</h2>
-          <div>
-            <span v-for="n in 5" :key="n" @click="rate(n)" :class="{'star filled': n <= filledStars, 'star empty': n > filledStars}">&#9733;</span>
-          </div>
-        </div>
-        <textarea v-model="newPost.content" placeholder="Share your opinion on rating..." required></textarea>
-        <div class="button">
-          <button @click="submitRating" class="subbmit">Submit</button>
         </div>
       </div>
       
@@ -159,49 +123,112 @@ async function submitRating() {
 
 <style scoped>
 
+
+/* Course Grid */
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  padding: 40px;
+  background-color: var(--app-bg);
+}
+
+.course-card {
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  transition: transform 0.4s ease, box-shadow 0.4s ease, opacity 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  cursor: grab;
+  opacity: 1;
+}
+
+.course-card.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.course-card:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.course-card h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 24px;
+  color: #fff;
+  margin-bottom: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.course-card p {
+  font-size: 16px;
+  color: #f3f3f3;
+  position: relative;
+  z-index: 1;
+}
+
+.course-card .card-content {
+  position: relative;
+  z-index: 2;
+}
+
+.course-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0));
+  transition: transform 0.6s ease;
+  transform: scale(0.5);
+  z-index: 0;
+}
+
+.course-card:hover::before {
+  transform: scale(1.5);
+}
+
+.course-link {
+  font-size: 16px;
+  padding: 10px 20px;
+  color: black;
+  background-color: #fff;
+  border-radius: 20px;
+  text-decoration: none;
+  text-align: center;
+  transition: background-color 0.3s ease;
+  z-index: 3;
+}
+
+.course-link:hover {
+  background-color: #ffdd57;
+  color: #764ba2;
+}
+
+.card-footer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 600px) {
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-
-.stars {
-  margin-right: 10px;
-}
-
-.star {
-  cursor: pointer;
-  font-size: 50px;
-}
-
-.button {
-  margin-left: 10px;
-}
-
-.filled {
-  color: gold;
-}
-
-.empty {
-  color: #ccc;
-}
-
-.subbmit {
-  display: inline-block;
-  margin-top: 15px;
-  background: #1cad0c;
-  color: white;
-  padding: 10px 15px;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: background 0.3s ease;
-  border: none; 
-}
-
-.subbmit:hover {
-  background: #0f8b06;
 }
 
 body {
@@ -255,68 +282,6 @@ body {
   font-size: 1.5rem;
 }
 
-/* Recent Posts */
-.recent-posts {
-  margin-bottom: 40px;
-}
-
-.posts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.post-card.enhanced {
-  position: relative;
-  background: linear-gradient(135deg, #43cea2, #185a9d);
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-  color: #fff;
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-  animation: slide-in 1s ease-in-out;
-}
-
-.post-card.enhanced:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-}
-
-.post-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.post-header h3 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.post-tag {
-  background: #87ab05;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: #fff;
-  animation: pop 1.2s infinite;
-}
-
-.post-excerpt {
-  margin: 15px 0;
-  font-size: 1rem;
-}
-
-.post-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.9rem;
-  color: #ccefff;
-}
 
 .meta-item {
   display: flex;
@@ -364,26 +329,6 @@ body {
   bottom: 30px;
   right: 30px;
   z-index: 100;
-}
-
-.star_container {
-  width: 600px;
-}
-
-.star_container textarea {
-  width: 100%;
-  padding: 12px;
-  font-size: 1rem;
-  border: 1px solid #bdc3c7;
-  border-radius: 8px;
-  transition: border-color 0.3s ease;
-}
-
-.star_container input:focus,
-.star_container textarea:focus {
-  border-color: #3498db;
-  outline: none;
-  box-shadow: 0 0 6px rgba(52, 152, 219, 0.3);
 }
 
 .teacher-rating {
