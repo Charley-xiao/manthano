@@ -93,7 +93,9 @@ onMounted(async () => {
 
       <h2>Tags</h2>
       <section class="tag-container">
-        <div class="tag" v-for="(tag, index) in tags" :key="index" :style="`--i: ${index + 1}`">{{ tag }}</div>
+        <div class="tag" v-for="(tag, index) in tags"
+          @click="$router.push({ path: '/community/tag/', query: { tag: tag } })" :key="index"
+          :style="`--i: ${index + 1}`">{{ tag }}</div>
       </section>
     </main>
 
@@ -551,6 +553,7 @@ footer nav a:hover {
   backdrop-filter: blur(12px);
   -webkit-text-stroke: 1px rgba(0, 0, 0, 0.5);
   color: black;
+  background-color: #7f86f1;
   -webkit-box-reflect: below 4px linear-gradient(to bottom, transparent 80%, rgba(0, 0, 0, 0.5));
   z-index: 1;
 }

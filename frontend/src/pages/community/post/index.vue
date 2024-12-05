@@ -9,10 +9,12 @@ interface Comment {
     floor: number;
     commenter_name: string;
     comment_content: string;
+    likes: number;
     date_submitted: string;
 }
 
 const comments = ref<Comment[]>([]);
+const likedComments = ref<number[]>([]);
 
 const submitComment = async () => {
     if (!newComment.value.comment_content?.trim()) {
@@ -31,6 +33,7 @@ const submitComment = async () => {
                 floor: response.data.floor,
                 commenter_name: response.data.commenter_name,
                 comment_content: response.data.comment_content,
+                likes: 0,
                 date_submitted: response.data.date_submitted
             });
             newComment.value = {};
@@ -56,7 +59,8 @@ async function getComments() {
                     floor: comment[2],
                     commenter_name: comment[3],
                     comment_content: comment[4],
-                    date_submitted: comment[5]
+                    likes: comment[5],
+                    date_submitted: comment[6]
                 });
             });
         })
@@ -82,6 +86,20 @@ const toHumanReadable = (timestamp: string) => {
     }
 };
 
+async function addLikes(comment: Comment) {
+    const putComment = {
+        floor: comment.floor,
+        likes: comment.likes + 1,
+    };
+    await axios.put(`/api/post/${postId}/comments`, putComment)
+        .then((response) => {
+            console.log(response.data);
+        })
+        .catch((error) => {
+            console.error('Failed to add likes:', error);
+        });
+}
+
 onMounted(async () => {
     await getComments();
 });
@@ -98,13 +116,15 @@ onMounted(async () => {
                         <span class="comment-floor">#{{ comment.floor }}</span>
                     </div>
                     <p class="comment-content">{{ comment.comment_content }}</p>
+                    <small class="comment-like">
+                        <img src="../../../assets/heart_empty.svg" alt="likes" @click="addLikes(comment)">
+                        {{ comment.likes }} likes
+                    </small>
                     <small class="comment-date">{{ toHumanReadable(comment.date_submitted) }}</small>
                 </div>
             </div>
             <div class="add-comment-section">
-                <textarea 
-                    v-model="newComment.comment_content" 
-                    class="comment-input" 
+                <textarea v-model="newComment.comment_content" class="comment-input"
                     placeholder="Add a comment"></textarea>
                 <button @click="submitComment" class="submit-button">Submit</button>
             </div>

@@ -49,7 +49,7 @@ class Course:
         return str(self)
 
 class Post:
-    def __init__(self, id, title, course_id, sender_name, content, likes, tag):
+    def __init__(self, id, title, course_id, sender_name, content, likes, tag, date_submitted):
         self.id = id
         self.title = title
         self.course_id = course_id
@@ -57,6 +57,7 @@ class Post:
         self.content = content
         self.likes = likes
         self.tag = tag
+        self.date_submitted = date_submitted
 
     def __str__(self):
         return f"Post(id={self.id}, title='{self.title}', course_id={self.course_id}, sender_name='{self.sender_name}', content='{self.content}', likes={self.likes}, tag='{self.tag}')"
@@ -364,7 +365,7 @@ def add_post(course_id, title, sender_name, content, likes, tag):
     # finally:
     #     conn.close()
     cursor.execute('INSERT INTO posts (course_id, title, sender_name, content, likes, tag) VALUES (?, ?, ?, ?, ?, ?)', (course_id, title, sender_name, content, likes, tag))
-    cursor.execute('INSERT INTO post_comments (post_id, floor, commenter_name, comment_content) VALUES (?, ?, ?, ?)', (cursor.lastrowid, 1, sender_name, content))
+    cursor.execute('INSERT INTO post_comments (post_id, floor, commenter_name, comment_content, likes) VALUES (?, ?, ?, ?, ?)', (cursor.lastrowid, 1, sender_name, content, likes))
     conn.commit()
     return True
 
@@ -418,6 +419,7 @@ def create_post_comments_table():
             floor INTEGER NOT NULL,
             commenter_name TEXT NOT NULL,
             comment_content TEXT NOT NULL,
+            likes INTEGER NOT NULL DEFAULT 0,
             date_submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(post_id) REFERENCES posts(id),
             FOREIGN KEY(commenter_name) REFERENCES users(username)
@@ -426,11 +428,11 @@ def create_post_comments_table():
     conn.commit()
     conn.close()
 
-def add_post_comment(post_id, floor, commenter_name, comment_content):
+def add_post_comment(post_id, floor, commenter_name, comment_content, likes=0):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO post_comments (post_id, floor, commenter_name, comment_content) VALUES (?, ?, ?, ?)',
-                   (post_id, floor, commenter_name, comment_content))
+    cursor.execute('INSERT INTO post_comments (post_id, floor, commenter_name, comment_content, likes) VALUES (?, ?, ?, ?, ?)',
+                   (post_id, floor, commenter_name, comment_content, likes))
     conn.commit()
     conn.close()
 
@@ -440,6 +442,15 @@ def get_post_comments(post_id):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM post_comments WHERE post_id=?', (post_id,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    return rows
+
+def get_post_by_tag(tag):
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM posts WHERE tag=?', (tag,))
     rows = cursor.fetchall()
     conn.close()
 

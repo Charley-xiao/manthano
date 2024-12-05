@@ -76,7 +76,7 @@ from components.course.anticheat import VideoAnticheatHandler
 from components.course.courseware import CourseWareHandler, CourseWareFileHandlerWithAuth, HomeworkProjectHandler
 from components.course.mainCourse import AllCoursesHandler, DetailedCourseHandler, AddCourseHandler, CourseProgressHandler, AddCourseStudentHandler
 from components.course.derived import CourseCommentsHandler, CourseNotifHandler, CourseLikeHandler, CourseRecommendHandler, CourseRatingHandler, CourseSendNotificationHandler
-from components.post.post import PostHandler, CommentHandler
+from components.post.post import PostHandler, CommentHandler, PostTagHandler
 
 class MainHandler(BaseHandler):
     def get(self):
@@ -132,6 +132,7 @@ def make_app():
         (r"/api/course/progress/\d+", CourseProgressHandler),
         (r"/api/posts", PostHandler),
         (r"/api/post/(\d+)/comments", CommentHandler),
+        (r"/api/post/tag/(.+)", PostTagHandler),
         (r"/api/add-course-requests", AddCourseRequestHandler),
         (r"/api/add-teacher-requests", AddTeacherRequestHandler),
         (r"/api/course/progress", CourseProgressHandler),
@@ -141,42 +142,6 @@ def make_app():
         (r"/static/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH}), # serve static files
         (r"/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH, "default_filename": "index.html"}), # Serve PWA (SPA fallback)
     ], cookie_secret=SECRET_KEY, login_url="/api/login", debug=True)
-
-    return tornado.web.Application([
-        (r"/", MainHandler),
-        (r"/login", LoginHandler),
-        (r"/register", RegisterHandler),
-        (r"/admin", AdminHandler),
-        (r"/logout", LogoutHandler),
-        (r"/inbox", InboxHandler),
-        (r"/courses/\d+/comments", CourseCommentsHandler),
-        (r"/courses/\d+/notifications", CourseSendNotificationHandler),
-        (r"/courses/\d+/students", AddCourseStudentHandler),
-        (r"/my/course", MyCourseHandler),
-        (r"/add/teacher", AddTeacherHandler),
-        (r"/add/course", AddCourseHandler),
-        (r"/courses/\d+", DetailedCourseHandler),
-        (r"/courses/notif", CourseNotifHandler), # deprecated
-        (r"/courses/like", CourseLikeHandler),
-        (r"/courses/recommend", CourseRecommendHandler),
-        (r"/anticheat", VideoAnticheatHandler),
-        (r"/courseware", CourseWareHandler),
-        (r"/hwpj", HomeworkProjectHandler),
-        (r"/files/courseware/(.*)", CourseWareFileHandlerWithAuth, {"path": "files/courseware"}),
-        (r"/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
-        (r"/course/all", AllCoursesHandler),
-        (r"/course/progress/\d+", CourseProgressHandler),
-        (r"/posts", PostHandler),
-        (r"/post/(\d+)/comments", CommentHandler),
-        (r"/add-course-requests", AddCourseRequestHandler),
-        (r"/add-teacher-requests", AddTeacherRequestHandler),
-        (r"/course/progress", CourseProgressHandler),
-        (r"/rating", CourseRatingHandler),
-        (r"/users/search", UserSearchHandler),
-        (r"/teacher/all", AllTeacherHandler),
-        (r"/static/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH}), # serve static files
-        (r"/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH, "default_filename": "index.html"}), # Serve PWA (SPA fallback)
-    ], cookie_secret=SECRET_KEY, login_url="/login", debug=True)
 
 if __name__ == "__main__":
     app = make_app()

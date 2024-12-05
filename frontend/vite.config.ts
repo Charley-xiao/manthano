@@ -11,7 +11,11 @@ export default defineConfig(({ mode }) => ({
   build: {
     // Configure build options
     rollupOptions: {
+      output: {
+        manualChunks: {
 
+        }
+      }
     }
   },
 
@@ -25,9 +29,9 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'My Awesome App',
-        short_name: 'MyApp',
-        description: 'My Awesome App description',
+        name: 'Mathano',
+        short_name: 'Mathano',
+        description: 'Mathano is a course platform',
         theme_color: '#ffffff',
         icons: [
           {
