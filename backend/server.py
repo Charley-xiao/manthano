@@ -70,7 +70,7 @@ from components.sendEmail import config
 from components.inbox import InboxHandler
 from components.user.base import BaseHandler
 from components.user.login import LoginHandler, LogoutHandler, RegisterHandler, UserSearchHandler
-from components.user.teacher import AddTeacherHandler, AllTeacherHandler
+from components.user.teacher import AddTeacherHandler, AllTeacherHandler, GetTeacherHandler
 from components.user.mycourse import MyCourseHandler, AddCourseRequestHandler, AddTeacherRequestHandler
 from components.course.anticheat import VideoAnticheatHandler
 from components.course.courseware import CourseWareHandler, CourseWareFileHandlerWithAuth, HomeworkProjectHandler
@@ -139,6 +139,7 @@ def make_app():
         (r"/api/rating", CourseRatingHandler),
         (r"/api/users/search", UserSearchHandler),
         (r"/api/teacher/all", AllTeacherHandler),
+        (r"/teacher/getname", GetTeacherHandler),
         (r"/static/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH}), # serve static files
         (r"/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH, "default_filename": "index.html"}), # Serve PWA (SPA fallback)
     ], cookie_secret=SECRET_KEY, login_url="/api/login", debug=True)

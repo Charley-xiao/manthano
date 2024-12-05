@@ -85,12 +85,12 @@ class AddTeacherHandler(BaseHandler):
 
 class AllTeacherHandler(BaseHandler):
     """
-    Return all teachers
+    find a teachers
     """
     @tornado.web.authenticated
     def get(self):
         """
-        Return all teachers
+        find a teachers
         """
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
@@ -101,6 +101,32 @@ class AllTeacherHandler(BaseHandler):
             teachers = cursor.fetchall()
             teachers = [{'id': teacher[0], 'username': teacher[1], 'thumbnail': "https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg",
                           'rating': int(teacher[0])*11%31/10.0+2, 'description': "This is a sample descriptionduction"} for teacher in teachers]
+            self.write(json.dumps(teachers))
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+class GetTeacherHandler(BaseHandler):
+    """
+    Return all teachers
+    """
+    @tornado.web.authenticated
+    def get(self):
+        """
+        Return all teachers
+        """
+        id = self.get_argument("id")
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+        try:
+            cursor.execute('''
+                SELECT username FROM users WHERE id = ?
+            ''',(id,))
+            teachers = cursor.fetchall()
+            teachers = [{'id': id, 'name': teacher[0], 'rating': int(id)*11%31/10.0+2} for teacher in teachers]
             self.write(json.dumps(teachers))
         except sqlite3.Error as e:
             self.set_status(500)

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import axios from "axios";
 import { ref, onMounted } from "vue";
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
 
 interface Post {
   id: number;
@@ -16,8 +19,7 @@ interface Post {
 
 interface Teacher {
   id: number;
-  title: string;
-  instructor: string;
+  name: string;
   rating: number;
 }
 
@@ -46,8 +48,7 @@ const posts = ref<Post[]>([
 const teacher = ref<Teacher>(
   {
     id: 1,
-    title: "Teacher Wang",
-    instructor: "A",
+    name: "Teacher Wang",
     rating: 1.4
   })
 
@@ -62,6 +63,20 @@ const newPost = ref<Post>({
   tag: ''
 });
 
+async function fetchTeacher() {
+  const params = new URLSearchParams();
+  params.append('id', route.params.id[0]);
+
+  try {
+    const response = await axios.get('/api/teacher/getname', {params: params});
+    console.log(response.data);
+    teacher.value = response.data[0];
+  } catch (error) {
+      alert(params);
+      console.error('Failed to get name:', error);
+    }
+}
+
 async function fetchPosts() {
   const response = await axios.get('/api/posts');
   console.log(response.data.posts);
@@ -70,6 +85,7 @@ async function fetchPosts() {
 
 onMounted(() => {
   fetchPosts();
+  fetchTeacher();
 });
 
 const filledStars = ref(0);
@@ -88,8 +104,7 @@ async function submitRating() {
 <template>
   <div id="main-page" class="main-container">
     <header class="header">
-      <h1>{{ teacher.title + " post"}} </h1>
-      <p>{{ teacher.instructor }}</p>
+      <h1>{{ teacher.name + " post"}} </h1>
       <div class="teacher-rating">Rating: {{ teacher.rating }} ★</div>
     </header>
 
