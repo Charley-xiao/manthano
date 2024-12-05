@@ -163,6 +163,10 @@ onMounted(() => {
         <p>{{ course.description }}</p>
       </div>
       <div class="card-footer">
+        <div class="likes">
+          <img src="../../assets/heart_empty.svg" alt="likes" />
+          <!-- <span>{{ likes }} likes</span> -->
+        </div>
         <div class="course-link" @click="router.push(`/cdetail/${course.id}`)">
           View Course
         </div>

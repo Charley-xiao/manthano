@@ -127,7 +127,7 @@ def make_app():
         (r"/api/courseware", CourseWareHandler),
         (r"/api/hwpj", HomeworkProjectHandler),
         (r"/api/files/courseware/(.*)", CourseWareFileHandlerWithAuth, {"path": "files/courseware"}),
-        (r"/api/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
+        # (r"/api/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
         (r"/api/course/all", AllCoursesHandler),
         (r"/api/course/progress/\d+", CourseProgressHandler),
         (r"/api/course/post", CoursePostHandler),

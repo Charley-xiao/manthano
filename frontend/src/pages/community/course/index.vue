@@ -275,50 +275,50 @@ const sendRequestToJoinCourse = () => {
       </section>
 
       <div class="star_container">
-        <h2>Give a rating</h2>
-        <div class="stars">
-          <div>
+        <h2>Rate by you</h2>
+        <div class="center">
+          <div class="stars">
             <span v-for="n in 5" :key="n" @click="rate(n)"
               :class="{ 'star filled': n <= newRating.star, 'star empty': n > newRating.star }">&#9733;</span>
           </div>
-        </div>
-        <div class="rating_optations">
-          <label for="difficulty">Difficulty:&nbsp;</label>
-          <select id="difficulty" v-model="newRating.difficulty" class="input3d-flip">
-            <option value="Very low">Very low</option>
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="Very high">Very high</option>
-            <option value="High">High</option>
-          </select>
-          <label for="workload">Workload:</label>
-          <select id="workload" v-model="newRating.workload" class="input3d-flip">
-            <option value="Very low">Very low</option>
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="Very high">Very high</option>
-            <option value="High">High</option>
-          </select>
-          <label for="grading">Grading:&nbsp;&nbsp;</label>
-          <select id="grading" v-model="newRating.grading" class="input3d-flip">
-            <option value="Very low">Very low</option>
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="Very high">Very high</option>
-            <option value="High">High</option>
-          </select>
-          <label for="gain">Gain:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-          <select id="gain" v-model="newRating.gain" class="input3d-flip">
-            <option value="Very low">Very low</option>
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="Very high">Very high</option>
-            <option value="High">High</option>
-          </select>
-        </div>
-        <textarea v-model="newRating.comment" placeholder="Share your opinion on rating..." required></textarea>
-        <div class="button">
-          <button @click="submitRating" class="subbmit">Submit</button>
+          <div class="rating_optations">
+            <label for="difficulty">Difficulty:&nbsp;</label>
+            <select id="difficulty" v-model="newRating.difficulty" class="input3d-flip">
+              <option value="Very low">Very low</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="Very high">Very high</option>
+              <option value="High">High</option>
+            </select>
+            <label for="workload">Workload:</label>
+            <select id="workload" v-model="newRating.workload" class="input3d-flip">
+              <option value="Very low">Very low</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="Very high">Very high</option>
+              <option value="High">High</option>
+            </select>
+            <label for="grading">Grading:&nbsp;&nbsp;</label>
+            <select id="grading" v-model="newRating.grading" class="input3d-flip">
+              <option value="Very low">Very low</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="Very high">Very high</option>
+              <option value="High">High</option>
+            </select>
+            <label for="gain">Gain:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+            <select id="gain" v-model="newRating.gain" class="input3d-flip">
+              <option value="Very low">Very low</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="Very high">Very high</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+          <textarea v-model="newRating.comment" placeholder="Share your opinion on rating..." required></textarea>
+          <div class="button">
+            <button @click="submitRating" class="subbmit">Submit</button>
+          </div>
         </div>
       </div>
 
@@ -352,6 +352,15 @@ const sendRequestToJoinCourse = () => {
 .stars {
   display: flex;
   justify-content: center;
+  margin-bottom: 10px;
+}
+
+.stars::before {
+  content: 'Rate: ';
+  margin-right: 12px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
 }
 
 .star {
@@ -564,16 +573,25 @@ body {
 
 
 .star_container {
-  width: 600px;
+  width: 100%;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
 .star_container textarea {
-  width: 100%;
+  width: 90%;
+  height: 100px;
   padding: 12px;
   font-size: 1rem;
   border: 1px solid #bdc3c7;
   border-radius: 8px;
   transition: border-color 0.3s ease;
+  resize: none;
 }
 
 .star_container input:focus,
