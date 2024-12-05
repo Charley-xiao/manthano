@@ -95,7 +95,7 @@ const handleDragEnd = () => {
 <template>
   <div id="main-page" class="main-container">
     <header class="header">
-      <h1>{{ teacher.name + " post"}} </h1>
+      <h1>{{ teacher.name + " courses"}} </h1>
       <div class="teacher-rating">Rating: {{ teacher.rating }} ★</div>
     </header>
 
@@ -107,7 +107,7 @@ const handleDragEnd = () => {
           <div class="card-content">
             <h2>{{ course.title }}</h2>
             <p>{{ course.description }}</p>
-          </div>s
+          </div>
           <div class="card-footer">
             <div class="course-link" @click="router.push(`/cdetail/${course.id}`)">
               View Course

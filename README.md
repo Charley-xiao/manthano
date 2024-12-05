@@ -5,6 +5,19 @@ An innovative, next-generation online course platform designed to transform the 
 
 `Manthano` is inspired by the Greek word for "learning" and is dedicated to all those who seek knowledge and share it with others.
 
+![](docs/1.png)
+
+![](docs/2.png)
+
+![](docs/3.png)
+
+![](docs/4.png)
+
+![](docs/5.png)
+
+![](docs/6.png)
+
+
 ## 🌟 Key Features
 
 ### 🎯 Personalized Learning Paths
