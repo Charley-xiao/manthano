@@ -117,12 +117,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted} from 'vue';
 import axios from "axios";
 export default defineComponent({
   name: 'ExplorePage',
   setup() {
-    
+
     const activeTab = ref<string>('courses');
 
     const changeTab = (tab: string) => {
@@ -145,67 +144,36 @@ export default defineComponent({
       filterCourses();
       sortCourses();
     });
-    
+
     const selectedSort = ref<string>('newest');
     const searchCourse = ref<string>('');
     const selectedFilter = ref<string>('All');
     const currentPage = ref(1);
     const itemsPerPage = ref(8);
     const filters = ref<string[]>(['All', 'Development', 'Design', 'Business']);
-    const courses = ref([
-      {
-        id: 1,
-        title: 'descriptionduction to TypeScript',
-        instructor: 'John Doe',
-        rating: 2.5,
-      },
-      {
-        id: 2,
-        title: 'Advanced Vue.js Techniques',
-        instructor: 'Jane Smith',
-        rating: 4.7,
-      },
-    ]);
+    const courses: Ref<Array<{ id: number; title: string; instructor: string; rating: number }>> = ref([]);
 
-    const teachers = ref([
-      {
-        id: 1,
-        username: 'A',
-        thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
-        description: 'This is a sample descriptionduction',
-        rating: 1.4,
-      },
-      {
-        id: 2,
-        username: 'B',
-        thumbnail: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
-        description: 'This is a sample descriptionduction',
-        rating: 4.5,
-      },
-    ]);
+    const teachers: Ref<Array<{ id: number; username: string; description: string; rating: number; thumbnail: string }>> = ref([]);
 
-    
-
-    
     const fetchCourses = async () => {
       try {
-          const response = await axios.get(`/api/course/all`);
-          courses.value = response.data;
-          console.log('Course details:', courses.value);
+        const response = await axios.get(`/api/course/all`);
+        courses.value = response.data;
+        console.log('Course details:', courses.value);
 
       } catch (error) {
-          console.error('Failed to fetch course details:', error);
+        console.error('Failed to fetch course details:', error);
       }
     };
 
     const fetchTeachers = async () => {
       try {
-          const response = await axios.get(`/api/teacher/all`);
-          teachers.value = response.data;
-          console.log('Teacher details:', teachers.value);
+        const response = await axios.get(`/api/teacher/all`);
+        teachers.value = response.data;
+        console.log('Teacher details:', teachers.value);
 
       } catch (error) {
-          console.error('Failed to fetch teacher details:', error);
+        console.error('Failed to fetch teacher details:', error);
       }
     };
 
@@ -213,11 +181,11 @@ export default defineComponent({
     const sortedTeachers = ref([...teachers.value]);
     const filteredCourses = ref([...courses.value]);
     const filteredTeachers = ref([...teachers.value]);
-    
+
     const filterCourses = () => {
       if (!searchCourse) {
-        filteredCourses.value = [...courses.value]; 
-        filteredTeachers.value = [...teachers.value]; 
+        filteredCourses.value = [...courses.value];
+        filteredTeachers.value = [...teachers.value];
       } else {
         filteredCourses.value = courses.value.filter(course =>
           course.title.includes(searchCourse.value)
@@ -301,30 +269,29 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
- .search-bar {
-    display: flex;
-    align-items: center;
+.search-bar {
+  display: flex;
+  align-items: center;
 }
 
 .search-bar input[type="text"] {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    outline: none;
-} 
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  outline: none;
+}
 
 .search-bar button {
-    background-color: #f8f9fa;
-    border: none;
-    padding: 8px;
-    border-radius: 50%;
-    margin-left: -35px; 
+  background-color: #f8f9fa;
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  margin-left: -35px;
 }
 
 .fa-search {
-    color: #555;
-} 
+  color: #555;
+}
 
 
 .explore-page {
@@ -541,6 +508,7 @@ export default defineComponent({
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   font-size: 14px;
   font-family: Arial;
+  cursor: pointer;
 }
 
 .selected-button {

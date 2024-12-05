@@ -383,7 +383,6 @@ def create_rating_table():
             grading TEXT NOT NULL,
             gain TEXT NOT NULL,
             comment TEXT NOT NULL,
-            likes INTEGER NOT NULL,
             date_submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(course_id) REFERENCES courses(id),
             FOREIGN KEY(sender_name) REFERENCES users(username)
@@ -395,7 +394,7 @@ def create_rating_table():
 def add_rating(star, difficulty, workload, grading, gain, comment, course_id):
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute('INSERT INTO rating (star, difficulty, workload, grading, gain, comment, likes, course_id) VALUES (?, ?, ?, ?, ?, ?, 0, ?)',
+    cursor.execute('INSERT INTO rating (star, difficulty, workload, grading, gain, comment, course_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
                    (star, difficulty, workload, grading, gain, comment, course_id))
     conn.commit()
     conn.close()

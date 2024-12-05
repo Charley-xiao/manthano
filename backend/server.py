@@ -143,7 +143,7 @@ def make_app():
         (r"/api/teacher/getname", GetTeacherHandler),
         (r"/static/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH}), # serve static files
         (r"/(.*)", StaticFileHandler, {"path": FRONTEND_DIST_PATH, "default_filename": "index.html"}), # Serve PWA (SPA fallback)
-    ], cookie_secret=SECRET_KEY, login_url="/api/login", debug=True)
+    ], cookie_secret=SECRET_KEY, login_url="/api/login")
 
 if __name__ == "__main__":
     app = make_app()

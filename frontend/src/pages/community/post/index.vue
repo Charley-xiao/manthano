@@ -14,7 +14,6 @@ interface Comment {
 }
 
 const comments = ref<Comment[]>([]);
-const likedComments = ref<number[]>([]);
 
 const submitComment = async () => {
     if (!newComment.value.comment_content?.trim()) {

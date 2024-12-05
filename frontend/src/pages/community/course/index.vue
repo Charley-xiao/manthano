@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import axios from "axios";
-import { ref, onMounted } from "vue";
-
-import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
@@ -30,7 +27,6 @@ interface Rating {
   gain: string;
   comment: string;
   timestamp: string;
-  like: number;
 }
 
 interface Course {
@@ -40,87 +36,39 @@ interface Course {
   rating: number;
 }
 
-const posts = ref<Post[]>([
-  {
-    id: 1,
-    course_id: "101",
-    title: "Sample Post Title",
-    sender_name: "A",
-    content: "Sample content.",
-    timestamp: "2024-11-17",
-    like: 25,
-    tag: "CS101"
-  },{
-    id: 2,
-    course_id: "101",
-    title: "Sample Post Title 2",
-    sender_name: "B",
-    content: "Sample content 2.",
-    timestamp: "2024-11-17",
-    like: 25,
-    tag: "CS101"
-  }
-]);
+const posts = ref<Post[]>([]);
 
-const ratings = ref<Rating[]>([
-  {
-    id: 1,
-    course_id: courseId,
-    sender_name: 'AA',
-    star: 4,
-    difficulty: 'Low',
-    workload: 'Low',
-    grading: 'Low',
-    gain: 'Low',
-    comment: 'abababa',
-    timestamp: '2024-11-11',
-    like: 2
-  },{
-    id: 2,
-    course_id: courseId,
-    sender_name: 'A',
-    star: 4,
-    difficulty: 'High',
-    workload: 'Low',
-    grading: 'Low',
-    gain: 'Low',
-    comment: 'very very easy',
-    timestamp: '2024-11-11',
-    like: 4
-  }
-]);
+const ratings = ref<Rating[]>([]);
 
-const course = ref<Course>(
-  {
-    id: 1,
-    title: "CS101",
-    instructor: "A",
-    rating: 1.4
-  })
+const course = ref<Course>({
+  id: 0,
+  title: '',
+  instructor: '',
+  rating: 0
+})
 
 const newRating = ref<Rating>({
   id: 0,
   course_id: courseId,
-  sender_name: 'AA',
+  sender_name: '',
   star: 5,
   difficulty: 'Low',
   workload: 'Low',
   grading: 'Low',
   gain: 'Low',
   comment: '',
-  timestamp: '2024-11-11',
-  like: 0
+  timestamp: ''
 });
 
 
 async function fetchCourse() {
   try {
-      const response = await axios.get(`/api/course/all`);
-      course.value = response.data[parseInt(courseId)-1];
-      console.log('Teacher details:', response.data);
+    const response = await axios.get(`/api/course/all`);
+    course.value = response.data[parseInt(courseId) - 1];
+    console.log('Teacher details:', response.data);
 
   } catch (error) {
-      console.error('Failed to fetch course details:', error);
+    console.error('Failed to fetch course details:', error);
   }
 };
 
@@ -141,7 +89,7 @@ async function submitRating() {
   try {
     await axios.post('/api/rating', params);
     alert('Rating added successfully!');
-    newRating.value={
+    newRating.value = {
       id: 0,
       course_id: courseId,
       sender_name: '',
@@ -151,8 +99,7 @@ async function submitRating() {
       grading: 'Low',
       gain: 'Low',
       comment: '',
-      timestamp: '',
-      like: 0
+      timestamp: ''
     }
     fetchRating();
   } catch (error) {
@@ -168,13 +115,13 @@ async function fetchPosts() {
   params.append('course_id', courseId);
 
   try {
-    const response = await axios.get('/api/course/post', {params: params});
-    console.log('post detail:',response.data);
-    posts.value = response.data;
+    const response = await axios.get('/api/course/post', { params: params });
+    console.log('post detail:', response.data);
+    posts.value = response.data.posts;
   } catch (error) {
-      alert(params);
-      console.error('Failed to get rate:', error);
-    }
+    alert(params);
+    console.error('Failed to get rate:', error);
+  }
 }
 
 
@@ -183,19 +130,33 @@ async function fetchRating() {
   params.append('course_id', courseId);
 
   try {
-    const response = await axios.get('/api/rating', {params: params});
-    console.log('rating detail:',response.data);
-    ratings.value = response.data;
+    const response = await axios.get('/api/rating', { params: params });
+    console.log('rating detail:', response.data);
+    response.data.forEach((rating: any) => {
+      console.log(rating);
+      ratings.value.push({
+        id: rating.id,
+        course_id: courseId,
+        sender_name: rating.sender_name,
+        star: rating.star,
+        difficulty: rating.difficulty,
+        workload: rating.workload,
+        grading: rating.grading,
+        gain: rating.gain,
+        comment: rating.comment,
+        timestamp: rating.timestamp
+      });
+    });
   } catch (error) {
-      alert(params);
-      console.error('Failed to get rate:', error);
-    }
+    alert(params);
+    console.error('Failed to get rate:', error);
+  }
 }
 const isTeacher = ref(false);
-onMounted(() => {
-  fetchPosts();
-  fetchCourse();
-  fetchRating();
+onMounted(async () => {
+  await fetchPosts();
+  await fetchCourse();
+  await fetchRating();
   isTeacher.value = localStorage.getItem('role') === 'teacher';
 });
 
@@ -220,9 +181,17 @@ const sendRequestToJoinCourse = () => {
 <template>
   <div id="main-page" class="main-container">
     <header class="header">
-      <h1>{{ course.title + " post"}} </h1>
+      <h1>{{ course.title }} </h1>
       <p>{{ course.instructor }}</p>
-      <div class="course-rating">Rating: {{ course.rating }} ★</div>
+      <div class="course-rating">Rating:
+        <!-- <span v-for="n in course.rating" :key="n" class="ratestar filled">★</span> -->
+        <span class="ratestar filled" v-for="n in Math.floor(course.rating)" :key="n">★</span>
+        <span class="ratestar half" v-if="course.rating % 1 !== 0">★</span>
+        <span class="ratestar empty" v-for="n in 5 - Math.ceil(course.rating)" :key="n">★</span>
+        <span style="margin-left: 10px;">
+          {{ course.rating.toFixed(1) }} ({{ ratings.length }} ratings)
+        </span>
+      </div>
       <div class="button" v-if="!isTeacher">
         <button @click="sendRequestToJoinCourse" class="subbmit">Join Course</button>
       </div>
@@ -233,15 +202,16 @@ const sendRequestToJoinCourse = () => {
 
         <h2>Rating post</h2>
         <div class="posts-grid">
-          <div class="post-card enhanced" v-for="post in ratings" :key="post.id">
+          <div class="post-card enhanced" id="rating-post" v-for="post in ratings" :key="post.id">
             <div class="post-header">
               <div>
-                <span v-for="n in 5" :key="n" :class="{'ratestar filled': n <= post.star, 'ratestar empty': n > post.star}">&#9733;</span>
+                <span v-for="n in 5" :key="n"
+                  :class="{ 'ratestar filled': n <= post.star, 'ratestar empty': n > post.star }">&#9733;</span>
               </div>
             </div>
             <p class="post-excerpt">{{ post.comment.substring(0, 80) }}</p>
-            
-            
+
+
             <div class="post-meta">
               <div class="meta-item">
                 <i class="icon difficulty"></i>
@@ -252,7 +222,7 @@ const sendRequestToJoinCourse = () => {
                 <span>Workload: {{ post.workload }}</span>
               </div>
             </div>
-            
+
             <div class="post-meta">
               <div class="meta-item">
                 <i class="icon gain"></i>
@@ -273,10 +243,6 @@ const sendRequestToJoinCourse = () => {
                 <i class="icon date"></i>
                 <span>{{ new Date(post.timestamp).toLocaleDateString() }}</span>
               </div>
-              <div class="meta-item">
-                <i class="icon like"></i>
-                <span>0 Likes</span>
-              </div>
             </div>
 
           </div>
@@ -290,7 +256,7 @@ const sendRequestToJoinCourse = () => {
               <span class="post-tag">{{ post.tag }}</span>
             </div>
             <p class="post-excerpt">{{ post.content.substring(0, 80) }}...</p>
-            
+
             <div class="post-meta">
               <div class="meta-item">
                 <i class="icon sender"></i>
@@ -300,78 +266,74 @@ const sendRequestToJoinCourse = () => {
                 <i class="icon date"></i>
                 <span>{{ new Date(post.timestamp).toLocaleDateString() }}</span>
               </div>
-              <div class="meta-item">
-                <i class="icon like"></i>
-                <span>{{ post.like }} Likes</span>
-              </div>
             </div>
 
             <router-link :to="'/community/post/' + post.id" class="read-more">Read More</router-link>
           </div>
         </div>
       </section>
-      
+
       <div class="star_container">
         <h2>Give a rating</h2>
         <div class="stars">
           <div>
-            <span v-for="n in 5" :key="n" @click="rate(n)" :class="{'star filled': n <= newRating.star, 'star empty': n > newRating.star}">&#9733;</span>
+            <span v-for="n in 5" :key="n" @click="rate(n)"
+              :class="{ 'star filled': n <= newRating.star, 'star empty': n > newRating.star }">&#9733;</span>
           </div>
         </div>
         <div class="rating_optations">
           <label for="difficulty">Difficulty:&nbsp;</label>
-            <select id="difficulty" v-model="newRating.difficulty" class="input3d-flip">
-                <option value="Very low">Very low</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="Very high">Very high</option>
-                <option value="High">High</option>
-            </select>
+          <select id="difficulty" v-model="newRating.difficulty" class="input3d-flip">
+            <option value="Very low">Very low</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="Very high">Very high</option>
+            <option value="High">High</option>
+          </select>
           <label for="workload">Workload:</label>
-            <select id="workload" v-model="newRating.workload" class="input3d-flip">
-                <option value="Very low">Very low</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="Very high">Very high</option>
-                <option value="High">High</option>
-            </select>
+          <select id="workload" v-model="newRating.workload" class="input3d-flip">
+            <option value="Very low">Very low</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="Very high">Very high</option>
+            <option value="High">High</option>
+          </select>
           <label for="grading">Grading:&nbsp;&nbsp;</label>
-            <select id="grading" v-model="newRating.grading" class="input3d-flip">
-                <option value="Very low">Very low</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="Very high">Very high</option>
-                <option value="High">High</option>
-            </select>
+          <select id="grading" v-model="newRating.grading" class="input3d-flip">
+            <option value="Very low">Very low</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="Very high">Very high</option>
+            <option value="High">High</option>
+          </select>
           <label for="gain">Gain:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-            <select id="gain" v-model="newRating.gain" class="input3d-flip">
-                <option value="Very low">Very low</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="Very high">Very high</option>
-                <option value="High">High</option>
-            </select>
+          <select id="gain" v-model="newRating.gain" class="input3d-flip">
+            <option value="Very low">Very low</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="Very high">Very high</option>
+            <option value="High">High</option>
+          </select>
         </div>
         <textarea v-model="newRating.comment" placeholder="Share your opinion on rating..." required></textarea>
         <div class="button">
           <button @click="submitRating" class="subbmit">Submit</button>
         </div>
       </div>
-      
+
     </main>
 
   </div>
 </template>
 
 <style scoped>
-
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.rating_optations > *{
+.rating_optations>* {
   padding-left: 20px;
 }
 
@@ -390,6 +352,7 @@ const sendRequestToJoinCourse = () => {
   display: flex;
   justify-content: center;
 }
+
 .star {
   margin-right: 10px;
   cursor: pointer;
@@ -399,7 +362,7 @@ const sendRequestToJoinCourse = () => {
 .ratestar {
   margin-right: 10px;
   cursor: pointer;
-  font-size: 40px;
+  font-size: 20px;
 }
 
 .button {
@@ -409,6 +372,12 @@ const sendRequestToJoinCourse = () => {
 
 .filled {
   color: gold;
+}
+
+.half {
+  background: linear-gradient(90deg, gold 50%, transparent 50%);
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
 .empty {
@@ -422,10 +391,10 @@ const sendRequestToJoinCourse = () => {
   color: white;
   padding: 10px 15px;
   border-radius: 10px;
-  text-decoration: none; 
+  text-decoration: none;
   font-weight: bold;
   transition: background 0.3s ease;
-  border: none; 
+  border: none;
 }
 
 .subbmit:hover {
@@ -560,15 +529,12 @@ body {
 }
 
 .icon.sender {
-  background-image: url('/icons/user.svg'); /* Placeholder SVG URL */
+  background-image: url('/icons/user.svg');
+  /* Placeholder SVG URL */
 }
 
 .icon.date {
   background-image: url('/icons/calendar.svg');
-}
-
-.icon.like {
-  background-image: url('/icons/heart.svg');
 }
 
 .read-more {
@@ -616,16 +582,19 @@ body {
 }
 
 .course-rating {
-    margin-top: 10px;
-    font-size: 1rem;
-    color: #f39c12;
-  }
+  margin-top: 10px;
+  font-size: 1rem;
+  /* color: #f39c12; */
+}
 
 /* Pulse Animation */
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 10px 30px rgba(42, 230, 149, 0.5), 0 0 0 0 rgba(42, 230, 149, 0.3);
   }
+
   50% {
     box-shadow: 0 15px 45px rgba(42, 230, 149, 0.7), 0 0 20px 10px rgba(42, 230, 149, 0);
   }
@@ -633,9 +602,17 @@ body {
 
 /* Gradient Shift Animation */
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Slide Down on Load */
@@ -643,6 +620,7 @@ body {
   from {
     transform: translateX(-50%) translateY(-100%);
   }
+
   to {
     transform: translateX(-50%) translateY(0);
   }
@@ -655,6 +633,7 @@ body {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -666,6 +645,7 @@ body {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -673,12 +653,14 @@ body {
 }
 
 @keyframes pop {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.1);
   }
 }
-
 </style>
