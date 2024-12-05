@@ -16,7 +16,7 @@ class AllCoursesHandler(BaseHandler):
 
         try:
             cursor.execute('''
-                SELECT id, title, description FROM courses
+                SELECT id, title, description, owner FROM courses
             ''')
             courses = cursor.fetchall()
             update_courses = []
@@ -40,7 +40,7 @@ class AllCoursesHandler(BaseHandler):
                         star = cursor.fetchall()[0]
                         print(star)
 
-                update_courses.append({'id': course[0], 'title': course[1], 'description': course[2], 'rating': star})
+                update_courses.append({'id': course[0], 'title': course[1], 'instructor': course[3], 'description': course[2], 'rating': star})
 
             self.write(json.dumps(update_courses))
         except sqlite3.Error as e:

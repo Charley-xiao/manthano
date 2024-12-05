@@ -84,7 +84,51 @@ class PostHandler(tornado.web.RequestHandler):
             self.set_status(500)
             self.write({'error': 'Database error'})
 
+class CoursePostHandler(tornado.web.RequestHandler):
+    """
+    Handler for creating and retrieving posts.
 
+    Each post includes:
+    - sender name
+    - sender avatar
+    - content
+    - likes
+    - date_submitted
+    - tag
+    - comments
+    """
+
+    # @tornado.web.authenticated
+    def get(self):
+        """Retrieve all posts along with their comments."""
+        id = self.get_argument("course_id")
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT id, course_id, title, sender_name, content, likes, tag, date_submitted FROM posts Where course_id = ?
+            ''',(id,))
+            posts = cursor.fetchall()
+
+            post_list = []
+            for post in posts:
+                post_list.append({
+                    'id': post[0],
+                    'course_id': post[1],
+                    'title': post[2],
+                    'sender_name': post[3],
+                    'content': post[4],
+                    'likes': post[5],
+                    'tag': post[6],
+                    'date_submitted': post[7]
+                })
+            self.write({'posts': post_list})
+        except sqlite3.Error:
+            self.set_status(500)
+            self.write({'error': 'Database error'})
+        finally:
+            conn.close()
 
 class CommentHandler(tornado.web.RequestHandler):
     """

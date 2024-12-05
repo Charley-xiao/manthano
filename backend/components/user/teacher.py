@@ -85,12 +85,12 @@ class AddTeacherHandler(BaseHandler):
 
 class AllTeacherHandler(BaseHandler):
     """
-    find a teachers
+    Return all teachers
     """
     @tornado.web.authenticated
     def get(self):
         """
-        find a teachers
+        Return all teachers
         """
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
@@ -110,12 +110,12 @@ class AllTeacherHandler(BaseHandler):
 
 class GetTeacherHandler(BaseHandler):
     """
-    Return all teachers
+    find a teacher
     """
     @tornado.web.authenticated
     def get(self):
         """
-        Return all teachers
+        find a teacher
         """
         id = self.get_argument("id")
 

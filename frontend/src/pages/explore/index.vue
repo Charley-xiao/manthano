@@ -191,7 +191,7 @@ export default defineComponent({
       try {
           const response = await axios.get(`/api/course/all`);
           courses.value = response.data;
-          console.log('Teacher details:', courses.value);
+          console.log('Course details:', courses.value);
 
       } catch (error) {
           console.error('Failed to fetch course details:', error);

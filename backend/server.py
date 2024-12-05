@@ -76,7 +76,7 @@ from components.course.anticheat import VideoAnticheatHandler
 from components.course.courseware import CourseWareHandler, CourseWareFileHandlerWithAuth, HomeworkProjectHandler
 from components.course.mainCourse import AllCoursesHandler, DetailedCourseHandler, AddCourseHandler, CourseProgressHandler, AddCourseStudentHandler
 from components.course.derived import CourseCommentsHandler, CourseNotifHandler, CourseLikeHandler, CourseRecommendHandler, CourseRatingHandler, CourseSendNotificationHandler
-from components.post.post import PostHandler, CommentHandler, PostTagHandler
+from components.post.post import PostHandler, CommentHandler, PostTagHandler, CoursePostHandler
 
 class MainHandler(BaseHandler):
     def get(self):
@@ -130,6 +130,7 @@ def make_app():
         (r"/api/static/(.*)", tornado.web.StaticFileHandler, {"path": "static"}),
         (r"/api/course/all", AllCoursesHandler),
         (r"/api/course/progress/\d+", CourseProgressHandler),
+        (r"/api/course/post", CoursePostHandler),
         (r"/api/posts", PostHandler),
         (r"/api/post/(\d+)/comments", CommentHandler),
         (r"/api/post/tag/(.+)", PostTagHandler),
