@@ -5,6 +5,7 @@ import { ref, onMounted } from "vue";
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const courseId = route.params.id[0];
 
 interface Post {
@@ -170,14 +171,29 @@ async function fetchRating() {
     }
 }
 
+const isTeacher = ref(false);
+
 onMounted(() => {
   fetchPosts();
   fetchRating();
+  isTeacher.value = localStorage.getItem('role') === 'teacher';
 });
 
 function rate(stars: number) {
   newRating.value.star = stars;
 }
+
+const sendRequestToJoinCourse = () => {
+  const params = new URLSearchParams();
+  params.append('course_id', courseId);
+  params.append('username', localStorage.getItem('username') || '');
+  try {
+    axios.post('/api/joincourserequest', params);
+    router.push('/cdetail/' + courseId);
+  } catch (error) {
+    console.error('Failed to send request:', error);
+  }
+};
 
 </script>
 
@@ -187,6 +203,9 @@ function rate(stars: number) {
       <h1>{{ course.title + " post"}} </h1>
       <p>{{ course.instructor }}</p>
       <div class="course-rating">Rating: {{ course.rating }} ★</div>
+      <div class="button" v-if="!isTeacher">
+        <button @click="sendRequestToJoinCourse" class="subbmit">Join Course</button>
+      </div>
     </header>
 
     <main>
