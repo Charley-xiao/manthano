@@ -75,7 +75,7 @@ from components.user.mycourse import MyCourseHandler, AddCourseRequestHandler, A
 from components.course.anticheat import VideoAnticheatHandler
 from components.course.courseware import CourseWareHandler, CourseWareFileHandlerWithAuth, HomeworkProjectHandler
 from components.course.mainCourse import AllCoursesHandler, DetailedCourseHandler, AddCourseHandler, CourseProgressHandler, AddCourseStudentHandler
-from components.course.derived import CourseCommentsHandler, CourseNotifHandler, CourseLikeHandler, CourseRecommendHandler, CourseRatingHandler, CourseSendNotificationHandler
+from components.course.derived import CourseCommentsHandler, CourseNotifHandler, CourseLikeHandler, CourseRecommendHandler, CourseRatingHandler, CourseSendNotificationHandler, CheckLikeHandler
 from components.post.post import PostHandler, CommentHandler, PostTagHandler, CoursePostHandler
 
 class MainHandler(BaseHandler):
@@ -121,7 +121,8 @@ def make_app():
         (r"/api/add/course", AddCourseHandler),
         (r"/api/courses/\d+", DetailedCourseHandler),
         (r"/api/courses/notif", CourseNotifHandler), # deprecated
-        (r"/api/courses/like", CourseLikeHandler),
+        (r"/api/courses/like/\d+", CourseLikeHandler),
+        (r"/api/courses/checklike/\d+", CheckLikeHandler),
         (r"/api/courses/recommend", CourseRecommendHandler),
         (r"/api/anticheat", VideoAnticheatHandler),
         (r"/api/courseware", CourseWareHandler),

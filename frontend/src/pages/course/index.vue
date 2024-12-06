@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import axios from 'axios';
-import { ref, onMounted } from 'vue';
 axios.defaults.withCredentials = true;
 
 const router = useRouter();
 
-const courses = ref<Array<{ id: number; title: string; description: string; color?: string }>>([]);
+const courses = ref<Array<{ id: number; title: string; description: string; color?: string; likes: number; }>>([]);
 const draggedItem = ref<{ id: number; index: number } | null>(null);
 const currentUsername = ref('');
+const hasLiked = ref<Array<boolean>>([]);
 
 const colors = [
   "linear-gradient(135deg, #667eea, #764ba2)",
@@ -24,10 +24,25 @@ const getCardBackground = (index: number) => {
 const getCourses = async () => {
   try {
     const response = await axios.get('/api/my/course');
-    courses.value = response.data;
-    for (let i = 0; i < courses.value.length; i++) {
-      courses.value[i].color = getCardBackground(i);
-    }
+    response.data.forEach(async (course: { id: number; title: string; description: string; likes: number; }, index: number) => {
+      const r = await axios.get(`/api/courses/like/${course.id}`);
+      course.likes = r.data;
+      courses.value.push({
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        color: getCardBackground(index),
+        likes: course.likes
+      });
+
+      const r2 = await axios.get(`/api/courses/checklike/${course.id}`);
+      hasLiked.value.push(r2.data);
+    });
+
+    console.log(courses.value);
+    // for (let i = 0; i < courses.value.length; i++) {
+    //   courses.value[i].color = getCardBackground(i);
+    // }
     /*// fetch the first course and see if the user is a teacher
     if (courses.value.length > 0) {
       const response = await axios.get(`/api/courses/${courses.value[0].id}`);
@@ -35,6 +50,19 @@ const getCourses = async () => {
     }*/
   } catch (error: any) {
     console.error('An error occurred while fetching courses:', error);
+  }
+};
+
+const likeCourse = async (courseId: number) => {
+  try {
+    await axios.post(`/api/courses/like/${courseId}`, {
+      course_id: courseId
+    });
+    const index = courses.value.findIndex((course) => course.id === courseId);
+    courses.value[index].likes++;
+    hasLiked.value[index] = true;
+  } catch (error: any) {
+    console.error('An error occurred while liking course:', error);
   }
 };
 
@@ -164,8 +192,13 @@ onMounted(() => {
       </div>
       <div class="card-footer">
         <div class="likes">
-          <img src="../../assets/heart_empty.svg" alt="likes" />
-          <!-- <span>{{ likes }} likes</span> -->
+          <div v-if="hasLiked[index]" class="img-like">
+            <img src="../../assets/heart_filled.svg" alt="likes" />
+          </div>
+          <div v-else @click="likeCourse(course.id)" class="img-like">
+            <img src="../../assets/heart_empty.svg" alt="likes" />
+          </div>
+          <span>{{ course.likes }} likes</span>
         </div>
         <div class="course-link" @click="router.push(`/cdetail/${course.id}`)">
           View Course
@@ -296,6 +329,17 @@ onMounted(() => {
   transform: scale(1.5);
 }
 
+.likes {
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+
+.course-card .img-like {
+  cursor: pointer;
+  z-index: 3;
+}
+
 .course-link {
   font-size: 16px;
   padding: 10px 20px;
@@ -311,12 +355,6 @@ onMounted(() => {
 .course-link:hover {
   background-color: #ffdd57;
   color: #764ba2;
-}
-
-.card-footer {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
 }
 
 @media (max-width: 600px) {
@@ -526,7 +564,7 @@ onMounted(() => {
 
 .card-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-around;
   margin-top: 20px;
 }
 

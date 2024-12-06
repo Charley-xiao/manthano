@@ -2,6 +2,7 @@ import json
 import sqlite3
 import time
 import tornado.web
+import re
 from components.user.base import BaseHandler
 from database import DATABASE
 
@@ -53,6 +54,31 @@ class CourseLikeHandler(BaseHandler):
     """
     Handles the likes of a course.
     """
+
+    @tornado.web.authenticated
+    def get(self):
+        """
+        Returns the number of likes of a course.
+
+        GET /api/courses/like/:course_id
+        """
+        course_id = re.search(r'/(\d+)', self.request.uri).group(1)
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT COUNT(*) FROM course_likes WHERE course_id = ?
+            ''', (course_id,))
+            likes = cursor.fetchone()
+            self.write(json.dumps(likes[0]))
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
     @tornado.web.authenticated
     def post(self):
         """
@@ -63,7 +89,7 @@ class CourseLikeHandler(BaseHandler):
         - If the user has already liked the course, the request will be interpreted as an unlike request.
         """
         username = self.get_current_user()
-        course_id = self.get_argument("course_id")
+        course_id = re.search(r'/(\d+)', self.request.uri).group(1)
 
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
@@ -93,6 +119,39 @@ class CourseLikeHandler(BaseHandler):
             else:
                 self.set_status(403)
                 self.write("Forbidden: You do not have permission to like this course.")
+        except sqlite3.Error as e:
+            self.set_status(500)
+            self.write(str(e))
+        finally:
+            conn.close()
+
+
+class CheckLikeHandler(BaseHandler):
+    """
+    Checks if the user has liked the course.
+    """
+    @tornado.web.authenticated
+    def get(self):
+        """
+        Returns whether the user has liked the course.
+
+        GET /api/courses/checklike/:course_id
+        """
+        username = self.get_current_user()
+        course_id = re.search(r'/(\d+)', self.request.uri).group(1)
+
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                SELECT student FROM course_likes WHERE course_id = ? AND student = ?
+            ''', (course_id, username))
+            like = cursor.fetchone()
+            if like:
+                self.write("true")
+            else:
+                self.write("false")
         except sqlite3.Error as e:
             self.set_status(500)
             self.write(str(e))

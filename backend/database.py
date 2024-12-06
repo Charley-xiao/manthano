@@ -2,7 +2,7 @@ import sqlite3
 import bcrypt
 import re
 import os
-import random 
+import random
 
 DATABASE = 'db.db'
 
@@ -605,6 +605,66 @@ def add_fake_data():
     cursor.execute('INSERT INTO chapters (title, content, type, course_id) VALUES (?, ?, ?, ?)',
                    ('Applied Ethics', 'https://www.youtube.com/embed/12', 'project', ph201_id))
 
+    # Add course likes
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (cs101_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (cs101_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (cs201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (cs201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma101_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma101_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph101_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph101_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (bio101_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (bio101_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (chem101_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (chem101_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_likes (course_id, student) VALUES (?, ?)', (ma201_id, 'john.doe'))
+
     # Add students to courses
     cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs101_id, 'jane.doe'))
     cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (cs101_id, 'john.doe'))
@@ -620,6 +680,10 @@ def add_fake_data():
     cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (chem101_id, 'alice.wong'))
     cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (ma201_id, 'john.doe'))
     cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (ma201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (ph201_id, 'john.doe'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (ph201_id, 'alice.wong'))
+    cursor.execute('INSERT INTO course_students (course_id, student) VALUES (?, ?)', (ph201_id, 'jane.doe'))
 
     # Add courseware for additional chapters
 
@@ -804,7 +868,7 @@ def add_fake_data():
                     'For our next class, please prepare to discuss various ethical dilemmas. Think about scenarios where moral principles may conflict, '
                     'and consider the reasoning behind different ethical decisions. I encourage you to bring real-world examples to enrich our discussion.',
                     35, 'Academic')
-    
+
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
 
@@ -852,12 +916,12 @@ def add_fake_data():
     for course in courses:
         course_id = course[0]
         course_title = course[1]
-        
+
         # Decide how many ratings to add per course (e.g., between 5 and 20)
         num_ratings = random.randint(5, 20)
         # Randomly select students to rate the course
         rating_students = random.sample(students, min(num_ratings, len(students)))
-        
+
         for student in rating_students:
             star = random.randint(1, 5)
             difficulty = random.choice(difficulty_options)
