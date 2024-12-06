@@ -163,37 +163,37 @@ const deleteChapter = async (chapterId: string) => {
     }
 };
 
-/*const addCourseware = async (chapterId: string, courseware: { name: string; file: File }) => {
-    const chapter = courseDetails.value.chapters.find(ch => ch.id === chapterId);
-    if (chapter) {
-        try {
-            const formData = new FormData();
-            formData.append('chapterId', chapterId);
-            formData.append('name', courseware.name);
-            formData.append('file', courseware.file); // Attach the selected file
+// const addCourseware = async (chapterId: string, courseware: { name: string; file: File }) => {
+//     const chapter = courseDetails.value.chapters.find(ch => ch.id === chapterId);
+//     if (chapter) {
+//         try {
+//             const formData = new FormData();
+//             formData.append('chapterId', chapterId);
+//             formData.append('name', courseware.name);
+//             formData.append('file', courseware.file); // Attach the selected file
 
-            const response = await axios.post(`/api/courseware`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+//             const response = await axios.post(`/api/courseware`, formData, {
+//                 headers: {
+//                     'Content-Type': 'multipart/form-data',
+//                 },
+//             });
 
-            // Assuming the response contains the file's public link
-            const uploadedCourseware = {
-                name: response.data.name || courseware.name,
-                link: response.data.link, // URL of the uploaded courseware
-            };
+//             // Assuming the response contains the file's public link
+//             const uploadedCourseware = {
+//                 name: response.data.name || courseware.name,
+//                 link: response.data.link, // URL of the uploaded courseware
+//             };
 
-            chapter.courseware.push(uploadedCourseware);
-            alert('Courseware uploaded and added successfully!');
-        } catch (error) {
-            console.error('Failed to upload courseware:', error);
-            alert('Failed to upload courseware.');
-        }
-    } else {
-        alert('Chapter not found.');
-    }
-};*/
+//             chapter.courseware.push(uploadedCourseware);
+//             // alert('Courseware uploaded and added successfully!');
+//         } catch (error) {
+//             console.error('Failed to upload courseware:', error);
+//             // alert('Failed to upload courseware.');
+//         }
+//     } else {
+//         alert('Chapter not found.');
+//     }
+// };
 
 
 const fetchCourseDetails = async () => {
@@ -470,11 +470,11 @@ const uploadCourseware = async (chapterId: string) => {
     formData.append('chapter_id', chapterId);
 
     try {
-        /*const response = await axios.post(`/api/courseware`, formData, {
+        const response = await axios.post(`/api/courseware`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-        });*/
+        });
 
         // const uploadedCourseware = {
         //     name: response.data.name,
@@ -482,12 +482,12 @@ const uploadCourseware = async (chapterId: string) => {
         // };
 
         // await addCourseware(chapterId, uploadedCourseware);
-
-        alert('Courseware uploaded successfully!');
+        console.log(response.data);
         // Reset fields
         selectedFile.value = null;
         selectedFileName.value = '';
         coursewareFileName.value = '';
+        window.location.reload();
     } catch (error) {
         console.error('Failed to upload courseware:', error);
         alert('Failed to upload courseware.');
@@ -548,11 +548,11 @@ const uploadHomeworkProject = async (chapterId: string) => {
     formData.append('chapter_id', chapterId);
 
     try {
-        /*const response = await axios.post(`/api/hwpj`, formData, {
+        const response = await axios.post(`/api/hwpj`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-        });*/
+        });
 
         // const uploadedCourseware = {
         //     name: response.data.name,
@@ -561,11 +561,12 @@ const uploadHomeworkProject = async (chapterId: string) => {
 
         // await addCourseware(chapterId, uploadedCourseware);
 
-        alert('Homework/project submitted successfully!');
+        console.log(response.data);
         // Reset fields
         selectedFile.value = null;
         selectedFileName.value = '';
         coursewareFileName.value = '';
+        window.location.reload();
     } catch (error) {
         console.error('Failed to submit homework/project:', error);
         alert('Failed to submit homework/project.');
